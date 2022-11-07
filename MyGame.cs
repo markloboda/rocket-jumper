@@ -1,33 +1,39 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using RocketJumper.Classes;
+using System.IO;
 
 namespace RocketJumper
 {
-    public class Game1 : Game
+    public class MyGame : Game
     {
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
+        Level currentLevel;
 
-        public Game1()
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+
+        public MyGame()
         {
-            _graphics = new GraphicsDeviceManager(this);
+            graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            // TODO: Add your initialization logic
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            LoadLevel("Content/Levels/Tutorial.txt");
+
         }
 
         protected override void Update(GameTime gameTime)
@@ -35,7 +41,8 @@ namespace RocketJumper
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            // TODO: Add your update logic
+
 
             base.Update(gameTime);
         }
@@ -45,8 +52,19 @@ namespace RocketJumper
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+            spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+
+            currentLevel.Draw(null, spriteBatch);
+
+            spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void LoadLevel(string filename)
+        {
+            using (Stream fileStream = TitleContainer.OpenStream(filename))
+                currentLevel = new Level(Services, fileStream);
         }
     }
 }
