@@ -55,6 +55,7 @@ namespace RocketJumper
             spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
             currentLevel.Draw(null, spriteBatch);
+            currentLevel.Player.Draw(gameTime, spriteBatch);
 
             spriteBatch.End();
 

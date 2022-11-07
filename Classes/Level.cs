@@ -35,6 +35,8 @@ namespace RocketJumper.Classes
             content = new ContentManager(serviceProvider, "Content");
 
             LoadTiles(fileStream);
+
+            player = new Player(this, start);
         }
 
         private Tile LoadTile(char tileType, int x, int y)
