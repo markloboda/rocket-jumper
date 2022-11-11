@@ -4,7 +4,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-
+using Microsoft.Xna.Framework.Input;
 
 namespace RocketJumper.Classes
 {
@@ -125,6 +125,9 @@ namespace RocketJumper.Classes
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            // Draw player
+            player.Draw(gameTime, spriteBatch);
+
             // Draw tiles:
             for (int iy = 0; iy < Height; iy++)
             {
@@ -139,6 +142,12 @@ namespace RocketJumper.Classes
             }
 
         }
+
+        public void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, GamePadState gamePadState)
+        {
+            player.Update(gameTime, keyboardState, mouseState, gamePadState);
+        }
+
 
 
         public void Dispose()

@@ -82,7 +82,7 @@ namespace RocketJumper.Classes
             this.isPlaying = true;
         }
 
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Vector2 position)
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Vector2 position, SpriteEffects spriteEffects)
         {
             if (!isPlaying)
                 return;
@@ -105,7 +105,7 @@ namespace RocketJumper.Classes
             Rectangle source = new Rectangle(frameX, frameY, frameWidth, frameHeight);
 
             // Draw the current frame.
-            spriteBatch.Draw(texture, position, source, Color.White, 0.0f, Origin, scale, SpriteEffects.None, 0.0f);
+            spriteBatch.Draw(texture, position, source, Color.White, 0.0f, Origin, scale, spriteEffects, 0.0f);
         }
 
         public Animation(Texture2D texture, float frameTime, bool isLooping, int frameCount, float scale)

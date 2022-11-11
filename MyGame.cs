@@ -13,6 +13,11 @@ namespace RocketJumper
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
+        // inputs
+        KeyboardState keyboardState;
+        MouseState mouseState;
+        GamePadState gamePadState;
+
         public MyGame()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -41,8 +46,10 @@ namespace RocketJumper
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic
+            GetInputs();
 
+            // TODO: Add your update logic
+            currentLevel.Update(gameTime, keyboardState, mouseState, gamePadState);
 
             base.Update(gameTime);
         }
@@ -54,8 +61,7 @@ namespace RocketJumper
             // TODO: Add your drawing code here
             spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-            currentLevel.Draw(null, spriteBatch);
-            currentLevel.Player.Draw(gameTime, spriteBatch);
+            currentLevel.Draw(gameTime, spriteBatch);
 
             spriteBatch.End();
 
@@ -66,6 +72,13 @@ namespace RocketJumper
         {
             using (Stream fileStream = TitleContainer.OpenStream(filename))
                 currentLevel = new Level(Services, fileStream);
+        }
+
+        private void GetInputs()
+        {
+            keyboardState = Keyboard.GetState();
+            mouseState = Mouse.GetState();
+            gamePadState = GamePad.GetState(PlayerIndex.One);
         }
     }
 }
