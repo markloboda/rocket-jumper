@@ -96,7 +96,7 @@ namespace RocketJumper.Classes
             }
 
 
-            tiles = new Tile[levelWidth, lines.Count];
+            tiles = new Tile[lines.Count, levelWidth];
 
             for (int iy = 0; iy < Height; iy++)
             {
@@ -104,23 +104,19 @@ namespace RocketJumper.Classes
                 {
                     char tileType = lines[iy][ix];
                     tiles[iy, ix] = LoadTile(tileType, ix, iy);
-                    if (tiles[iy, ix].Collision == TileCollision.Impassable)
-                    {
-                        collidableTiles[iy, ix] = tiles[iy, ix];
-                    }
                 }
             }
         }
 
         public int Width
         {
-            get { return tiles.GetLength(0); }
+            get { return tiles.GetLength(1); }
         }
 
 
         public int Height
         {
-            get { return tiles.GetLength(1); }
+            get { return tiles.GetLength(0); }
         }
 
         public Rectangle GetTileBounds(int x, int y)
@@ -138,7 +134,7 @@ namespace RocketJumper.Classes
             {
                 for (int ix = 0; ix < Width; ix++)
                 {
-                    Texture2D texture = tiles[ix, iy].Texture;
+                    Texture2D texture = tiles[iy, ix].Texture;
                     if (texture != null)
                     {
                         spriteBatch.Draw(texture, new Vector2(ix * Tile.Width, iy * Tile.Height), Color.White);
