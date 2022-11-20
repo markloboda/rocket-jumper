@@ -10,9 +10,22 @@ namespace RocketJumper.Classes
         private Animation idleAnimation;
         private Animation runAnimation;
 
+        private Physics physics;
+        private float speed = 300.0f;
+
+        public int Height { get { return height; } }
+        private int height = 26;
+        public int Width { get { return width; } }
+        private int width = 16;
+
         SpriteEffects flipEffect = SpriteEffects.None;
 
-        private float playerSizeScale = 3.0f;
+        public float PlayerSizeScale
+        {
+            get { return playerSizeScale; }
+            set { playerSizeScale = value; }
+        }
+        float playerSizeScale = 3.0f;
 
         // movement vars
         private float inputMovement;
@@ -23,26 +36,30 @@ namespace RocketJumper.Classes
         }
         Level level;
 
-        public Vector2 Position
+        public Physics Physics
         {
-            get { return position; }
+            get { return physics; }
+            set { physics = value; }
         }
-        Vector2 position;
 
-        public Player(Level level, Vector2 position)
+
+
+        public Player(Level level, Vector2 position, Tile[,] tiles)
         {
             this.level = level;
-            this.position = position;
+
+            // offset position
+            position.Y -= 26 * playerSizeScale;
+
+
+            physics = new Physics(position, tiles);
+            physics.BoundingBox = new Rectangle((int)position.X, (int)position.Y, width * (int)playerSizeScale, height * (int)playerSizeScale);
+            physics.IsBoundingBoxVisible = true;
 
             LoadContent();
         }
-        
-        private void ApplyMovement(GameTime gameTime)
-        {
-            // apply input movement
-            Vector2 movement = new Vector2(inputMovement, 0.0f) * 100.0f * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            position = position + movement;
-        }
+
+
 
 
         public void LoadContent()
@@ -51,11 +68,11 @@ namespace RocketJumper.Classes
             idleAnimation = new Animation(Level.Content.Load<Texture2D>("Sprites/Player/Idle"), 0.2f, true, 5, playerSizeScale);
             runAnimation = new Animation(Level.Content.Load<Texture2D>("Sprites/Player/Run"), 0.2f, true, 4, playerSizeScale);
         }
-        
+
         private void HandleInputs(KeyboardState keyboardState, GamePadState gamePadState)
         {
             // gamepad input
-            
+
             // keyboard input
             if (keyboardState.IsKeyDown(Keys.A) || keyboardState.IsKeyDown(Keys.Left))
                 inputMovement = -1.0f;
@@ -69,7 +86,9 @@ namespace RocketJumper.Classes
         {
             HandleInputs(keyboardState, gamePadState);
 
-            ApplyMovement(gameTime);
+            // add horizontal movement
+            physics.AddMovement(gameTime, new Vector2(inputMovement, 0.0f) * speed);
+            physics.Update(gameTime);
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -78,21 +97,28 @@ namespace RocketJumper.Classes
             if (inputMovement < 0)
             {
                 flipEffect = SpriteEffects.FlipHorizontally;
-            } else if (inputMovement > 0)
+            }
+            else if (inputMovement > 0)
             {
                 flipEffect = SpriteEffects.None;
             }
 
             // choose and draw right animation
-            if (inputMovement == 0) { 
+            if (inputMovement == 0)
+            {
                 idleAnimation.StartAnimation();
-                idleAnimation.Draw(gameTime, spriteBatch, position, flipEffect);
-            } else
+                idleAnimation.Draw(gameTime, spriteBatch, physics.Position, flipEffect);
+            }
+            else
             {
                 runAnimation.StartAnimation();
-                runAnimation.Draw(gameTime, spriteBatch, position, flipEffect);
+                runAnimation.Draw(gameTime, spriteBatch, physics.Position, flipEffect);
             }
 
+            if (this.Physics.IsBoundingBoxVisible)
+            {
+                this.Physics.DrawBoundingBox(gameTime, spriteBatch);
+            }
 
         }
     }

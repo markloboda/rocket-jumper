@@ -6,6 +6,18 @@ namespace RocketJumper.Classes
 {
     class Animation
     {
+        public Animation(Texture2D texture, float frameTime, bool isLooping, int frameCount, float scale)
+        {
+            this.texture = texture;
+            this.frameTime = frameTime;
+            this.isLooping = isLooping;
+            this.frameCount = frameCount;
+            this.scale = scale;
+
+            this.frameWidth = texture.Width / frameCount;
+            this.frameHeight = texture.Height;
+        }
+
         public Texture2D Texture
         {
             get { return texture; }
@@ -60,11 +72,6 @@ namespace RocketJumper.Classes
         }
         float scale;
 
-        public Vector2 Origin
-        {
-            get { return new Vector2(frameWidth / 2.0f, frameHeight); }
-        }
-
         // The time since we last updated the frame.
         private float time;
 
@@ -105,19 +112,9 @@ namespace RocketJumper.Classes
             Rectangle source = new Rectangle(frameX, frameY, frameWidth, frameHeight);
 
             // Draw the current frame.
-            spriteBatch.Draw(texture, position, source, Color.White, 0.0f, Origin, scale, spriteEffects, 0.0f);
+            spriteBatch.Draw(texture, position, source, Color.White, 0.0f, Vector2.Zero, scale, spriteEffects, 0.0f);
         }
 
-        public Animation(Texture2D texture, float frameTime, bool isLooping, int frameCount, float scale)
-        {
-            this.texture = texture;
-            this.frameTime = frameTime;
-            this.isLooping = isLooping;
-            this.frameCount = frameCount;
-            this.scale = scale;
 
-            this.frameWidth = texture.Width / frameCount;
-            this.frameHeight = texture.Height;
-        }
     }
 }

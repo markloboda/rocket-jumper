@@ -11,6 +11,7 @@ namespace RocketJumper.Classes
     class Level : IDisposable
     {
         private Tile[,] tiles;
+        private Tile[,] collidableTiles;
 
         private Rectangle finishTileBounds;
 
@@ -36,7 +37,7 @@ namespace RocketJumper.Classes
 
             LoadTiles(fileStream);
 
-            player = new Player(this, start);
+            player = new Player(this, start, tiles);
         }
 
         private Tile LoadTile(char tileType, int x, int y)
@@ -45,7 +46,7 @@ namespace RocketJumper.Classes
             {
                 // empty:
                 case '.':
-                    return new Tile(null, TileCollision.Passable);
+                    return new Tile(null, new Vector2(x, y), TileCollision.Passable);
 
                 // finish:
                 case 'f':
@@ -57,7 +58,7 @@ namespace RocketJumper.Classes
 
                 // normal block:
                 case 'o':
-                    return new Tile(Content.Load<Texture2D>("Tiles/Block"), TileCollision.Impassable);
+                    return new Tile(Content.Load<Texture2D>("Tiles/Block"), new Vector2(x, y), TileCollision.Impassable);
 
                 default:
                     throw new NotSupportedException("Unsupported tile type character '" + tileType + "' at position " + x + ", " + y + ".");
@@ -67,13 +68,13 @@ namespace RocketJumper.Classes
         private Tile LoadFinishTile(int x, int y)
         {
             finishTileBounds = GetTileBounds(x, y);
-            return new Tile(Content.Load<Texture2D>("Tiles/Finish"), TileCollision.Passable);
+            return new Tile(Content.Load<Texture2D>("Tiles/Finish"), new Vector2(x, y), TileCollision.Passable);
         }
 
         private Tile LoadStartTile(int x, int y)
         {
             start = GetTileBounds(x, y).Center.ToVector2();
-            return new Tile(null, TileCollision.Passable);
+            return new Tile(null, new Vector2(x, y), TileCollision.Passable);
         }
 
         private void LoadTiles(Stream fileStream)
@@ -102,7 +103,11 @@ namespace RocketJumper.Classes
                 for (int ix = 0; ix < Width; ix++)
                 {
                     char tileType = lines[iy][ix];
-                    tiles[ix, iy] = LoadTile(tileType, ix, iy);
+                    tiles[iy, ix] = LoadTile(tileType, ix, iy);
+                    if (tiles[iy, ix].Collision == TileCollision.Impassable)
+                    {
+                        collidableTiles[iy, ix] = tiles[iy, ix];
+                    }
                 }
             }
         }
