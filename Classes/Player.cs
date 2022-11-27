@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
+using RocketJumper.Classes.MapData;
 
 namespace RocketJumper.Classes
 {
@@ -44,7 +45,7 @@ namespace RocketJumper.Classes
 
 
 
-        public Player(Level level, Vector2 position, Tile[,] tiles)
+        public Player(Level level, Vector2 position, Tile[] collidables)
         {
             this.level = level;
 
@@ -52,7 +53,7 @@ namespace RocketJumper.Classes
             position.Y -= 26 * playerSizeScale;
 
 
-            physics = new Physics(position, tiles);
+            physics = new Physics(position, collidables);
             physics.BoundingBox = new Rectangle((int)position.X, (int)position.Y, width * (int)playerSizeScale, height * (int)playerSizeScale);
             physics.IsBoundingBoxVisible = true;
 

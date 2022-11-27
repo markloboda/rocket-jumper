@@ -6,12 +6,16 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+using Newtonsoft.Json.Linq;
+using RocketJumper.Classes.MapData;
+
 namespace RocketJumper.Classes
 {
     class Level : IDisposable
     {
-        private Tile[,] tiles;
-        private Tile[,] collidableTiles;
+        private Tile[] collidables;
+        List<TileSet> tileSets;
+        List<Layer> layers;
 
         private Rectangle finishTileBounds;
 
@@ -23,6 +27,30 @@ namespace RocketJumper.Classes
 
         private Vector2 start;
 
+        public int Width
+        {
+            get { return width; }
+        }
+        private int width;
+
+        public int Height
+        {
+            get { return height; }
+        }
+        private int height;
+
+        public int TileWidth
+        {
+            get { return tileWidth; }
+        }
+        private int tileWidth;
+
+        public int TileHeight
+        {
+            get { return tileHeight; }
+        }
+        private int tileHeight;
+
 
         // content
         public ContentManager Content
@@ -31,97 +59,38 @@ namespace RocketJumper.Classes
         }
         ContentManager content;
 
-        public Level(IServiceProvider serviceProvider, Stream fileStream)
+        public Level(IServiceProvider serviceProvider, String filePath)
         {
             content = new ContentManager(serviceProvider, "Content");
 
-            LoadTiles(fileStream);
+            LoadJsonMap(filePath);
 
-            player = new Player(this, start, tiles);
+            player = new Player(this, start, collidables);
         }
 
-        private Tile LoadTile(char tileType, int x, int y)
+        private void LoadJsonMap(String file)
         {
-            switch (tileType)
+            dynamic json = JObject.Parse(File.ReadAllText(file));
+
+            width = json.width;
+            height = json.height;
+
+            tileWidth = json.tilewidth;
+            tileHeight = json.tileheight;
+
+            // load tilesets
+            tileSets = new List<TileSet>();
+            foreach (dynamic tileSetJson in json.tilesets)
             {
-                // empty:
-                case '.':
-                    return new Tile(null, new Vector2(x, y), TileCollision.Passable);
-
-                // finish:
-                case 'f':
-                    return LoadFinishTile(x, y);
-
-                // start:
-                case 's':
-                    return LoadStartTile(x, y);
-
-                // normal block:
-                case 'o':
-                    return new Tile(Content.Load<Texture2D>("Tiles/Block"), new Vector2(x, y), TileCollision.Impassable);
-
-                default:
-                    throw new NotSupportedException("Unsupported tile type character '" + tileType + "' at position " + x + ", " + y + ".");
-            }
-        }
-
-        private Tile LoadFinishTile(int x, int y)
-        {
-            finishTileBounds = GetTileBounds(x, y);
-            return new Tile(Content.Load<Texture2D>("Tiles/Finish"), new Vector2(x, y), TileCollision.Passable);
-        }
-
-        private Tile LoadStartTile(int x, int y)
-        {
-            start = GetTileBounds(x, y).Center.ToVector2();
-            return new Tile(null, new Vector2(x, y), TileCollision.Passable);
-        }
-
-        private void LoadTiles(Stream fileStream)
-        {
-            int levelWidth;
-            List<string> lines = new List<string>();
-
-            using (StreamReader sr = new StreamReader(fileStream))
-            {
-                string line = sr.ReadLine();
-                levelWidth = line.Length;
-                while (line != null)
-                {
-                    lines.Add(line);
-                    if (line.Length != levelWidth)
-                        throw new Exception("All lines in the level must be the same length.");
-                    line = sr.ReadLine();
-                }
+                tileSets.Add(new TileSet(tileSetJson, this));
             }
 
-
-            tiles = new Tile[lines.Count, levelWidth];
-
-            for (int iy = 0; iy < Height; iy++)
+            // load layers (data)
+            layers = new List<Layer>();
+            foreach (dynamic layerJson in json.layers)
             {
-                for (int ix = 0; ix < Width; ix++)
-                {
-                    char tileType = lines[iy][ix];
-                    tiles[iy, ix] = LoadTile(tileType, ix, iy);
-                }
+                layers.Add(new Layer(layerJson, this));
             }
-        }
-
-        public int Width
-        {
-            get { return tiles.GetLength(1); }
-        }
-
-
-        public int Height
-        {
-            get { return tiles.GetLength(0); }
-        }
-
-        public Rectangle GetTileBounds(int x, int y)
-        {
-            return new Rectangle(x * Tile.Width, y * Tile.Height, Tile.Width, Tile.Height);
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -129,27 +98,59 @@ namespace RocketJumper.Classes
             // Draw player
             player.Draw(gameTime, spriteBatch);
 
-            // Draw tiles:
-            for (int iy = 0; iy < Height; iy++)
+            // draw layers
+            foreach (Layer layer in layers)
             {
-                for (int ix = 0; ix < Width; ix++)
+                DrawTileLayer(gameTime, spriteBatch, layer);
+            }
+        }
+
+        private void DrawTileLayer(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)
+        {
+
+            for (int y = 0; y < layer.Height; y++)
+            {
+                for (int x = 0; x < layer.Width; x++)
                 {
-                    Texture2D texture = tiles[iy, ix].Texture;
-                    if (texture != null)
+                    int tileIndex = layer.Data[x + y * layer.Width];
+
+                    if (tileIndex == 0)
+                        continue;
+
+                    int tileSetIndex = 0;
+                    for (int i = 0; i < tileSets.Count; i++)
                     {
-                        spriteBatch.Draw(texture, new Vector2(ix * Tile.Width, iy * Tile.Height), Color.White);
+                        if (tileIndex < tileSets[i].FirstGID)
+                        {
+                            tileSetIndex = i - 1;
+                            break;
+                        }
                     }
+
+                    int tileSetTileIndex = tileIndex - tileSets[tileSetIndex].FirstGID;
+
+                    DrawTile(tileSetIndex, tileSetTileIndex, new Vector2(x * TileWidth, y * TileHeight), spriteBatch);
                 }
             }
+        }
 
+        private void DrawTile(int tileSetIndex, int tileIndex, Vector2 position, SpriteBatch spriteBatch)
+        {
+            TileSet tileSet = tileSets[tileSetIndex];
+
+            int row = tileIndex / tileSet.Columns;
+            int column = tileIndex % tileSet.Columns;
+
+            Rectangle sourceRectangle = new Rectangle(column * (int)tileSet.TileSize.X, row * (int)tileSet.TileSize.Y, (int)tileSet.TileSize.X, (int)tileSet.TileSize.Y);
+            Rectangle destinationRectangle = new Rectangle((int)position.X, (int)position.Y, (int)tileSet.TileSize.X, (int)tileSet.TileSize.Y);
+
+            spriteBatch.Draw(tileSet.Texture, destinationRectangle, sourceRectangle, Color.White);
         }
 
         public void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, GamePadState gamePadState)
         {
             player.Update(gameTime, keyboardState, mouseState, gamePadState);
         }
-
-
 
         public void Dispose()
         {

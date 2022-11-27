@@ -13,6 +13,9 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Levels/test-map.json
+/copy:Levels/test-map.json
+
 #begin Sprites/bazooka-static.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -49,7 +52,7 @@
 /processorParam:TextureFormat=Color
 /build:Sprites/Player/main-character-running-atlas.png;Sprites/Player/Run.png
 
-#begin Tiles/Block.png
+#begin Tiles/basicTileset.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -59,5 +62,5 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Tiles/Block.png
+/build:Tiles/basicTileset.png
 

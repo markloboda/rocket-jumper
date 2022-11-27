@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RocketJumper.Classes.MapData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,17 +14,20 @@ namespace RocketJumper.Classes
 
     class Physics
     {
-        private Tile[,] tiles;
+        private Tile[] collidables;
+
+        private readonly float gravity = 500.0f;
+
 
         public Physics(Vector2 position)
         {
             this.position = position;
         }
 
-        public Physics(Vector2 position, Tile[,] tiles)
+        public Physics(Vector2 position, Tile[] collidables)
         {
             this.position = position;
-            this.tiles = tiles;
+            this.collidables = collidables;
         }
 
         public Rectangle BoundingBox
@@ -112,9 +116,9 @@ namespace RocketJumper.Classes
                 boundingBox.Offset(deltaMove);
 
                 // check if player is on ground
-                if (this.tiles != null)
+                if (this.collidables != null)
                 {
-                    foreach (Tile tile in this.tiles)
+                    foreach (Tile tile in this.collidables)
                     {
                         if (tile.Collision == TileCollision.Passable)
                         {
@@ -136,7 +140,7 @@ namespace RocketJumper.Classes
             // apply gravity to speed
             if (!isOnGround)
             {
-                velocity.Y = velocity.Y + 9.81f * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                velocity.Y = velocity.Y + gravity * (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
             else
             {

@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace RocketJumper.Classes
+namespace RocketJumper.Classes.MapData
 {
 
     enum TileCollision
@@ -17,15 +17,13 @@ namespace RocketJumper.Classes
         public const int Width = 32;
         public const int Height = 32;
 
-        public Texture2D Texture;
         Vector2 Position;
         public TileCollision Collision;
         public static readonly Vector2 Size = new Vector2(Width, Height);
         public Rectangle BoundingBox;
 
-        public Tile(Texture2D texture, Vector2 tilePosition, TileCollision collision)
+        public Tile(Vector2 tilePosition, TileCollision collision)
         {
-            Texture = texture;
             Collision = collision;
             Position = tilePosition;
 
