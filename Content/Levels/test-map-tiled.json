@@ -67,7 +67,7 @@
         {
          "columns":5,
          "firstgid":1,
-         "image":"../Content/Tiles/basicTileset",
+         "image":"../Tiles/basicTileset.png",
          "imageheight":32,
          "imagewidth":160,
          "margin":0,
@@ -80,7 +80,7 @@
         {
          "columns":1,
          "firstgid":6,
-         "image":"../Content/Tiles/interactiblesTileset",
+         "image":"../Tiles/interactiblesTileset.png",
          "imageheight":32,
          "imagewidth":32,
          "margin":0,

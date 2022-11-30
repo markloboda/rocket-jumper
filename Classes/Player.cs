@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
 using RocketJumper.Classes.MapData;
+using System.Collections.Generic;
 
 namespace RocketJumper.Classes
 {
@@ -11,13 +12,10 @@ namespace RocketJumper.Classes
         private Animation idleAnimation;
         private Animation runAnimation;
 
-        private Physics physics;
-        private float speed = 300.0f;
+        private float horizontalSpeed = 300.0f;
 
-        public int Height { get { return height; } }
-        private int height = 26;
-        public int Width { get { return width; } }
-        private int width = 16;
+        public int Height;
+        public int Width;
 
         SpriteEffects flipEffect = SpriteEffects.None;
 
@@ -26,38 +24,26 @@ namespace RocketJumper.Classes
             get { return playerSizeScale; }
             set { playerSizeScale = value; }
         }
-        float playerSizeScale = 3.0f;
+        private float playerSizeScale = 2.5f;
 
         // movement vars
         private float inputMovement;
 
-        public Level Level
+        public Level Level;
+
+        public Physics Physics;
+
+
+
+        public Player(Level level, Vector2 position)
         {
-            get { return level; }
-        }
-        Level level;
-
-        public Physics Physics
-        {
-            get { return physics; }
-            set { physics = value; }
-        }
-
-
-
-        public Player(Level level, Vector2 position, Tile[] collidables)
-        {
-            this.level = level;
-
-            // offset position
-            position.Y -= 26 * playerSizeScale;
-
-
-            physics = new Physics(position, collidables);
-            physics.BoundingBox = new Rectangle((int)position.X, (int)position.Y, width * (int)playerSizeScale, height * (int)playerSizeScale);
-            physics.IsBoundingBoxVisible = true;
+            this.Level = level;
 
             LoadContent();
+
+            Physics = new Physics(position, this.Level);
+            Physics.BoundingBox = new Rectangle((int)position.X, (int)position.Y, Width, Height);
+            Physics.IsBoundingBoxVisible = true;
         }
 
 
@@ -68,6 +54,10 @@ namespace RocketJumper.Classes
             // Load animations.
             idleAnimation = new Animation(Level.Content.Load<Texture2D>("Sprites/Player/Idle"), 0.2f, true, 5, playerSizeScale);
             runAnimation = new Animation(Level.Content.Load<Texture2D>("Sprites/Player/Run"), 0.2f, true, 4, playerSizeScale);
+
+            // Calculate bounds within texture size.
+            Width = (int)(idleAnimation.FrameWidth * playerSizeScale);
+            Height = (int)(idleAnimation.FrameHeight * playerSizeScale);
         }
 
         private void HandleInputs(KeyboardState keyboardState, GamePadState gamePadState)
@@ -88,8 +78,8 @@ namespace RocketJumper.Classes
             HandleInputs(keyboardState, gamePadState);
 
             // add horizontal movement
-            physics.AddMovement(gameTime, new Vector2(inputMovement, 0.0f) * speed);
-            physics.Update(gameTime);
+            Physics.AddMovement(gameTime, new Vector2(inputMovement, 0.0f) * horizontalSpeed);
+            Physics.Update(gameTime);
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -108,12 +98,12 @@ namespace RocketJumper.Classes
             if (inputMovement == 0)
             {
                 idleAnimation.StartAnimation();
-                idleAnimation.Draw(gameTime, spriteBatch, physics.Position, flipEffect);
+                idleAnimation.Draw(gameTime, spriteBatch, Physics.Position, flipEffect);
             }
             else
             {
                 runAnimation.StartAnimation();
-                runAnimation.Draw(gameTime, spriteBatch, physics.Position, flipEffect);
+                runAnimation.Draw(gameTime, spriteBatch, Physics.Position, flipEffect);
             }
 
             if (this.Physics.IsBoundingBoxVisible)
