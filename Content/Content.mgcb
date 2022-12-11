@@ -13,10 +13,13 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Levels/test-map-2.json
+/copy:Levels/test-map-2.json
+
 #begin Levels/test-map.json
 /copy:Levels/test-map.json
 
-#begin Sprites/bazooka-static.png
+#begin Sprites/Bazooka.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -26,7 +29,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Sprites/bazooka-static.png;Sprites/Bazooka.png
+/build:Sprites/Bazooka.png
 
 #begin Sprites/Player/main-character-idle-atlas.png
 /importer:TextureImporter
@@ -51,6 +54,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Sprites/Player/main-character-running-atlas.png;Sprites/Player/Run.png
+
+#begin Sprites/rocket-flying-atlas.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Sprites/rocket-flying-atlas.png;Sprites/Rocket.png
 
 #begin Tiles/basicTileset.png
 /importer:TextureImporter

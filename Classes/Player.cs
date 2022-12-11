@@ -1,6 +1,5 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
 using RocketJumper.Classes.MapData;
 using System.Collections.Generic;
@@ -9,22 +8,13 @@ namespace RocketJumper.Classes
 {
     class Player
     {
-        private Animation idleAnimation;
-        private Animation runAnimation;
 
         private float horizontalSpeed = 300.0f;
+        private Vector2 jumpingForce = new Vector2(0.0f, -200.0f);
 
-        public int Height;
-        public int Width;
+        SpriteEffects characterFlipEffect = SpriteEffects.None;
 
-        SpriteEffects flipEffect = SpriteEffects.None;
-
-        public float PlayerSizeScale
-        {
-            get { return playerSizeScale; }
-            set { playerSizeScale = value; }
-        }
-        private float playerSizeScale = 2.5f;
+        public const float PlayerSizeScale = 2.5f;
 
         // movement vars
         private float inputMovement;
@@ -33,52 +23,44 @@ namespace RocketJumper.Classes
 
         public Physics Physics;
 
+        public List<Item> Items = new();           // list of mapobject that draw onto the player
+
+        public bool HasBazooka = false;
+        public bool HasRocket = true;
+        public const int FireRate = 1000;           // time between shots in milliseconds
+        public int FireTimer = FireRate;
+        public List<Rocket> RocketList = new();
+
 
 
         public Player(Level level, Vector2 position)
         {
-            this.Level = level;
-
-            LoadContent();
-
-            Physics = new Physics(position, this.Level);
-            Physics.BoundingBox = new Rectangle((int)position.X, (int)position.Y, Width, Height);
-            Physics.IsBoundingBoxVisible = true;
-        }
-
-
-
-
-        public void LoadContent()
-        {
-            // Load animations.
-            idleAnimation = new Animation(Level.Content.Load<Texture2D>("Sprites/Player/Idle"), 0.2f, true, 5, playerSizeScale);
-            runAnimation = new Animation(Level.Content.Load<Texture2D>("Sprites/Player/Run"), 0.2f, true, 4, playerSizeScale);
-
-            // Calculate bounds within texture size.
-            Width = (int)(idleAnimation.FrameWidth * playerSizeScale);
-            Height = (int)(idleAnimation.FrameHeight * playerSizeScale);
-        }
-
-        private void HandleInputs(KeyboardState keyboardState, GamePadState gamePadState)
-        {
-            // gamepad input
-
-            // keyboard input
-            if (keyboardState.IsKeyDown(Keys.A) || keyboardState.IsKeyDown(Keys.Left))
-                inputMovement = -1.0f;
-            else if (keyboardState.IsKeyDown(Keys.D) || keyboardState.IsKeyDown(Keys.Right))
-                inputMovement = 1.0f;
-            else
-                inputMovement = 0.0f;
+            Level = level;
+            Physics = new Physics(position, new Vector2(Level.PlayerIdleAnimation.FrameWidth * PlayerSizeScale, Level.PlayerIdleAnimation.FrameHeight * PlayerSizeScale), Level);
+            Physics.AddBoundingBox();
+            Physics.EnableGravity();
         }
 
         public void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, GamePadState gamePadState)
         {
-            HandleInputs(keyboardState, gamePadState);
+            FireTimer -= gameTime.ElapsedGameTime.Milliseconds;
+
+            HandleInputs(keyboardState, mouseState, gamePadState);
+            CheckItemCollision();
+            MoveItemsToPlayer();
+
+            // rockets
+            for (int i = 0; i < RocketList.Count; i++)
+            {
+                RocketList[i].Update(gameTime);
+                if (RocketList[i].Collided)
+                {
+                    RocketList.RemoveAt(i--);
+                }
+            }
 
             // add horizontal movement
-            Physics.AddMovement(gameTime, new Vector2(inputMovement, 0.0f) * horizontalSpeed);
+            Physics.AddInputMovement(gameTime, new Vector2(inputMovement, 0.0f) * horizontalSpeed);
             Physics.Update(gameTime);
         }
 
@@ -86,31 +68,88 @@ namespace RocketJumper.Classes
         {
             // flip if necessary
             if (inputMovement < 0)
-            {
-                flipEffect = SpriteEffects.FlipHorizontally;
-            }
+                characterFlipEffect = SpriteEffects.FlipHorizontally;
             else if (inputMovement > 0)
-            {
-                flipEffect = SpriteEffects.None;
-            }
+                characterFlipEffect = SpriteEffects.None;
 
-            // choose and draw right animation
+            // choose and draw right player animation
             if (inputMovement == 0)
-            {
-                idleAnimation.StartAnimation();
-                idleAnimation.Draw(gameTime, spriteBatch, Physics.Position, flipEffect);
-            }
+                PlayAnimation(Level.PlayerIdleAnimation, Physics.Position, gameTime, spriteBatch);
             else
+                PlayAnimation(Level.PlayerRunAnimation, Physics.Position, gameTime, spriteBatch);
+
+            // items
+            foreach (Item item in Items)
             {
-                runAnimation.StartAnimation();
-                runAnimation.Draw(gameTime, spriteBatch, Physics.Position, flipEffect);
+                item.Draw(gameTime, spriteBatch, characterFlipEffect);
             }
 
-            if (this.Physics.IsBoundingBoxVisible)
+            // rockets
+            foreach (Rocket rocket in RocketList)
+                rocket.Draw(gameTime, spriteBatch);
+            
+            Physics.Draw(gameTime, spriteBatch);
+        }
+
+        private void HandleInputs(KeyboardState keyboardState, MouseState mouseState, GamePadState gamePadState)
+        {
+            // gamepad input
+
+            //
+            // keyboard input
+            //
+
+            // basic moving
+            if (keyboardState.IsKeyDown(Keys.A) || keyboardState.IsKeyDown(Keys.Left))
+                inputMovement = -1.0f;
+            else if (keyboardState.IsKeyDown(Keys.D) || keyboardState.IsKeyDown(Keys.Right))
+                inputMovement = 1.0f;
+            else
+                inputMovement = 0.0f;
+
+            // jumping
+            if ((keyboardState.IsKeyDown(Keys.Space) || keyboardState.IsKeyDown(Keys.W)) && Physics.BottomCollision)
+                Physics.AddTempForce(jumpingForce);
+
+            // shooting
+            if (HasBazooka && HasRocket && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
             {
-                this.Physics.DrawBoundingBox(gameTime, spriteBatch);
+                RocketList.Add(new Rocket(Physics.Position, Level, this));
+                FireTimer = FireRate;
             }
 
+        }
+
+        private void CheckItemCollision()
+        {
+            foreach (Item item in Level.Items)
+            {
+                if (item.Physics.BoundingBox.Intersects(Physics.BoundingBox))
+                {
+                    if (item.Name == "Bazooka")
+                    {
+                        HasBazooka = true;
+                        Level.Items.Remove(item);
+                        Items.Add(item);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void MoveItemsToPlayer()
+        {
+            foreach (Item item in Items)
+            {
+                item.Physics.MoveTo(Physics.Position);
+                item.AddAttachmentOffset();
+            }
+        }
+
+        private void PlayAnimation(Animation animation, Vector2 position, GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            animation.StartAnimation();
+            animation.Draw(gameTime, spriteBatch, position, characterFlipEffect);
         }
     }
 }

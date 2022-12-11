@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,7 +14,6 @@ namespace RocketJumper.Classes
     class Level : IDisposable
     {
         private Vector2 start;
-        private Rectangle finishTileBounds;
 
         public Map Map;
 
@@ -19,16 +21,55 @@ namespace RocketJumper.Classes
 
         // content
         public ContentManager Content;
+        public Animation PlayerIdleAnimation, PlayerRunAnimation, RocketAnimation;
+
+        public List<Item> Items = new();
+
+
 
         public Level(IServiceProvider serviceProvider, String filePath)
         {
             Content = new ContentManager(serviceProvider, "Content");
-
             Map = new Map(filePath, this);
-            Player = new Player(this, start);
         }
 
-        
+        public void LoadContent()
+        {
+            // Load Player
+            PlayerIdleAnimation = new Animation(Content.Load<Texture2D>("Sprites/Player/Idle"), 0.2f, true, 5, Player.PlayerSizeScale);
+            PlayerRunAnimation = new Animation(Content.Load<Texture2D>("Sprites/Player/Run"), 0.2f, true, 4, Player.PlayerSizeScale);
+            Player = new Player(this, start);
+
+            // load all items
+            foreach (Layer layer in Map.Layers)
+            {
+                if (layer.Type == "objectgroup" && layer.Class == "items")
+                {
+                    foreach (Item item in layer.Items)
+                    {
+                        Items.Add(item);
+                    }
+                }
+            }
+
+
+            RocketAnimation = new Animation(Content.Load<Texture2D>("Sprites/Rocket"), 0.2f, true, 5, 1.0f);
+        }
+
+        public void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, GamePadState gamePadState)
+        {
+            // check for collision with pickups / items
+            //HandleMapObjectCollision();
+
+            Player.Update(gameTime, keyboardState, mouseState, gamePadState);
+
+            // update all items
+            foreach (Item item in Items)
+            {
+                item.Update(gameTime);
+            }
+
+        }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
@@ -38,55 +79,44 @@ namespace RocketJumper.Classes
             // draw Layers
             foreach (Layer layer in Map.Layers)
             {
-                DrawTileLayer(gameTime, spriteBatch, layer);
+                if (layer.Type == "tilelayer")
+                    DrawTileLayer(gameTime, spriteBatch, layer);
+                else if (layer.Type == "objectgroup")
+                {
+                    if (layer.Class == "items")
+                        continue;
+                }
             }
+
+            // draw items
+            foreach (Item item in Items)
+            {
+                item.Draw(gameTime, spriteBatch, SpriteEffects.None);
+            }
+
         }
 
         private void DrawTileLayer(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)
         {
-
             for (int y = 0; y < layer.Height; y++)
             {
                 for (int x = 0; x < layer.Width; x++)
                 {
-                    int tileIndex = layer.Data[x + y * layer.Width];
+                    int tileGID = layer.Data[x + y * layer.Width];
 
-                    if (tileIndex == 0)
+                    if (tileGID == 0)
                         continue;
 
-                    int tileSetIndex = 0;
-                    for (int i = 0; i < Map.TileSets.Count; i++)
+                    // find the tileset for this Tile and draw it
+                    foreach (TileSet tileSet in Map.TileSets)
                     {
-                        if (tileIndex < Map.TileSets[i].FirstGID)
+                        if (tileGID >= tileSet.FirstGID)
                         {
-                            tileSetIndex = i - 1;
-                            break;
+                            tileSet.DrawTile(tileGID, new Vector2(x * Map.TileWidth + layer.X, y * Map.TileHeight + layer.Y), spriteBatch, SpriteEffects.None);
                         }
                     }
-
-                    int tileSetTileIndex = tileIndex - Map.TileSets[tileSetIndex].FirstGID;
-
-                    DrawTile(tileSetIndex, tileSetTileIndex, new Vector2(x * Map.TileWidth + layer.X, y * Map.TileHeight + layer.Y), spriteBatch);
                 }
             }
-        }
-
-        private void DrawTile(int tileSetIndex, int tileIndex, Vector2 position, SpriteBatch spriteBatch)
-        {
-            TileSet tileSet = Map.TileSets[tileSetIndex];
-
-            int row = tileIndex / tileSet.Columns;
-            int column = tileIndex % tileSet.Columns;
-
-            Rectangle sourceRectangle = new Rectangle(column * (int)tileSet.TileSize.X, row * (int)tileSet.TileSize.Y, (int)tileSet.TileSize.X, (int)tileSet.TileSize.Y);
-            Rectangle destinationRectangle = new Rectangle((int)position.X, (int)position.Y, (int)tileSet.TileSize.X, (int)tileSet.TileSize.Y);
-
-            spriteBatch.Draw(tileSet.Texture, destinationRectangle, sourceRectangle, Color.White);
-        }
-
-        public void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, GamePadState gamePadState)
-        {
-            Player.Update(gameTime, keyboardState, mouseState, gamePadState);
         }
 
         public void Dispose()

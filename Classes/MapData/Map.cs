@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System;
+using Microsoft.Xna.Framework;
 
 namespace RocketJumper.Classes.MapData
 {
@@ -34,8 +34,13 @@ namespace RocketJumper.Classes.MapData
             Layers = new List<Layer>();
             foreach (dynamic layerJson in json.layers)
             {
-                Layers.Add(new Layer(layerJson));
+                Layers.Add(new Layer(layerJson, level, this));
             }
+        }
+
+        public Rectangle GetBounds(int x, int y)
+        {
+            return new Rectangle(x * TileWidth, y * TileHeight, TileWidth, TileHeight);
         }
     }
 }

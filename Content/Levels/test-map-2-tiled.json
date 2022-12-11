@@ -1,0 +1,114 @@
+{ "compressionlevel":-1,
+ "height":15,
+ "infinite":false,
+ "layers":[
+        {
+         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 3, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+            0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+            4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+         "height":15,
+         "id":1,
+         "name":"Tile Layer 1",
+         "opacity":1,
+         "properties":[
+                {
+                 "name":"Collidable",
+                 "type":"bool",
+                 "value":true
+                }, 
+                {
+                 "name":"Static",
+                 "type":"bool",
+                 "value":true
+                }],
+         "type":"tilelayer",
+         "visible":true,
+         "width":23,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "class":"items",
+         "draworder":"topdown",
+         "id":2,
+         "name":"items",
+         "objects":[
+                {
+                 "class":"item",
+                 "gid":6,
+                 "height":32,
+                 "id":1,
+                 "name":"Bazooka",
+                 "properties":[
+                        {
+                         "name":"AttachOffsetX",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"AttachOffsetY",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "visible":true,
+                 "width":60,
+                 "x":462.666666666666,
+                 "y":446
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }],
+ "nextlayerid":3,
+ "nextobjectid":2,
+ "orientation":"orthogonal",
+ "renderorder":"right-down",
+ "tiledversion":"1.9.2",
+ "tileheight":32,
+ "tilesets":[
+        {
+         "columns":5,
+         "firstgid":1,
+         "image":"..\/Tiles\/basicTileset.png",
+         "imageheight":32,
+         "imagewidth":160,
+         "margin":0,
+         "name":"basicTileset",
+         "spacing":0,
+         "tilecount":5,
+         "tileheight":32,
+         "tilewidth":32
+        }, 
+        {
+         "columns":1,
+         "firstgid":6,
+         "image":"..\/Sprites\/Bazooka.png",
+         "imageheight":32,
+         "imagewidth":60,
+         "margin":0,
+         "name":"Bazooka",
+         "spacing":0,
+         "tilecount":1,
+         "tileheight":32,
+         "tilewidth":60
+        }],
+ "tilewidth":32,
+ "type":"map",
+ "version":"1.9",
+ "width":23
+}

@@ -37,7 +37,7 @@ namespace RocketJumper
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            LoadLevel("Content/Levels/test-map.json");
+            LoadLevel("Content/Levels/test-map-2.json");
 
         }
 
@@ -71,6 +71,7 @@ namespace RocketJumper
         private void LoadLevel(string fileName)
         {
             currentLevel = new Level(Services, fileName);
+            currentLevel.LoadContent();
         }
 
         private void GetInputs()

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json.Linq;
+using System.Reflection.Metadata.Ecma335;
 
 namespace RocketJumper.Classes.MapData
 {
@@ -28,6 +29,19 @@ namespace RocketJumper.Classes.MapData
             ImageHeight = (int)tileSetJson["imageheight"];
             ImageWidth = (int)tileSetJson["imagewidth"];
             FirstGID = (int)tileSetJson["firstgid"];
+        }
+
+        public void DrawTile(int tileGID, Vector2 position, SpriteBatch spriteBatch, SpriteEffects effects)
+        {
+            int tileIndex = tileGID - FirstGID;
+
+            int row = tileIndex / Columns;
+            int column = tileIndex % Columns;
+
+            Rectangle sourceRectangle = new Rectangle(column * (int)TileSize.X, row * (int)TileSize.Y, (int)TileSize.X, (int)TileSize.Y);
+            Rectangle destinationRectangle = new Rectangle((int)position.X, (int)position.Y, (int)TileSize.X, (int)TileSize.Y);
+
+            spriteBatch.Draw(Texture, destinationRectangle, sourceRectangle, Color.White, 0.0f, Vector2.Zero, effects, 0.0f);
         }
     }
 }

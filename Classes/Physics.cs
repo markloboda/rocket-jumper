@@ -1,12 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using RocketJumper.Classes.MapData;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace RocketJumper.Classes
 {
@@ -15,22 +11,18 @@ namespace RocketJumper.Classes
         private Level level;
 
         // forces
-        private readonly float fGravity = 2000.0f;
+        private readonly float gravityAccel = 10.0f;
+
+        // forces that last until removed
+        public List<float> forcesY = new();
+        public List<float> forcesX = new();
+
+        // temp forces that last 1 frame
+        public List<float> tempForcesY = new();
+        public List<float> tempForcesX = new();
 
         // movement per frame
         private Vector2 deltaMove;
-
-
-        public Physics(Vector2 position)
-        {
-            this.position = position;
-        }
-
-        public Physics(Vector2 position, Level level)
-        {
-            this.position = position;
-            this.level = level;
-        }
 
         public Rectangle BoundingBox
         {
@@ -43,97 +35,133 @@ namespace RocketJumper.Classes
         }
         private Rectangle boundingBox;
         private bool isBoundingDef = false;
-        public bool IsBoundingBoxVisible
-        {
-            get { return isBoundingBoxVisible; }
-            set { isBoundingBoxVisible = value; }
-        }
-        private bool isBoundingBoxVisible = false;
 
-        public Texture2D BoundingBoxTexture
-        {
-            get { return boundingBoxTexture; }
-            set { boundingBoxTexture = value; }
-        }
-        private Texture2D boundingBoxTexture;
+        public bool IsBoundingBoxVisible = false;
 
-        public Vector2 Velocity
-        {
-            get { return velocity; }
-        }
-        private Vector2 velocity;
+        public Vector2 Velocity;
 
         private Vector2 inputVelocity;
+        public Vector2 Position;
+        public Vector2 Size;
 
-        public Vector2 Position
+        public bool TopCollision, BottomCollision, LeftCollision, RightCollision;
+
+
+        public Physics(Vector2 Position, Vector2 Size, Level level)
         {
-            get { return position; }
+            this.Position = Position;
+            this.Size = Size;
+            this.level = level;
         }
-        private Vector2 position;
-
-        public bool IsOnGround
-        {
-            get { return isOnGround; }
-        }
-        private bool isOnGround;
-
-
 
         public void Update(GameTime gameTime)
         {
-            // vars in function
-            List<float> fVerticalList = new List<float>();
-            float accelVertical;
-
-            // if bounding is defined, handle collisions
-            if (isBoundingDef)
-                HandleCollision();
-
-            if (!isOnGround)
-                // apply gravity                
-                fVerticalList.Add(fGravity);
-            else
-                if (velocity.Y >= 0)
-                // if velocity is down and object isOnGround -> reset velocity.Y
-                velocity.Y = 0;
-
-
-
             // calculate resulting vertical force
-            float fVerticalRes = 0.0f;
-            foreach (float force in fVerticalList)
-                fVerticalRes += force;
+            float fYRes = 0.0f;
+            foreach (float force in forcesY)
+                fYRes += force;
+            foreach (float force in tempForcesY)
+                fYRes += force;
 
-            // if force is pointing down and object isOnGround -> no movement
-            if (isOnGround && fVerticalRes > 0)
-                fVerticalRes = 0;
+            // calculate resulting horizontal force
+            float fXRes = 0.0f;
+            foreach (float force in forcesX)
+                fXRes += force;
+            foreach (float force in tempForcesX)
+                fXRes += force;
 
-            // apply vertical force (mass is 1)
-            accelVertical = fVerticalRes;
+            // multiply by unit for 1 meter
+            fYRes *= 200;
+            fXRes *= 200;
 
-            // apply vertical acceleration to speed of object
-            velocity.Y = velocity.Y + accelVertical * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            // apply acceleration to speed of object
+            Velocity.Y = Velocity.Y + fYRes * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Velocity.X = Velocity.X + fXRes * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 
-
-
-
-            // apply velocity to deltaMove
-            this.deltaMove = velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            // apply Velocity to deltaMove
+            this.deltaMove = Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // apply inputVelocity to deltaMove
             this.deltaMove += inputVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            boundingBox.Offset(deltaMove);
-            position += this.deltaMove;
+            // move object in Y direction and check for collision on Y axis
+            MoveBy(new Vector2(0, this.deltaMove.Y));
+            SetHorizontalCollisionFlags();
+            if (BottomCollision && Velocity.Y > 0)
+            {
+                Velocity.Y = 0;
+                MoveBy(new Vector2(0, -this.deltaMove.Y));
+            }
+            else if (TopCollision && Velocity.Y < 0)
+            {
+                Velocity.Y = 0;
+                MoveBy(new Vector2(0, -this.deltaMove.Y));
+            }
+
+            // move object in X direction and check for collision on X axis
+            MoveBy(new Vector2(this.deltaMove.X, 0));
+            SetVerticalCollisionFlags();
+            
+
+            // clear temp forces
+            tempForcesY.Clear();
+            tempForcesX.Clear();
         }
 
-        public void AddMovement(GameTime gameTime, Vector2 inputSpeed)
+        public void EnableGravity()
+        {
+            forcesY.Add(gravityAccel);
+        }
+
+        public void DisableGravity()
+        {
+            forcesY.Remove(gravityAccel);
+        }
+
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            if (IsBoundingBoxVisible)
+                Tools.DrawRectangle(boundingBox, Color.Red, spriteBatch);
+        }
+
+        public void AddInputMovement(GameTime gameTime, Vector2 inputSpeed)
         {
             inputVelocity = inputSpeed;
         }
 
-        private void HandleCollision()
+
+        public void AddForce(Vector2 force)
+        {
+            forcesX.Add(force.X);
+            forcesY.Add(force.Y);
+        }
+
+        public void AddTempForce(Vector2 force)
+        {
+            tempForcesX.Add(force.X);
+            tempForcesY.Add(force.Y);
+        }
+
+        public void AddBoundingBox()
+        {
+            BoundingBox = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
+        }
+
+        public void MoveTo(Vector2 position)
+        {
+            Position = position;
+            boundingBox = Tools.RectangleMove(boundingBox, Position);
+        }
+
+        public void MoveBy(Vector2 move)
+        {
+            Position += move;
+            boundingBox = Tools.RectangleMove(boundingBox, Position);
+        }
+
+
+        private void SetVerticalCollisionFlags()
         {
             // get surrounding tiles of boundingBox
             int leftTile = (int)Math.Floor((float)boundingBox.Left / level.Map.TileWidth);
@@ -141,7 +169,10 @@ namespace RocketJumper.Classes
             int topTile = (int)Math.Floor((float)boundingBox.Top / level.Map.TileHeight);
             int bottomTile = (int)Math.Ceiling(((float)boundingBox.Bottom / level.Map.TileHeight)) - 1;
 
-            isOnGround = false;
+            // reset collision flags
+            TopCollision = false;
+            BottomCollision = false;
+
 
             foreach (Layer layer in level.Map.Layers)
             {
@@ -149,83 +180,73 @@ namespace RocketJumper.Classes
                 if (!layer.Collidable)
                     continue;
 
-                // get tile type of surrounding tiles
-                for (int y = topTile; y <= bottomTile; y++)
+                // check for collision with each side
+                // top
+                for (int x = leftTile; x <= rightTile; ++x)
                 {
-                    for (int x = leftTile; x <= rightTile; x++)
+                    if (layer.GetTileType(x, topTile) != 0)
                     {
-                        if (x >= 0 && x < level.Map.Width && y >= 0 && y < level.Map.Height)
-                        {
-                            int tile = layer.GetTileType(x, y);
-                            if (tile != 0)
-                            {
-                                // get tile boundingBox
-                                Rectangle tileBoundingBox = new Rectangle(x * level.Map.TileWidth, y * level.Map.TileHeight, level.Map.TileWidth, level.Map.TileHeight);
+                        Rectangle tileBounds = level.Map.GetBounds(x, topTile);
+                        if (boundingBox.Intersects(tileBounds))
+                            TopCollision = true;
+                    }
+                }
 
-                                // check if boundingBox intersects with tileBoundingBox
-                                if (boundingBox.Intersects(tileBoundingBox))
-                                {
-                                    // get intersection depth
-                                    Vector2 depth = GetRectangleIntersectionDepth(boundingBox, tileBoundingBox);
-
-                                    // if depth is not zero, move boundingBox
-                                    if (depth != Vector2.Zero)
-                                    {
-                                        // if depth.Y is not zero, object isOnGround
-                                        if (depth.Y != 0)
-                                            isOnGround = true;
-
-                                        // move boundingBox
-                                        boundingBox = RectangleOffset(boundingBox, new Vector2(0, -depth.Y));
-                                        position = new Vector2(boundingBox.X, boundingBox.Y);
-                                    }
-                                }
-                            }
-                        }
+                // bottom
+                for (int x = leftTile; x <= rightTile; ++x)
+                {
+                    if (layer.GetTileType(x, bottomTile) != 0)
+                    {
+                        Rectangle tileBounds = level.Map.GetBounds(x, bottomTile);
+                        if (boundingBox.Intersects(tileBounds))
+                            BottomCollision = true;
                     }
                 }
             }
         }
 
-        public void DrawBoundingBox(GameTime gameTime, SpriteBatch spriteBatch)
+        public void SetHorizontalCollisionFlags()
         {
-            if (isBoundingDef)
+            // get surrounding tiles of boundingBox
+            int leftTile = (int)Math.Floor((float)boundingBox.Left / level.Map.TileWidth);
+            int rightTile = (int)Math.Ceiling(((float)boundingBox.Right / level.Map.TileWidth)) - 1;
+            int topTile = (int)Math.Floor((float)boundingBox.Top / level.Map.TileHeight);
+            int bottomTile = (int)Math.Ceiling(((float)boundingBox.Bottom / level.Map.TileHeight)) - 1;
+
+            // reset collision flags
+            LeftCollision = false;
+            RightCollision = false;
+
+
+            foreach (Layer layer in level.Map.Layers)
             {
-                if (boundingBoxTexture == null)
+                // skip uncollidable layers
+                if (!layer.Collidable)
+                    continue;
+
+                // check for collision with each side
+                // left
+                for (int y = topTile; y <= bottomTile; ++y)
                 {
-                    // setup Texture2D for bounding box
-                    boundingBoxTexture = new Texture2D(spriteBatch.GraphicsDevice, boundingBox.Width, boundingBox.Height);
-                    Color[] data = new Color[boundingBox.Width * boundingBox.Height];
-                    for (int i = 0; i < boundingBox.Width; ++i)
+                    if (layer.GetTileType(leftTile, y) != 0)
                     {
-                        data[i] = Color.Red;
-                        data[(boundingBox.Height - 1) * boundingBox.Width + i] = Color.Red;
+                        Rectangle tileBounds = level.Map.GetBounds(leftTile, y);
+                        if (boundingBox.Intersects(tileBounds))
+                            LeftCollision = true;
                     }
-                    for (int i = 0; i < boundingBox.Height; ++i)
-                    {
-                        data[i * boundingBox.Width] = Color.Red;
-                        data[i * boundingBox.Width + boundingBox.Width - 1] = Color.Red;
-                    }
-                    boundingBoxTexture.SetData(data);
                 }
-                spriteBatch.Draw(boundingBoxTexture, Position, Color.White);
+
+                // right
+                for (int y = topTile; y <= bottomTile; ++y)
+                {
+                    if (layer.GetTileType(rightTile, y) != 0)
+                    {
+                        Rectangle tileBounds = level.Map.GetBounds(rightTile, y);
+                        if (boundingBox.Intersects(tileBounds))
+                            RightCollision = true;
+                    }
+                }
             }
-        }
-
-        private static Vector2 GetRectangleIntersectionDepth(Rectangle rectangle1, Rectangle rectangle2)
-        {
-            Rectangle intersection = Rectangle.Intersect(rectangle1, rectangle2);
-            if (intersection.IsEmpty)
-                return Vector2.Zero;
-
-            return new Vector2(intersection.Width, intersection.Height);
-        }
-
-        private static Rectangle RectangleOffset(Rectangle rectangle, Vector2 offset)
-        {
-            rectangle.X += (int)offset.X;
-            rectangle.Y += (int)offset.Y;
-            return rectangle;
         }
     }
 }
