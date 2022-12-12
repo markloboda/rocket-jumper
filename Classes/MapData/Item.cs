@@ -17,6 +17,8 @@ namespace RocketJumper.Classes.MapData
 
         public Physics Physics;
 
+        public SpriteEffects SpriteEffects;
+
         // custom properties //
         public int AttachOffsetX = 0;
         public int AttachOffsetY = 0;
@@ -38,6 +40,7 @@ namespace RocketJumper.Classes.MapData
             Name = objectJson["name"].ToString();
             Rotation = (float)objectJson["rotation"];
             Visible = (bool)objectJson["visible"];
+            SpriteEffects = SpriteEffects.None;
 
             if (objectJson.ContainsKey("properties"))
             {
@@ -82,9 +85,9 @@ namespace RocketJumper.Classes.MapData
             Physics.Update(gameTime);
         }
 
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteEffects effects)
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            tileSet.DrawTile(Gid, Physics.Position, spriteBatch, effects);
+            tileSet.DrawTile(Gid, Physics.Position, spriteBatch, SpriteEffects);
 
             Physics.Draw(gameTime, spriteBatch);
         }

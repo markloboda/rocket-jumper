@@ -11,7 +11,7 @@ namespace RocketJumper.Classes
 
     class Rocket
     {
-        private Animation rocketAnimation;
+        private AnimatedSprite rocketAnimation;
 
         public Physics Physics;
 

@@ -31,6 +31,11 @@ namespace RocketJumper.Classes
         public int FireTimer = FireRate;
         public List<Rocket> RocketList = new();
 
+        // inputs
+        KeyboardState keyboardState;
+        MouseState mouseState;
+        GamePadState gamePadState;
+
 
 
         public Player(Level level, Vector2 position)
@@ -41,11 +46,11 @@ namespace RocketJumper.Classes
             Physics.EnableGravity();
         }
 
-        public void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, GamePadState gamePadState)
+        public void Update(GameTime gameTime)
         {
             FireTimer -= gameTime.ElapsedGameTime.Milliseconds;
 
-            HandleInputs(keyboardState, mouseState, gamePadState);
+            HandleInputs();
             CheckItemCollision();
             MoveItemsToPlayer();
 
@@ -62,6 +67,12 @@ namespace RocketJumper.Classes
             // add horizontal movement
             Physics.AddInputMovement(gameTime, new Vector2(inputMovement, 0.0f) * horizontalSpeed);
             Physics.Update(gameTime);
+
+            // items
+            foreach (Item item in Items)
+            {
+                item.SpriteEffects = characterFlipEffect;
+            }
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -81,18 +92,20 @@ namespace RocketJumper.Classes
             // items
             foreach (Item item in Items)
             {
-                item.Draw(gameTime, spriteBatch, characterFlipEffect);
+                item.Draw(gameTime, spriteBatch);
             }
 
             // rockets
             foreach (Rocket rocket in RocketList)
                 rocket.Draw(gameTime, spriteBatch);
-            
+
             Physics.Draw(gameTime, spriteBatch);
         }
 
-        private void HandleInputs(KeyboardState keyboardState, MouseState mouseState, GamePadState gamePadState)
+        private void HandleInputs()
         {
+            GetInputs();
+
             // gamepad input
 
             //
@@ -146,10 +159,16 @@ namespace RocketJumper.Classes
             }
         }
 
-        private void PlayAnimation(Animation animation, Vector2 position, GameTime gameTime, SpriteBatch spriteBatch)
+        private void PlayAnimation(AnimatedSprite animation, Vector2 position, GameTime gameTime, SpriteBatch spriteBatch)
         {
             animation.StartAnimation();
             animation.Draw(gameTime, spriteBatch, position, characterFlipEffect);
+        }
+        private void GetInputs()
+        {
+            keyboardState = Keyboard.GetState();
+            mouseState = Mouse.GetState();
+            gamePadState = GamePad.GetState(PlayerIndex.One);
         }
     }
 }

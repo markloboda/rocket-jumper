@@ -13,21 +13,17 @@ namespace RocketJumper
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        // inputs
-        KeyboardState keyboardState;
-        MouseState mouseState;
-        GamePadState gamePadState;
 
         public MyGame()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
         }
 
         protected override void Initialize()
         {
             // TODO: Add your initialization logic
+            IsMouseVisible = true;
 
             base.Initialize();
         }
@@ -46,10 +42,8 @@ namespace RocketJumper
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            GetInputs();
-
             // TODO: Add your update logic
-            currentLevel.Update(gameTime, keyboardState, mouseState, gamePadState);
+            currentLevel.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -72,13 +66,6 @@ namespace RocketJumper
         {
             currentLevel = new Level(Services, fileName);
             currentLevel.LoadContent();
-        }
-
-        private void GetInputs()
-        {
-            keyboardState = Keyboard.GetState();
-            mouseState = Mouse.GetState();
-            gamePadState = GamePad.GetState(PlayerIndex.One);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace RocketJumper.Classes
 
         // content
         public ContentManager Content;
-        public Animation PlayerIdleAnimation, PlayerRunAnimation, RocketAnimation;
+        public AnimatedSprite PlayerIdleAnimation, PlayerRunAnimation, RocketAnimation;
 
         public List<Item> Items = new();
 
@@ -36,8 +36,8 @@ namespace RocketJumper.Classes
         public void LoadContent()
         {
             // Load Player
-            PlayerIdleAnimation = new Animation(Content.Load<Texture2D>("Sprites/Player/Idle"), 0.2f, true, 5, Player.PlayerSizeScale);
-            PlayerRunAnimation = new Animation(Content.Load<Texture2D>("Sprites/Player/Run"), 0.2f, true, 4, Player.PlayerSizeScale);
+            PlayerIdleAnimation = new AnimatedSprite(Content.Load<Texture2D>("Sprites/Player/Idle"), 0.2f, true, 5, Player.PlayerSizeScale);
+            PlayerRunAnimation = new AnimatedSprite(Content.Load<Texture2D>("Sprites/Player/Run"), 0.2f, true, 4, Player.PlayerSizeScale);
             Player = new Player(this, start);
 
             // load all items
@@ -53,15 +53,12 @@ namespace RocketJumper.Classes
             }
 
 
-            RocketAnimation = new Animation(Content.Load<Texture2D>("Sprites/Rocket"), 0.2f, true, 5, 1.0f);
+            RocketAnimation = new AnimatedSprite(Content.Load<Texture2D>("Sprites/Rocket"), 0.2f, true, 5, 1.0f);
         }
 
-        public void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, GamePadState gamePadState)
+        public void Update(GameTime gameTime)
         {
-            // check for collision with pickups / items
-            //HandleMapObjectCollision();
-
-            Player.Update(gameTime, keyboardState, mouseState, gamePadState);
+            Player.Update(gameTime);
 
             // update all items
             foreach (Item item in Items)
@@ -91,7 +88,7 @@ namespace RocketJumper.Classes
             // draw items
             foreach (Item item in Items)
             {
-                item.Draw(gameTime, spriteBatch, SpriteEffects.None);
+                item.Draw(gameTime, spriteBatch);
             }
 
         }
