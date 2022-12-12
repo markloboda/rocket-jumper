@@ -30,7 +30,9 @@ namespace RocketJumper.Classes.MapData
         public bool Static = true;                          // is the layer static (all the tiles are non moving)
 
         // object layer specific
-        public List<Item> Items = null;                     // list of objects
+        public List<MapObject> Items = null;                     // list of objects
+
+        public List<MapObject> MapObjects = null;
 
         public Layer(JObject layerJson, Level level, Map map)
         {
@@ -71,11 +73,20 @@ namespace RocketJumper.Classes.MapData
             {
                 if (Class == "items")
                 {
-                    Items = new List<Item>();
+                    Items = new List<MapObject>();
                     JArray objects = layerJson["objects"].ToObject<JArray>();
                     for (int i = 0; i < objects.Count; i++)
                     {
-                        Items.Add(new Item(objects[i].ToObject<JObject>(), level, map));
+                        Items.Add(new MapObject(objects[i].ToObject<JObject>(), level, map));
+                    }
+                }
+                else if (Class == "map-objects")
+                {
+                    MapObjects = new List<MapObject>();
+                    JArray objects = layerJson["objects"].ToObject<JArray>();
+                    for (int i = 0; i < objects.Count; i++)
+                    {
+                        MapObjects.Add(new MapObject(objects[i].ToObject<JObject>(), level, map));
                     }
                 }
             }

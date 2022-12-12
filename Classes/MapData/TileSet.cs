@@ -31,6 +31,22 @@ namespace RocketJumper.Classes.MapData
             FirstGID = (int)tileSetJson["firstgid"];
         }
 
+        public void DrawTile(int tileGID, Vector2 position, SpriteBatch spriteBatch, Vector2 size, SpriteEffects effects = SpriteEffects.None, float rotation = 0.0f)
+        {
+            int tileIndex = tileGID - FirstGID;
+
+            int row = tileIndex / Columns;
+            int column = tileIndex % Columns;
+
+            int xScale = (int)(size.X / TileSize.X);
+            int yScale = (int)(size.Y / TileSize.Y);
+
+            Rectangle sourceRectangle = new Rectangle(column * (int)TileSize.X, row * (int)TileSize.Y, (int)TileSize.X, (int)TileSize.Y);
+            Rectangle destinationRectangle = new Rectangle((int)position.X, (int)position.Y, (int)(TileSize.X * xScale), (int)(TileSize.Y * yScale));
+
+            spriteBatch.Draw(Texture, destinationRectangle, sourceRectangle, Color.White, rotation, Vector2.Zero, effects, 0.0f);
+        }
+
         public void DrawTile(int tileGID, Vector2 position, SpriteBatch spriteBatch, SpriteEffects effects = SpriteEffects.None, float rotation = 0.0f)
         {
             int tileIndex = tileGID - FirstGID;

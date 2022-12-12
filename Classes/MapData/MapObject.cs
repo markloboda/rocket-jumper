@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace RocketJumper.Classes.MapData
 {
-    public class Item
+    public class MapObject
     {
         public string Class;
         public int Gid;
@@ -32,7 +32,7 @@ namespace RocketJumper.Classes.MapData
             }
         }
 
-        public Item(JObject objectJson, Level level, Map map)
+        public MapObject(JObject objectJson, Level level, Map map)
         {
             Class = objectJson["class"].ToString();
             Gid = (int)objectJson["gid"];
@@ -87,7 +87,7 @@ namespace RocketJumper.Classes.MapData
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            tileSet.DrawTile(Gid, Physics.Position, spriteBatch, effects: SpriteEffects, rotation: Rotation);
+            tileSet.DrawTile(Gid, Physics.Position, spriteBatch, size: Physics.Size, effects: SpriteEffects, rotation: Rotation);
 
             Physics.Draw(gameTime, spriteBatch);
         }

@@ -23,7 +23,7 @@ namespace RocketJumper.Classes
         public ContentManager Content;
         public AnimatedSprite PlayerIdleAnimation, PlayerRunAnimation, RocketAnimation;
 
-        public List<Item> Items = new();
+        public List<MapObject> Items = new();
 
         public Matrix CameraTransform;
 
@@ -46,7 +46,7 @@ namespace RocketJumper.Classes
             {
                 if (layer.Type == "objectgroup" && layer.Class == "items")
                 {
-                    foreach (Item item in layer.Items)
+                    foreach (MapObject item in layer.Items)
                     {
                         Items.Add(item);
                     }
@@ -62,7 +62,7 @@ namespace RocketJumper.Classes
             Player.Update(gameTime);
 
             // update all items
-            foreach (Item item in Items)
+            foreach (MapObject item in Items)
             {
                 item.Update(gameTime);
             }
@@ -81,13 +81,16 @@ namespace RocketJumper.Classes
                     DrawTileLayer(gameTime, spriteBatch, layer);
                 else if (layer.Type == "objectgroup")
                 {
+                    // skip items (are handled in LoadContent)
                     if (layer.Class == "items")
                         continue;
+                    else if (layer.Class == "map-objects")
+                        DrawMapObjects(gameTime, spriteBatch, layer);
                 }
             }
 
             // draw items
-            foreach (Item item in Items)
+            foreach (MapObject item in Items)
             {
                 item.Draw(gameTime, spriteBatch);
             }
@@ -114,6 +117,14 @@ namespace RocketJumper.Classes
                         }
                     }
                 }
+            }
+        }
+
+        private void DrawMapObjects(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)
+        {
+            foreach (MapObject mapObject in layer.MapObjects)
+            {
+                mapObject.Draw(gameTime, spriteBatch);
             }
         }
 

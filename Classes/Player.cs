@@ -24,9 +24,9 @@ namespace RocketJumper.Classes
 
         public Physics Physics;
 
-        public List<Item> Items = new();           // list of mapobject that draw onto the player
+        public List<MapObject> Items = new();           // list of mapobject that draw onto the player
 
-        public Item Bazooka;
+        public MapObject Bazooka;
         public bool HasBazooka = false;
         public bool HasRocket = true;
         public const int FireRate = 1000;           // time between shots in milliseconds
@@ -86,7 +86,7 @@ namespace RocketJumper.Classes
                 PlayAnimation(Level.PlayerRunAnimation, Physics.Position, gameTime, spriteBatch);
 
             // items
-            foreach (Item item in Items)
+            foreach (MapObject item in Items)
             {
                 item.Draw(gameTime, spriteBatch);
             }
@@ -145,7 +145,7 @@ namespace RocketJumper.Classes
 
         private void CheckItemCollision()
         {
-            foreach (Item item in Level.Items)
+            foreach (MapObject item in Level.Items)
             {
                 if (item.Physics.BoundingBox.Intersects(Physics.BoundingBox))
                 {
@@ -163,7 +163,7 @@ namespace RocketJumper.Classes
 
         private void MoveItemsToPlayer()
         {
-            foreach (Item item in Items)
+            foreach (MapObject item in Items)
             {
                 item.Physics.MoveTo(Physics.Position);
                 item.AddAttachmentOffset();

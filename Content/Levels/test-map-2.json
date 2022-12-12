@@ -251,9 +251,9 @@
                 0,
                 0,
                 0,
-                0,
-                0,
-                0,
+                1,
+                1,
+                1,
                 0,
                 0,
                 1,
@@ -374,6 +374,43 @@
             "y": 0
         },
         {
+            "class": "map-objects",
+            "draworder": "topdown",
+            "id": 3,
+            "name": "map-objects",
+            "objects": [
+                {
+                    "class": "map-object",
+                    "gid": 8,
+                    "height": 51.1111111111111,
+                    "id": 10,
+                    "name": "TurretTop",
+                    "rotation": 0,
+                    "visible": true,
+                    "width": 80,
+                    "x": 511.636363636364,
+                    "y": 302.782828282828
+                },
+                {
+                    "class": "map-object",
+                    "gid": 7,
+                    "height": 46,
+                    "id": 11,
+                    "name": "TurretBase",
+                    "rotation": 0,
+                    "visible": true,
+                    "width": 72,
+                    "x": 516.181818181818,
+                    "y": 320.181818181818
+                }
+            ],
+            "opacity": 1,
+            "type": "objectgroup",
+            "visible": true,
+            "x": 0,
+            "y": 0
+        },
+        {
             "class": "items",
             "draworder": "topdown",
             "id": 2,
@@ -411,8 +448,8 @@
             "y": 0
         }
     ],
-    "nextlayerid": 3,
-    "nextobjectid": 2,
+    "nextlayerid": 4,
+    "nextobjectid": 12,
     "orientation": "orthogonal",
     "renderorder": "right-down",
     "tiledversion": "1.9.2",
@@ -443,6 +480,19 @@
             "tilecount": 1,
             "tileheight": 32,
             "tilewidth": 60
+        },
+        {
+            "columns": 2,
+            "firstgid": 7,
+            "image": "../Content/Sprites/Turret",
+            "imageheight": 23,
+            "imagewidth": 72,
+            "margin": 0,
+            "name": "Turret",
+            "spacing": 0,
+            "tilecount": 2,
+            "tileheight": 23,
+            "tilewidth": 36
         }
     ],
     "tilewidth": 32,
