@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using RocketJumper.Classes.MapData;
+using System;
 using System.Collections.Generic;
 
 namespace RocketJumper.Classes
@@ -25,6 +26,7 @@ namespace RocketJumper.Classes
 
         public List<Item> Items = new();           // list of mapobject that draw onto the player
 
+        public Item Bazooka;
         public bool HasBazooka = false;
         public bool HasRocket = true;
         public const int FireRate = 1000;           // time between shots in milliseconds
@@ -67,12 +69,6 @@ namespace RocketJumper.Classes
             // add horizontal movement
             Physics.AddInputMovement(gameTime, new Vector2(inputMovement, 0.0f) * horizontalSpeed);
             Physics.Update(gameTime);
-
-            // items
-            foreach (Item item in Items)
-            {
-                item.SpriteEffects = characterFlipEffect;
-            }
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -109,7 +105,7 @@ namespace RocketJumper.Classes
             // gamepad input
 
             //
-            // keyboard input
+            // keyboard and mouse input
             //
 
             // basic moving
@@ -124,13 +120,27 @@ namespace RocketJumper.Classes
             if ((keyboardState.IsKeyDown(Keys.Space) || keyboardState.IsKeyDown(Keys.W)) && Physics.BottomCollision)
                 Physics.AddTempForce(jumpingForce);
 
-            // shooting
-            if (HasBazooka && HasRocket && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
+            // bazooka
+            if (HasBazooka)
             {
-                RocketList.Add(new Rocket(Physics.Position, Level, this));
-                FireTimer = FireRate;
-            }
+                Vector2 mousePosition = mouseState.Position.ToVector2();
+                Vector2 playerPosition = Physics.Position + new Vector2(Physics.Size.X / 2, Physics.Size.Y / 2);
+                Vector2 direction = mousePosition - playerPosition;
 
+                // take into account the transformation of the camera
+                direction = Vector2.Transform(direction, Matrix.Invert(Level.CameraTransform));
+                direction.Normalize();
+
+                float angle = MathF.Atan2(direction.Y, direction.X);
+                Bazooka.Rotation = angle;
+
+                // shooting
+                if (HasRocket && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
+                {
+                    RocketList.Add(new Rocket(Physics.Position, Level, direction, this)); ;
+                    FireTimer = FireRate;
+                }
+            }
         }
 
         private void CheckItemCollision()
@@ -144,6 +154,7 @@ namespace RocketJumper.Classes
                         HasBazooka = true;
                         Level.Items.Remove(item);
                         Items.Add(item);
+                        Bazooka = item;
                         break;
                     }
                 }

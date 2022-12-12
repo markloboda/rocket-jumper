@@ -27,7 +27,7 @@ namespace RocketJumper
         {
             IsMouseVisible = true;
 
-            // camera
+            // screen properties
             ScreenWidth = graphics.PreferredBackBufferWidth;
             ScreenHeight = graphics.PreferredBackBufferHeight;
 
@@ -47,9 +47,16 @@ namespace RocketJumper
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            // fullscreen
+            if (Keyboard.GetState().IsKeyDown(Keys.F11))
+            {
+                graphics.ToggleFullScreen();
+            }
 
-            currentLevel.Update(gameTime);
+
             camera.Follow(currentLevel.Player);
+            currentLevel.CameraTransform = camera.Transform;
+            currentLevel.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -71,6 +78,12 @@ namespace RocketJumper
         {
             currentLevel = new Level(Services, fileName);
             currentLevel.LoadContent();
+        }
+
+        private void ToggleFullscreen()
+        {
+            graphics.IsFullScreen = !graphics.IsFullScreen;
+            graphics.ApplyChanges();
         }
     }
 }

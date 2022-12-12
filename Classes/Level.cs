@@ -25,6 +25,7 @@ namespace RocketJumper.Classes
 
         public List<Item> Items = new();
 
+        public Matrix CameraTransform;
 
 
         public Level(IServiceProvider serviceProvider, String filePath)
@@ -109,7 +110,7 @@ namespace RocketJumper.Classes
                     {
                         if (tileGID >= tileSet.FirstGID)
                         {
-                            tileSet.DrawTile(tileGID, new Vector2(x * Map.TileWidth + layer.X, y * Map.TileHeight + layer.Y), spriteBatch, SpriteEffects.None);
+                            tileSet.DrawTile(tileGID, new Vector2(x * Map.TileWidth + layer.X, y * Map.TileHeight + layer.Y), spriteBatch);
                         }
                     }
                 }

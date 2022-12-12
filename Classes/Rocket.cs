@@ -19,17 +19,21 @@ namespace RocketJumper.Classes
 
         private Level level;
         private Player player;
+        private Vector2 direction;
+        private float rotation;
 
-        public Rocket(Vector2 position, Level level, Player player)
+        public Rocket(Vector2 position, Level level, Vector2 direction, Player player)
         {
             this.level = level;
             this.player = player;
+            this.direction = direction;
+            this.rotation = (float)Math.Atan2(direction.Y, direction.X);
 
             rocketAnimation = this.level.RocketAnimation;
             Physics = new Physics(position, new Vector2(rocketAnimation.FrameWidth, rocketAnimation.FrameHeight), this.level);
             Physics.AddBoundingBox();
             Physics.IsBoundingBoxVisible = true;
-            Physics.AddForce(new Vector2(10.0f, 0.0f));
+            Physics.Velocity = 1000 * direction;
         }
 
         public void Update(GameTime gameTime)
@@ -44,8 +48,7 @@ namespace RocketJumper.Classes
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             rocketAnimation.StartAnimation();
-            rocketAnimation.Draw(gameTime, spriteBatch, Physics.Position, SpriteEffects.None);
-            Physics.Draw(gameTime, spriteBatch);
+            rocketAnimation.Draw(gameTime, spriteBatch, Physics.Position, SpriteEffects.None, rotation);
         }
     }
 }

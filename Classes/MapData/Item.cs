@@ -87,7 +87,7 @@ namespace RocketJumper.Classes.MapData
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            tileSet.DrawTile(Gid, Physics.Position, spriteBatch, SpriteEffects);
+            tileSet.DrawTile(Gid, Physics.Position, spriteBatch, effects: SpriteEffects, rotation: Rotation);
 
             Physics.Draw(gameTime, spriteBatch);
         }
