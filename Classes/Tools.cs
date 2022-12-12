@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 
 namespace RocketJumper.Classes
 {
-    class Tools
+    public class Tools
     {
         public static void DrawRectangle(Rectangle rec, Color color, SpriteBatch spriteBatch)
         {

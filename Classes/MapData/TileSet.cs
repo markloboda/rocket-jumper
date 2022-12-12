@@ -5,7 +5,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace RocketJumper.Classes.MapData
 {
-    struct TileSet
+    public struct TileSet
     {
         public Texture2D Texture;
         public Vector2 TileSize;

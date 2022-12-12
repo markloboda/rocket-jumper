@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace RocketJumper.Classes
 {
 
-    class Rocket
+    public class Rocket
     {
         private AnimatedSprite rocketAnimation;
 

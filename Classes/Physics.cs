@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace RocketJumper.Classes
 {
-    class Physics
+    public class Physics
     {
         private Level level;
 
@@ -30,11 +30,9 @@ namespace RocketJumper.Classes
             set
             {
                 boundingBox = value;
-                isBoundingDef = true;
             }
         }
         private Rectangle boundingBox;
-        private bool isBoundingDef = false;
 
         public bool IsBoundingBoxVisible = false;
 
@@ -43,6 +41,14 @@ namespace RocketJumper.Classes
         private Vector2 inputVelocity;
         public Vector2 Position;
         public Vector2 Size;
+        public int Height
+        {
+            get { return (int)Size.Y; }
+        }
+        public int Width
+        {
+            get { return (int)Size.X; }
+        }
 
         public bool TopCollision, BottomCollision, LeftCollision, RightCollision;
 
@@ -102,7 +108,7 @@ namespace RocketJumper.Classes
             // move object in X direction and check for collision on X axis
             MoveBy(new Vector2(this.deltaMove.X, 0));
             SetVerticalCollisionFlags();
-            
+
 
             // clear temp forces
             tempForcesY.Clear();

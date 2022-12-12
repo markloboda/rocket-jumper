@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace RocketJumper.Classes
 {
-    class Player
+    public class Player
     {
 
         private float horizontalSpeed = 300.0f;

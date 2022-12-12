@@ -11,7 +11,7 @@ using RocketJumper.Classes.MapData;
 
 namespace RocketJumper.Classes
 {
-    class Level : IDisposable
+    public class Level : IDisposable
     {
         private Vector2 start;
 

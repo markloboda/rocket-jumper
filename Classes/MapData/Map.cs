@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace RocketJumper.Classes.MapData
 {
-    struct Map
+    public struct Map
     {
         public int Height;              // Number of tile rows
         public int Width;               // Number of tile columns

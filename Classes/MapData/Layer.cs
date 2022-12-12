@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace RocketJumper.Classes.MapData
 {
-    struct Layer
+    public struct Layer
     {
         public string Type;                                 // type of the layer
         public string Class;                                // class of the layer

@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace RocketJumper.Classes.MapData
 {
-    class Item
+    public class Item
     {
         public string Class;
         public int Gid;

@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace RocketJumper.Classes
 {
-    class AnimatedSprite
+    public class AnimatedSprite
     {
         public AnimatedSprite(Texture2D texture, float frameTime, bool isLooping, int frameCount, float scale)
         {

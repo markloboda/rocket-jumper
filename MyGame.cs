@@ -13,6 +13,9 @@ namespace RocketJumper
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
+        public static int ScreenWidth;
+        public static int ScreenHeight;
+        private Camera camera;
 
         public MyGame()
         {
@@ -22,8 +25,11 @@ namespace RocketJumper
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic
             IsMouseVisible = true;
+
+            // camera
+            ScreenWidth = graphics.PreferredBackBufferWidth;
+            ScreenHeight = graphics.PreferredBackBufferHeight;
 
             base.Initialize();
         }
@@ -32,9 +38,8 @@ namespace RocketJumper
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
             LoadLevel("Content/Levels/test-map-2.json");
-
+            camera = new Camera(currentLevel.Map.Width * currentLevel.Map.TileWidth);
         }
 
         protected override void Update(GameTime gameTime)
@@ -42,8 +47,9 @@ namespace RocketJumper
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic
+
             currentLevel.Update(gameTime);
+            camera.Follow(currentLevel.Player);
 
             base.Update(gameTime);
         }
@@ -52,8 +58,7 @@ namespace RocketJumper
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
-            spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+            spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.Transform);
 
             currentLevel.Draw(gameTime, spriteBatch);
 
