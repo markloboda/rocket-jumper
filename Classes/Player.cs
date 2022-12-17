@@ -131,7 +131,7 @@ namespace RocketJumper.Classes
                 // shooting
                 if (HasRocket && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
                 {
-                    RocketList.Add(new Rocket(PlayerSprite.Physics.Position, Level, direction, this)); ;
+                    RocketList.Add(new Rocket(PlayerSprite.Physics.Position, direction, Level)); ;
                     FireTimer = FireRate;
                 }
             }

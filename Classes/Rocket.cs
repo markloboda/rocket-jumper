@@ -18,22 +18,26 @@ namespace RocketJumper.Classes
 
         public bool Collided = false;
 
-        private Level level;
-        private Player player;
         private Vector2 direction;
         private float rotation;
 
-        public Rocket(Vector2 position, Level level, Vector2 direction, Player player)
+        public Rocket(Vector2 position, Vector2 direction, Level level)
         {
-            this.player = player;
             this.direction = direction;
-            this.rotation = (float)Math.Atan2(direction.Y, direction.X);
+            rotation = (float)Math.Atan2(direction.Y, direction.X);
 
-            rocketAnimation = this.level.RocketAnimation;
+            rocketAnimation = level.RocketAnimation;
 
-            RocketSprite = new AnimatedSprite(new() { ["fly"] = rocketAnimation }, position, level, "fly", isLooping: true);
+            RocketSprite = new AnimatedSprite(
+                new() { ["fly"] = rocketAnimation },
+                position,
+                level,
+                "fly",
+                isLooping: true,
+                rotation: rotation
+                );
 
-            RocketSprite.Physics.Velocity = 1000 * direction;
+            RocketSprite.Physics.Velocity = 100 * this.direction;
         }
 
         public void Update(GameTime gameTime)

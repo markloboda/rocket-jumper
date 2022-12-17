@@ -77,6 +77,7 @@ namespace RocketJumper.Classes
             this.Position = Position;
             this.Size = Size;
             this.level = level;
+            Rotation = rotation;
             GravityEnabled = gravityEnabled;
             AddBoundingBox();
         }
