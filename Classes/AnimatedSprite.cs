@@ -1,120 +1,128 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RocketJumper.Classes.MapData;
+using System;
+using System.Collections.Generic;
 
 namespace RocketJumper.Classes
 {
-    public class AnimatedSprite
+    public class AnimatedSprite : Sprite
     {
-        public AnimatedSprite(Texture2D texture, float frameTime, bool isLooping, int frameCount, float scale)
-        {
-            this.texture = texture;
-            this.frameTime = frameTime;
-            this.isLooping = isLooping;
-            this.frameCount = frameCount;
-            this.scale = scale;
+        public Dictionary<string, Animation_s> AnimationDict { get; set; }
+        public string CurrentAnimationId { get; private set; }
+        public Animation_s CurrentAnimation { get { return AnimationDict[CurrentAnimationId]; } }
+        public List<Sprite> Children { get; set; }
+        public SpriteEffects Effects { get; set; }
+        public Vector2 FrameSize { get { return new Vector2(CurrentAnimation.FrameWidth, CurrentAnimation.FrameHeight); } }
+        public bool IsLooping { get; set; }
+        public int CurrentFrameId { get; private set; }
+        public Physics Physics { get; set; }
+        public Level Level { get; }
 
-            this.frameWidth = texture.Width / frameCount;
-            this.frameHeight = texture.Height;
+        // if Sprite attached
+        public Vector2 AttachmentOffset { get; set; }
+        public Vector2 AttachmentOrigin { get; set; }
+
+
+        private Rectangle sourceRectangle;
+        private float timer = 0.0f;
+
+        public AnimatedSprite(Dictionary<string, Animation_s> animationDict, Vector2 position, Level level, string currentAnimationId, float scale = 1.0f, bool isLooping = false, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, Vector2 attachmentOrigin = default)
+        {
+            // default to first frame
+            CurrentFrameId = 0;
+
+            CurrentAnimationId = currentAnimationId;
+            AnimationDict = animationDict;
+            IsLooping = isLooping;
+
+            Children = new();
+
+            AttachmentOffset = attachmentOffset;
+            AttachmentOrigin = attachmentOrigin;
+            
+            Level = level;
+            Physics = new Physics(position, FrameSize * scale, level, gravityEnabled, rotation);
         }
 
-        public Texture2D Texture
+        public void Update(GameTime gameTime)
         {
-            get { return texture; }
-        }
-        Texture2D texture;
+            Physics.Update(gameTime);
+            MoveChildren();
 
-        // The time per animation frame.
-        public float FrameTime
-        {
-            get { return frameTime; }
-        }
-        float frameTime;
-
-        // Is animation looping?
-        public bool IsLooping
-        {
-            get { return IsLooping; }
-        }
-        bool isLooping;
-
-        // The number of frames in the animation.
-        public int FrameCount
-        {
-            get { return frameCount; }
-        }
-        int frameCount;
-
-        // Width of each frame.
-        public int FrameWidth
-        {
-            get { return frameWidth; }
-        }
-        int frameWidth;
-
-        // Height of each frame.
-        public int FrameHeight
-        {
-            get { return frameHeight; }
-        }
-        int frameHeight;
-
-        // The current frame of animation.
-        public int FrameIndex
-        {
-            get { return frameIndex; }
-        }
-        int frameIndex;
-
-        public float Scale
-        {
-            get { return scale; }
-        }
-        float scale;
-
-        // The time since we last updated the frame.
-        private float time;
-
-        // Is the animation playing?
-        private bool isPlaying = false;
-
-
-        public void StartAnimation()
-        {
-            if (isPlaying)
-                return;
-
-            this.frameIndex = 0;
-            this.time = 0.0f;
-            this.isPlaying = true;
-        }
-
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Vector2 position, SpriteEffects spriteEffects, float rotation = 0.0f)
-        {
-            if (!isPlaying)
-                return;
-
-            time += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            while (time > frameTime)
+            // handle frames
+            timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            while (timer > CurrentAnimation.FrameTime)
             {
-                time -= frameTime;
-
-                // Advance the frame index; looping if necessary.
-                if (isLooping)
-                    frameIndex = (frameIndex + 1) % frameCount;
+                timer -= CurrentAnimation.FrameTime;
+                if (IsLooping)
+                    CurrentFrameId = (CurrentFrameId + 1) % CurrentAnimation.FrameCount;
                 else
-                    frameIndex = Math.Min(frameIndex + 1, frameCount - 1);
+                    CurrentFrameId = (int)MathF.Min(CurrentFrameId + 1, CurrentAnimation.FrameCount - 1);
             }
 
-            // Calculate the source rectangle of the current frame.
-            int frameX = (frameIndex % (texture.Width / frameWidth)) * frameWidth;
-            int frameY = (frameIndex / (texture.Width / frameWidth)) * frameHeight;
-            Rectangle source = new Rectangle(frameX, frameY, frameWidth, frameHeight);
 
-            // Draw the current frame.
-            spriteBatch.Draw(texture, position, source, Color.White, rotation, Vector2.Zero, scale, spriteEffects, 0.0f);
+            // set source rectangle
+            sourceRectangle = GetSourceRectangle(CurrentFrameId);
         }
 
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            Rectangle destinationRectangle = new Rectangle((int)Physics.Position.X, (int)Physics.Position.Y, (int)Physics.Size.X, (int)Physics.Size.Y);
 
+            spriteBatch.Draw(
+                texture: CurrentAnimation.Texture,
+                sourceRectangle: sourceRectangle,
+                destinationRectangle: destinationRectangle,
+                color: Color.White,
+                rotation: Physics.Rotation,
+                origin: Physics.Origin,
+                effects: Effects,
+                layerDepth: 0);
+
+            // draw children
+            foreach (Sprite child in Children)
+                child.Draw(gameTime, spriteBatch);
+
+            Physics.Draw(gameTime, spriteBatch);
+        }
+        public void AddAttachmentOffset()
+        {
+            Physics.MoveBy(AttachmentOffset + AttachmentOrigin);
+        }
+
+        public void AddChild(Sprite sprite)
+        {
+            Children.Add(sprite);
+            sprite.Physics.Origin = sprite.AttachmentOrigin;
+        }
+
+        public void AddInputToPhysics(GameTime gameTime, Vector2 movementVector)
+        {
+            Physics.AddInputMovement(gameTime, movementVector);
+        }
+
+        public void ChangeAnimation(string animationId)
+        {
+            CurrentAnimationId = animationId;
+
+            timer = 0.0f;
+            CurrentFrameId = 0;
+        }
+
+        private Rectangle GetSourceRectangle(int frameIndex)
+        {
+            return new Rectangle(frameIndex * CurrentAnimation.FrameWidth, 0, CurrentAnimation.FrameWidth, CurrentAnimation.FrameHeight);
+        }
+
+        private void MoveChildren()
+        {
+            foreach (Sprite child in Children)
+                if (child.Physics != null)
+                {
+                    child.Physics.MoveTo(Physics.Position);
+                    child.AddAttachmentOffset();
+                }
+        }
     }
 }

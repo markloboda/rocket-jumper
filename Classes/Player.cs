@@ -9,23 +9,19 @@ namespace RocketJumper.Classes
 {
     public class Player
     {
-
-        private float horizontalSpeed = 300.0f;
-        private Vector2 jumpingForce = new Vector2(0.0f, -200.0f);
-
-        SpriteEffects characterFlipEffect = SpriteEffects.None;
-
-        public const float PlayerSizeScale = 2.5f;
+        public AnimatedSprite PlayerSprite;
 
         // movement vars
         private float inputMovement;
+        private float horizontalSpeed = 300.0f;
+        private Vector2 jumpingForce = new Vector2(0.0f, -200.0f);
 
+        // components
         public Level Level;
-
-        public Physics Physics;
 
         public List<MapObject> Items = new();           // list of mapobject that draw onto the player
 
+        // bazooka
         public MapObject Bazooka;
         public bool HasBazooka = false;
         public bool HasRocket = true;
@@ -38,14 +34,13 @@ namespace RocketJumper.Classes
         MouseState mouseState;
         GamePadState gamePadState;
 
+        // other
+        public const float PlayerSizeScale = 2.5f;
 
-
-        public Player(Level level, Vector2 position)
+        public Player(AnimatedSprite playerSprite)
         {
-            Level = level;
-            Physics = new Physics(position, new Vector2(Level.PlayerIdleAnimation.FrameWidth * PlayerSizeScale, Level.PlayerIdleAnimation.FrameHeight * PlayerSizeScale), Level);
-            Physics.AddBoundingBox();
-            Physics.EnableGravity();
+            PlayerSprite = playerSprite;
+            Level = PlayerSprite.Level;
         }
 
         public void Update(GameTime gameTime)
@@ -54,7 +49,6 @@ namespace RocketJumper.Classes
 
             HandleInputs();
             CheckItemCollision();
-            MoveItemsToPlayer();
 
             // rockets
             for (int i = 0; i < RocketList.Count; i++)
@@ -67,35 +61,35 @@ namespace RocketJumper.Classes
             }
 
             // add horizontal movement
-            Physics.AddInputMovement(gameTime, new Vector2(inputMovement, 0.0f) * horizontalSpeed);
-            Physics.Update(gameTime);
+            PlayerSprite.AddInputToPhysics(gameTime, new Vector2(inputMovement, 0.0f) * horizontalSpeed);
+            PlayerSprite.Update(gameTime);
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             // flip if necessary
             if (inputMovement < 0)
-                characterFlipEffect = SpriteEffects.FlipHorizontally;
+                PlayerSprite.Effects = SpriteEffects.FlipHorizontally;
             else if (inputMovement > 0)
-                characterFlipEffect = SpriteEffects.None;
+                PlayerSprite.Effects = SpriteEffects.None;
 
             // choose and draw right player animation
             if (inputMovement == 0)
-                PlayAnimation(Level.PlayerIdleAnimation, Physics.Position, gameTime, spriteBatch);
-            else
-                PlayAnimation(Level.PlayerRunAnimation, Physics.Position, gameTime, spriteBatch);
-
-            // items
-            foreach (MapObject item in Items)
             {
-                item.Draw(gameTime, spriteBatch);
+                if (PlayerSprite.CurrentAnimationId != "idle")
+                    PlayerSprite.ChangeAnimation("idle");
+            }
+            else
+            {
+                if (PlayerSprite.CurrentAnimationId != "run")
+                    PlayerSprite.ChangeAnimation("run");
             }
 
             // rockets
             foreach (Rocket rocket in RocketList)
                 rocket.Draw(gameTime, spriteBatch);
 
-            Physics.Draw(gameTime, spriteBatch);
+            PlayerSprite.Draw(gameTime, spriteBatch);
         }
 
         private void HandleInputs()
@@ -117,14 +111,14 @@ namespace RocketJumper.Classes
                 inputMovement = 0.0f;
 
             // jumping
-            if ((keyboardState.IsKeyDown(Keys.Space) || keyboardState.IsKeyDown(Keys.W)) && Physics.BottomCollision)
-                Physics.AddTempForce(jumpingForce);
+            if ((keyboardState.IsKeyDown(Keys.Space) || keyboardState.IsKeyDown(Keys.W)) && PlayerSprite.Physics.BottomCollision)
+                PlayerSprite.Physics.AddTempForce(jumpingForce);
 
             // bazooka
             if (HasBazooka)
             {
                 Vector2 mousePosition = mouseState.Position.ToVector2();
-                Vector2 playerPosition = Physics.Position + new Vector2(Physics.Size.X / 2, Physics.Size.Y / 2);
+                Vector2 playerPosition = PlayerSprite.Physics.Position + new Vector2(PlayerSprite.Physics.Size.X / 2, PlayerSprite.Physics.Size.Y / 2);
                 Vector2 direction = mousePosition - playerPosition;
 
                 // take into account the transformation of the camera
@@ -132,12 +126,12 @@ namespace RocketJumper.Classes
                 direction.Normalize();
 
                 float angle = MathF.Atan2(direction.Y, direction.X);
-                Bazooka.Rotation = angle;
+                Bazooka.ObjectSprite.Physics.Rotation = angle;
 
                 // shooting
                 if (HasRocket && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
                 {
-                    RocketList.Add(new Rocket(Physics.Position, Level, direction, this)); ;
+                    RocketList.Add(new Rocket(PlayerSprite.Physics.Position, Level, direction, this)); ;
                     FireTimer = FireRate;
                 }
             }
@@ -147,39 +141,34 @@ namespace RocketJumper.Classes
         {
             foreach (MapObject item in Level.Items)
             {
-                if (item.Physics.BoundingBox.Intersects(Physics.BoundingBox))
+                if (item.ObjectSprite.Physics.BoundingBox.Intersects(PlayerSprite.Physics.BoundingBox))
                 {
-                    if (item.Name == "Bazooka")
-                    {
-                        HasBazooka = true;
-                        Level.Items.Remove(item);
-                        Items.Add(item);
-                        Bazooka = item;
-                        break;
-                    }
+                    AddItemToPlayer(item);
+                    break;
                 }
             }
         }
 
-        private void MoveItemsToPlayer()
+        private void AddItemToPlayer(MapObject item)
         {
-            foreach (MapObject item in Items)
+            if (item.Name == "Bazooka")
             {
-                item.Physics.MoveTo(Physics.Position);
-                item.AddAttachmentOffset();
+                Bazooka = item;
+                HasBazooka = true;
+                Bazooka.ObjectSprite.AttachmentOrigin = new Vector2(PlayerSprite.Physics.Width / 2, Bazooka.AttachOffsetY);
             }
+
+            Level.Items.Remove(item);
+            Items.Add(item);
+            PlayerSprite.AddChild(item.ObjectSprite);
         }
 
-        private void PlayAnimation(AnimatedSprite animation, Vector2 position, GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            animation.StartAnimation();
-            animation.Draw(gameTime, spriteBatch, position, characterFlipEffect);
-        }
         private void GetInputs()
         {
             keyboardState = Keyboard.GetState();
             mouseState = Mouse.GetState();
             gamePadState = GamePad.GetState(PlayerIndex.One);
         }
+
     }
 }

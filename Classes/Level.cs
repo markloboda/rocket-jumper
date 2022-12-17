@@ -13,19 +13,29 @@ namespace RocketJumper.Classes
 {
     public class Level : IDisposable
     {
+        // const
+        public const float PlayerScale = 2.5f;
+
+
+        // camera
+        public Matrix CameraTransform;
+
+
+        // vars
         private Vector2 start;
 
-        public Map Map;
 
+        public Map Map;
         public Player Player;
 
         // content
         public ContentManager Content;
-        public AnimatedSprite PlayerIdleAnimation, PlayerRunAnimation, RocketAnimation;
+        public Animation_s RocketAnimation;
 
         public List<MapObject> Items = new();
+        public List<MapObject> MapObjects = new();
+        public List<Turret> Turrets = new();
 
-        public Matrix CameraTransform;
 
 
         public Level(IServiceProvider serviceProvider, String filePath)
@@ -36,25 +46,64 @@ namespace RocketJumper.Classes
 
         public void LoadContent()
         {
+            // PLAYER
+            Dictionary<string, Animation_s> playerAnimationDict = new()
+            {
+                ["idle"] = new Animation_s(Content.Load<Texture2D>("Sprites/Player/Idle"), 5, 0.2f),
+                ["run"] = new Animation_s(Content.Load<Texture2D>("Sprites/Player/Run"), 4, 0.2f)
+            };
+            AnimatedSprite playerSprite = new AnimatedSprite(playerAnimationDict, start, this, "idle", PlayerScale, true, true);
+            
+            // Create Player Physics
             // Load Player
-            PlayerIdleAnimation = new AnimatedSprite(Content.Load<Texture2D>("Sprites/Player/Idle"), 0.2f, true, 5, Player.PlayerSizeScale);
-            PlayerRunAnimation = new AnimatedSprite(Content.Load<Texture2D>("Sprites/Player/Run"), 0.2f, true, 4, Player.PlayerSizeScale);
-            Player = new Player(this, start);
+            Player = new Player(playerSprite);
 
-            // load all items
+            // ROCKETS
+            RocketAnimation = new Animation_s(Content.Load<Texture2D>("Sprites/Rocket"), 5, 0.2f);
+
+
+            // load all items and mapObjects
             foreach (Layer layer in Map.Layers)
             {
-                if (layer.Type == "objectgroup" && layer.Class == "items")
+                if (layer.Type == "objectgroup")
                 {
-                    foreach (MapObject item in layer.Items)
+                    if (layer.Class == "items")
                     {
-                        Items.Add(item);
+                        foreach (MapObject item in layer.Items)
+                        {
+                            Items.Add(item);
+                        }
+                    }
+                    else if (layer.Class == "map-objects")
+                    {
+                        List<MapObject> parents = new();
+                        List<MapObject> children = new();
+                        foreach (MapObject mapObject in layer.MapObjects)
+                        {
+                            MapObjects.Add(mapObject);
+                            // add parents at the end (so that they are initialized with children (example: Turret))
+                            if (mapObject.HasChildren)
+                                parents.Add(mapObject);
+                            else
+                            {
+                                if (mapObject.ParentId != -1)
+                                    children.Add(mapObject);
+                            }
+                        }
+
+                        // add children to parents and initialize them
+                        foreach (MapObject parent in parents)
+                        {
+                            foreach (MapObject child in children)
+                                if (child.ParentId == parent.Id)
+                                    parent.Children.Add(child);
+                            if (parent.Name == "TurretBase")
+                                Turrets.Add(new Turret(parent, this));
+                        }
                     }
                 }
             }
 
-
-            RocketAnimation = new AnimatedSprite(Content.Load<Texture2D>("Sprites/Rocket"), 0.2f, true, 5, 1.0f);
         }
 
         public void Update(GameTime gameTime)
@@ -65,6 +114,12 @@ namespace RocketJumper.Classes
             foreach (MapObject item in Items)
             {
                 item.Update(gameTime);
+            }
+
+            // update turrets
+            foreach (Turret turret in Turrets)
+            {
+                turret.Update(gameTime);
             }
 
         }

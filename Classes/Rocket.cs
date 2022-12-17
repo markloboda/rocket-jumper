@@ -5,15 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RocketJumper.Classes.MapData;
 
 namespace RocketJumper.Classes
 {
 
     public class Rocket
     {
-        private AnimatedSprite rocketAnimation;
+        private Animation_s rocketAnimation;
 
-        public Physics Physics;
+        public AnimatedSprite RocketSprite;
 
         public bool Collided = false;
 
@@ -24,22 +25,21 @@ namespace RocketJumper.Classes
 
         public Rocket(Vector2 position, Level level, Vector2 direction, Player player)
         {
-            this.level = level;
             this.player = player;
             this.direction = direction;
             this.rotation = (float)Math.Atan2(direction.Y, direction.X);
 
             rocketAnimation = this.level.RocketAnimation;
-            Physics = new Physics(position, new Vector2(rocketAnimation.FrameWidth, rocketAnimation.FrameHeight), this.level);
-            Physics.AddBoundingBox();
-            Physics.IsBoundingBoxVisible = true;
-            Physics.Velocity = 1000 * direction;
+
+            RocketSprite = new AnimatedSprite(new() { ["fly"] = rocketAnimation }, position, level, "fly", isLooping: true);
+
+            RocketSprite.Physics.Velocity = 1000 * direction;
         }
 
         public void Update(GameTime gameTime)
         {
-            Physics.Update(gameTime);
-            if (Physics.TopCollision || Physics.BottomCollision || Physics.LeftCollision || Physics.RightCollision)
+            RocketSprite.Update(gameTime);
+            if (RocketSprite.Physics.TopCollision || RocketSprite.Physics.BottomCollision || RocketSprite.Physics.LeftCollision || RocketSprite.Physics.RightCollision)
             {
                 Collided = true;
             }
@@ -47,8 +47,7 @@ namespace RocketJumper.Classes
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            rocketAnimation.StartAnimation();
-            rocketAnimation.Draw(gameTime, spriteBatch, Physics.Position, SpriteEffects.None, rotation);
+            RocketSprite.Draw(gameTime, spriteBatch);
         }
     }
 }

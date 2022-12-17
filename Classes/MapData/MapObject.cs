@@ -1,23 +1,28 @@
 ﻿using Microsoft.Xna.Framework;
 using Newtonsoft.Json.Linq;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace RocketJumper.Classes.MapData
 {
     public class MapObject
     {
+        public Sprite ObjectSprite;
+
+        // read data
         public string Class;
         public int Gid;
         public int Id;
         public string Name;
         public float Rotation;
         public bool Visible;
-
-        public TileSet tileSet;
+        public TileSet TileSet;
 
         public Physics Physics;
 
         public SpriteEffects SpriteEffects;
+
+        public Vector2 Origin;
 
         // custom properties //
         public int AttachOffsetX = 0;
@@ -32,8 +37,14 @@ namespace RocketJumper.Classes.MapData
             }
         }
 
+        public MapObject Parent;
+        public List<MapObject> Children;
+        public int ParentId = -1;
+        public bool HasChildren = false;
+
         public MapObject(JObject objectJson, Level level, Map map)
         {
+            // READ PROPERTIES
             Class = objectJson["class"].ToString();
             Gid = (int)objectJson["gid"];
             Id = (int)objectJson["id"];
@@ -42,6 +53,12 @@ namespace RocketJumper.Classes.MapData
             Visible = (bool)objectJson["visible"];
             SpriteEffects = SpriteEffects.None;
 
+            int x = (int)objectJson["x"];
+            int y = (int)objectJson["y"];
+
+            int height = (int)objectJson["height"];
+            int width = (int)objectJson["width"];
+
             if (objectJson.ContainsKey("properties"))
             {
                 JArray customProperties = objectJson["properties"].ToObject<JArray>();
@@ -49,13 +66,23 @@ namespace RocketJumper.Classes.MapData
                 for (int i = 0; i < customProperties.Count; i++)
                 {
                     var property = customProperties[i];
-                    if (property["name"].ToString() == "AttachOffsetX")
+                    string propertyName = property["name"].ToString();
+                    if (propertyName == "AttachOffsetX")
                     {
                         AttachOffsetX = (int)property["value"];
                     }
-                    else if (property["name"].ToString() == "AttachOffsetY")
+                    else if (propertyName == "AttachOffsetY")
                     {
                         AttachOffsetY = (int)property["value"];
+                    }
+                    else if (propertyName == "Parent")
+                    {
+                        ParentId = (int)property["value"];
+                    }
+                    else if (propertyName == "HasChildren")
+                    {
+                        HasChildren = (bool)property["value"];
+                        Children = new List<MapObject>();
                     }
                 }
             }
@@ -65,41 +92,27 @@ namespace RocketJumper.Classes.MapData
             {
                 if (Gid >= tileSet.FirstGID)
                 {
-                    this.tileSet = tileSet;
+                    TileSet = tileSet;
                 }
             }
 
-            int x = (int)objectJson["x"];
-            int y = (int)objectJson["y"];
-
-            int height = (int)objectJson["height"];
-            int width = (int)objectJson["width"];
-
-            Physics = new Physics(new Vector2(x, y - height), new Vector2(width, height), level);
-            Physics.AddBoundingBox();
-            Physics.EnableGravity();
+            // create Sprite
+            ObjectSprite = new StaticSprite(tileSet: TileSet, gid: Gid, position: new Vector2(x, y - height), level: level, spriteSize: new Vector2(width, height), attachmentOffset: AttachOffset);
         }
 
         public void Update(GameTime gameTime)
         {
-            Physics.Update(gameTime);
+            ObjectSprite.Update(gameTime);
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            tileSet.DrawTile(Gid, Physics.Position, spriteBatch, size: Physics.Size, effects: SpriteEffects, rotation: Rotation);
-
-            Physics.Draw(gameTime, spriteBatch);
-        }
-
-        public void MoveItemTo(Vector2 position)
-        {
-            Physics.MoveTo(position);
+            ObjectSprite.Draw(gameTime, spriteBatch);
         }
 
         public void AddAttachmentOffset()
         {
-            Physics.MoveBy(AttachOffset);
+            ObjectSprite.Physics.MoveBy(AttachOffset);
         }
     }
 }

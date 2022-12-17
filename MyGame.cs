@@ -54,7 +54,7 @@ namespace RocketJumper
             }
 
 
-            camera.Follow(currentLevel.Player);
+            camera.Follow(currentLevel.Player.PlayerSprite);
             currentLevel.CameraTransform = camera.Transform;
             currentLevel.Update(gameTime);
 

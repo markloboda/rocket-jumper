@@ -40,6 +40,8 @@ namespace RocketJumper.Classes
 
         private Vector2 inputVelocity;
         public Vector2 Position;
+        public float Rotation;
+        public Vector2 Origin;
         public Vector2 Size;
         public int Height
         {
@@ -52,12 +54,31 @@ namespace RocketJumper.Classes
 
         public bool TopCollision, BottomCollision, LeftCollision, RightCollision;
 
+        // flags
+        public bool GravityEnabled
+        {
+            get
+            {
+                return gravityEnabled;
+            }
+            set
+            {
+                gravityEnabled = value;
+                if (gravityEnabled)
+                    EnableGravity();
+                else
+                    DisableGravity();
+            }
+        }
+        private bool gravityEnabled;
 
-        public Physics(Vector2 Position, Vector2 Size, Level level)
+        public Physics(Vector2 Position, Vector2 Size, Level level, bool gravityEnabled, float rotation)
         {
             this.Position = Position;
             this.Size = Size;
             this.level = level;
+            GravityEnabled = gravityEnabled;
+            AddBoundingBox();
         }
 
         public void Update(GameTime gameTime)
@@ -253,6 +274,15 @@ namespace RocketJumper.Classes
                     }
                 }
             }
+        }
+        public Vector2 GetGlobalCenter()
+        {
+            return new Vector2(Position.X + (Size.X / 2), Position.Y + (Size.Y / 2));
+        }
+
+        public Vector2 GetLocalCenter()
+        {
+            return new Vector2(Size.X / 2, Size.Y / 2);
         }
     }
 }

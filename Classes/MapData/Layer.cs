@@ -32,7 +32,7 @@ namespace RocketJumper.Classes.MapData
         // object layer specific
         public List<MapObject> Items = null;                     // list of objects
 
-        public List<MapObject> MapObjects = null;
+        public List<MapObject> MapObjects = null;               // list of objects
 
         public Layer(JObject layerJson, Level level, Map map)
         {
