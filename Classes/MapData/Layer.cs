@@ -30,9 +30,8 @@ namespace RocketJumper.Classes.MapData
         public bool Static = true;                          // is the layer static (all the tiles are non moving)
 
         // object layer specific
-        public List<MapObject> Items = null;                     // list of objects
-
-        public List<MapObject> MapObjects = null;               // list of objects
+        public Dictionary<int, Sprite> ItemSprites = new Dictionary<int, Sprite>();
+        public Dictionary<int, Sprite> Sprites = new Dictionary<int, Sprite>();
 
         public Layer(JObject layerJson, Level level, Map map)
         {
@@ -73,21 +72,39 @@ namespace RocketJumper.Classes.MapData
             {
                 if (Class == "items")
                 {
-                    Items = new List<MapObject>();
                     JArray objects = layerJson["objects"].ToObject<JArray>();
                     for (int i = 0; i < objects.Count; i++)
                     {
-                        Items.Add(new MapObject(objects[i].ToObject<JObject>(), level, map));
+                        Sprite sprite = JsonReader.GetSpriteFromJson(objects[i].ToObject<JObject>(), level, map.TileSets);
+                        ItemSprites.Add(sprite.GID, sprite);
+                    }
+
+                    // add children to parents
+                    foreach (Sprite sprite in Sprites.Values)
+                    {
+                        if (sprite.ParentId != -1)
+                        {
+                            ItemSprites[sprite.ParentId] = sprite;
+                            ItemSprites.Remove(sprite.GID);
+                        }
                     }
                 }
                 else if (Class == "map-objects")
                 {
-                    MapObjects = new List<MapObject>();
                     JArray objects = layerJson["objects"].ToObject<JArray>();
                     for (int i = 0; i < objects.Count; i++)
                     {
-                        MapObjects.Add(new MapObject(objects[i].ToObject<JObject>(), level, map));
+                        Sprite sprite = JsonReader.GetSpriteFromJson(objects[i].ToObject<JObject>(), level, map.TileSets);
+                        Sprites.Add(sprite.ID, sprite);
                     }
+
+                    // add children to parents
+                    foreach (Sprite sprite in Sprites.Values)
+                        if (sprite.ParentId != -1)
+                        {
+                            Sprites[sprite.ParentId].AddChild(sprite);
+                            Sprites.Remove(sprite.ID);
+                        }
                 }
             }
         }

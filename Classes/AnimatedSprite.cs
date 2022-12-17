@@ -23,6 +23,12 @@ namespace RocketJumper.Classes
         public Vector2 AttachmentOffset { get; set; }
         public Vector2 AttachmentOrigin { get; set; }
 
+        // if Sprite from Tiled
+        public string Name { get; set; }
+        public int GID { get; set; }
+        public int ID { get; set; }
+        public int ParentId { get; set; }
+
 
         private Rectangle sourceRectangle;
         private float timer = 0.0f;
@@ -40,7 +46,7 @@ namespace RocketJumper.Classes
 
             AttachmentOffset = attachmentOffset;
             AttachmentOrigin = attachmentOrigin;
-            
+
             Level = level;
             Physics = new Physics(position, FrameSize * scale, level, gravityEnabled, rotation);
         }

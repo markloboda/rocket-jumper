@@ -6,18 +6,18 @@ namespace RocketJumper.Classes
 {
     public class Turret
     {
-        public MapObject baseMapObject;
+        public Sprite baseSprite;
         private Level level;
-        private MapObject shootingObject;
+        private Sprite shootingSprite;
 
         public Vector2 ShootingPosition;
 
-        public Turret(MapObject baseMapObject, Level level)
+        public Turret(Sprite baseSprite, Level level)
         {
-            this.baseMapObject = baseMapObject;
+            this.baseSprite = baseSprite;
             this.level = level;
 
-            SetTurretTop(baseMapObject.Children[0]);
+            SetTurretTop(baseSprite.Children[0]);
         }
 
         public void Update(GameTime gameTime)
@@ -29,14 +29,14 @@ namespace RocketJumper.Classes
         {
             // get the rotation of the turret to aim at the target
             Vector2 direction = target - ShootingPosition;
-            shootingObject.Rotation = MathF.Atan2(direction.Y, direction.X);
+            shootingSprite.Physics.Rotation = MathF.Atan2(direction.Y, direction.X);
         }
 
-        public void SetTurretTop(MapObject mapObject)
+        public void SetTurretTop(Sprite mapObject)
         {
-            shootingObject = mapObject;
-            ShootingPosition = new Vector2(shootingObject.ObjectSprite.Physics.Position.X + shootingObject.ObjectSprite.Physics.Size.X / 2, shootingObject.ObjectSprite.Physics.Position.Y + shootingObject.ObjectSprite.Physics.Size.Y / 2);
-            shootingObject.Origin = shootingObject.ObjectSprite.Physics.GetLocalCenter();
+            shootingSprite = mapObject;
+            ShootingPosition = new Vector2(shootingSprite.Physics.Position.X + shootingSprite.Physics.Size.X / 2, shootingSprite.Physics.Position.Y + shootingSprite.Physics.Size.Y / 2);
+            shootingSprite.AttachmentOrigin = shootingSprite.Physics.GetLocalCenter();
         }
     }
 }

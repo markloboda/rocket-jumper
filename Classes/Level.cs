@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
@@ -32,8 +33,8 @@ namespace RocketJumper.Classes
         public ContentManager Content;
         public Animation_s RocketAnimation;
 
-        public List<MapObject> Items = new();
-        public List<MapObject> MapObjects = new();
+        public List<Sprite> ItemSprites = new();
+        public List<Sprite> Sprites = new();
         public List<Turret> Turrets = new();
 
 
@@ -53,7 +54,7 @@ namespace RocketJumper.Classes
                 ["run"] = new Animation_s(Content.Load<Texture2D>("Sprites/Player/Run"), 4, 0.2f)
             };
             AnimatedSprite playerSprite = new AnimatedSprite(playerAnimationDict, start, this, "idle", PlayerScale, true, true);
-            
+
             // Create Player Physics
             // Load Player
             Player = new Player(playerSprite);
@@ -64,45 +65,11 @@ namespace RocketJumper.Classes
 
             // load all items and mapObjects
             foreach (Layer layer in Map.Layers)
-            {
                 if (layer.Type == "objectgroup")
-                {
                     if (layer.Class == "items")
-                    {
-                        foreach (MapObject item in layer.Items)
-                        {
-                            Items.Add(item);
-                        }
-                    }
+                        ItemSprites = layer.ItemSprites.Values.ToList();
                     else if (layer.Class == "map-objects")
-                    {
-                        List<MapObject> parents = new();
-                        List<MapObject> children = new();
-                        foreach (MapObject mapObject in layer.MapObjects)
-                        {
-                            MapObjects.Add(mapObject);
-                            // add parents at the end (so that they are initialized with children (example: Turret))
-                            if (mapObject.HasChildren)
-                                parents.Add(mapObject);
-                            else
-                            {
-                                if (mapObject.ParentId != -1)
-                                    children.Add(mapObject);
-                            }
-                        }
-
-                        // add children to parents and initialize them
-                        foreach (MapObject parent in parents)
-                        {
-                            foreach (MapObject child in children)
-                                if (child.ParentId == parent.Id)
-                                    parent.Children.Add(child);
-                            if (parent.Name == "TurretBase")
-                                Turrets.Add(new Turret(parent, this));
-                        }
-                    }
-                }
-            }
+                        Sprites = layer.Sprites.Values.ToList();
 
         }
 
@@ -111,7 +78,7 @@ namespace RocketJumper.Classes
             Player.Update(gameTime);
 
             // update all items
-            foreach (MapObject item in Items)
+            foreach (Sprite item in ItemSprites)
             {
                 item.Update(gameTime);
             }
@@ -140,12 +107,12 @@ namespace RocketJumper.Classes
                     if (layer.Class == "items")
                         continue;
                     else if (layer.Class == "map-objects")
-                        DrawMapObjects(gameTime, spriteBatch, layer);
+                        DrawSprites(gameTime, spriteBatch, layer);
                 }
             }
 
             // draw items
-            foreach (MapObject item in Items)
+            foreach (Sprite item in ItemSprites)
             {
                 item.Draw(gameTime, spriteBatch);
             }
@@ -175,9 +142,9 @@ namespace RocketJumper.Classes
             }
         }
 
-        private void DrawMapObjects(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)
+        private void DrawSprites(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)
         {
-            foreach (MapObject mapObject in layer.MapObjects)
+            foreach (Sprite mapObject in Sprites)
             {
                 mapObject.Draw(gameTime, spriteBatch);
             }

@@ -18,6 +18,12 @@ namespace RocketJumper.Classes
         public Vector2 AttachmentOffset { get; internal set; }
         public Vector2 AttachmentOrigin { get; internal set; }
 
+        // if Sprite from Tiled json file
+        public string Name { get; internal set; }
+        public int GID { get; internal set; }
+        public int ID { get; internal set; }
+        public int ParentId { get; internal set; }
+
 
         public void Update(GameTime gameTime);
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch);

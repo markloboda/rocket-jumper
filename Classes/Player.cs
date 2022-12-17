@@ -19,10 +19,10 @@ namespace RocketJumper.Classes
         // components
         public Level Level;
 
-        public List<MapObject> Items = new();           // list of mapobject that draw onto the player
+        public List<Sprite> Items = new();           // list of mapobject that draw onto the player
 
         // bazooka
-        public MapObject Bazooka;
+        public Sprite Bazooka;
         public bool HasBazooka = false;
         public bool HasRocket = true;
         public const int FireRate = 1000;           // time between shots in milliseconds
@@ -126,7 +126,7 @@ namespace RocketJumper.Classes
                 direction.Normalize();
 
                 float angle = MathF.Atan2(direction.Y, direction.X);
-                Bazooka.ObjectSprite.Physics.Rotation = angle;
+                Bazooka.Physics.Rotation = angle;
 
                 // shooting
                 if (HasRocket && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
@@ -139,9 +139,9 @@ namespace RocketJumper.Classes
 
         private void CheckItemCollision()
         {
-            foreach (MapObject item in Level.Items)
+            foreach (Sprite item in Level.ItemSprites)
             {
-                if (item.ObjectSprite.Physics.BoundingBox.Intersects(PlayerSprite.Physics.BoundingBox))
+                if (item.Physics.BoundingBox.Intersects(PlayerSprite.Physics.BoundingBox))
                 {
                     AddItemToPlayer(item);
                     break;
@@ -149,18 +149,18 @@ namespace RocketJumper.Classes
             }
         }
 
-        private void AddItemToPlayer(MapObject item)
+        private void AddItemToPlayer(Sprite item)
         {
             if (item.Name == "Bazooka")
             {
                 Bazooka = item;
                 HasBazooka = true;
-                Bazooka.ObjectSprite.AttachmentOrigin = new Vector2(PlayerSprite.Physics.Width / 2, Bazooka.AttachOffsetY);
+                Bazooka.AttachmentOrigin = new Vector2(PlayerSprite.Physics.Width / 2, Bazooka.AttachmentOffset.Y);
             }
 
-            Level.Items.Remove(item);
+            Level.ItemSprites.Remove(item);
             Items.Add(item);
-            PlayerSprite.AddChild(item.ObjectSprite);
+            PlayerSprite.AddChild(item);
         }
 
         private void GetInputs()

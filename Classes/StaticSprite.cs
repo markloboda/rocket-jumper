@@ -21,13 +21,19 @@ namespace RocketJumper.Classes
         public SpriteEffects Effects { get; set; }
 
         // if texture in tileset
-        public bool IsTileSetUsed;
-        public TileSet TileSet { get; set; }
-        public int GID { get; private set; }
+
 
         // if Sprite attached
         public Vector2 AttachmentOffset { get; set; }
         public Vector2 AttachmentOrigin { get; set; }
+
+        // if Sprite from Tiled
+        public string Name { get; set; }
+        public bool IsTileSetUsed;
+        public TileSet TileSet { get; set; }
+        public int GID { get; set; }
+        public int ID { get; set; }
+        public int ParentId { get; set; }
 
         public float SpriteScale { get; set; }
 
@@ -49,10 +55,13 @@ namespace RocketJumper.Classes
 
         }
 
-        public StaticSprite(TileSet tileSet, int gid, Vector2 position, Level level, Vector2 spriteSize, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, Vector2 attachmentOrigin = default)
+        public StaticSprite(TileSet tileSet, int gid, int id, Vector2 position, Level level, Vector2 spriteSize, string name = default, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, Vector2 attachmentOrigin = default, int parentId = -1)
         {
             TileSet = tileSet;
+            Name = name;
             GID = gid;
+            ID = id;
+            ParentId = parentId;
             Children = new();
 
             IsTileSetUsed = true;
