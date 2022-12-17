@@ -76,19 +76,7 @@ namespace RocketJumper.Classes
         public void Update(GameTime gameTime)
         {
             Player.Update(gameTime);
-
-            // update all items
-            foreach (Sprite item in ItemSprites)
-            {
-                item.Update(gameTime);
-            }
-
-            // update turrets
-            foreach (Turret turret in Turrets)
-            {
-                turret.Update(gameTime);
-            }
-
+            UpdateSprites(gameTime);
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -98,25 +86,10 @@ namespace RocketJumper.Classes
 
             // draw Layers
             foreach (Layer layer in Map.Layers)
-            {
                 if (layer.Type == "tilelayer")
                     DrawTileLayer(gameTime, spriteBatch, layer);
-                else if (layer.Type == "objectgroup")
-                {
-                    // skip items (are handled in LoadContent)
-                    if (layer.Class == "items")
-                        continue;
-                    else if (layer.Class == "map-objects")
-                        DrawSprites(gameTime, spriteBatch, layer);
-                }
-            }
 
-            // draw items
-            foreach (Sprite item in ItemSprites)
-            {
-                item.Draw(gameTime, spriteBatch);
-            }
-
+            DrawSprites(gameTime, spriteBatch);
         }
 
         private void DrawTileLayer(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)
@@ -132,22 +105,32 @@ namespace RocketJumper.Classes
 
                     // find the tileset for this Tile and draw it
                     foreach (TileSet tileSet in Map.TileSets)
-                    {
                         if (tileGID >= tileSet.FirstGID)
-                        {
                             tileSet.DrawTile(tileGID, new Vector2(x * Map.TileWidth + layer.X, y * Map.TileHeight + layer.Y), spriteBatch);
-                        }
-                    }
                 }
             }
         }
 
-        private void DrawSprites(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)
+        private void UpdateSprites(GameTime gameTime)
         {
+            // update all items
+            foreach (Sprite item in ItemSprites)
+                item.Update(gameTime);
+
+            // update turrets
+            foreach (Turret turret in Turrets)
+                turret.Update(gameTime);
+        }
+
+        private void DrawSprites(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            // draw sprites
             foreach (Sprite mapObject in Sprites)
-            {
                 mapObject.Draw(gameTime, spriteBatch);
-            }
+
+            // draw items
+            foreach (Sprite item in ItemSprites)
+                item.Draw(gameTime, spriteBatch);
         }
 
         public void Dispose()
