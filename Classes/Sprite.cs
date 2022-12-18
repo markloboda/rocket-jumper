@@ -32,5 +32,6 @@ namespace RocketJumper.Classes
         public void AddAttachmentOffset();
         public void AddOriginOffset();
         public void AddChild(Sprite child);
+        public bool CollidesWith(Sprite otherSprite);
     }
 }

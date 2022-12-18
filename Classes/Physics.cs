@@ -32,7 +32,7 @@ namespace RocketJumper.Classes
                 boundingBox = value;
             }
         }
-        private Rectangle boundingBox;
+        public Rectangle boundingBox;
 
         public bool IsBoundingBoxVisible = false;
 

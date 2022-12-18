@@ -126,6 +126,11 @@ namespace RocketJumper.Classes
             Children.Add(sprite);
             sprite.Physics.Origin = sprite.AttachmentOrigin;
         }
+        
+        public bool CollidesWith(Sprite other)
+        {
+            return Physics.boundingBox.Intersects(other.Physics.boundingBox);
+        }
 
         public void ChangeTexture()
         {

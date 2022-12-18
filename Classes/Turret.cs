@@ -37,7 +37,7 @@ namespace RocketJumper.Classes
             fireTimer -= gameTime.ElapsedGameTime.Milliseconds;
             if (fireTimer <= 0)
             {
-                level.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, level));
+                level.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, level, level.Player.PlayerSprite, hitsPlayer: true));
                 fireTimer = fireRate;
             }
         }
@@ -85,7 +85,6 @@ namespace RocketJumper.Classes
                     // check if point is inside tile
                     if (tileX >= 0 && tileX < layer.Width && tileY >= 0 && tileY < layer.Height)
                     {
-
                         int tileID = layer.GetTileTypeFromTile(tileX, tileY);
 
                         // check if tile is collidable

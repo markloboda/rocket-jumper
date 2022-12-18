@@ -137,5 +137,10 @@ namespace RocketJumper.Classes
                     child.AddOriginOffset();
                 }
         }
+        
+        public bool CollidesWith(Sprite other)
+        {
+            return Physics.boundingBox.Intersects(other.Physics.boundingBox);
+        }
     }
 }
