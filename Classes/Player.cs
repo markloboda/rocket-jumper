@@ -118,7 +118,7 @@ namespace RocketJumper.Classes
             if (HasBazooka)
             {
                 Vector2 mousePosition = mouseState.Position.ToVector2();
-                Vector2 playerPosition = PlayerSprite.Physics.Position + new Vector2(PlayerSprite.Physics.Size.X / 2, PlayerSprite.Physics.Size.Y / 2);
+                Vector2 playerPosition = PlayerSprite.Physics.GetGlobalCenter();
                 Vector2 direction = mousePosition - playerPosition;
 
                 // take into account the transformation of the camera

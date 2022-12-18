@@ -37,7 +37,9 @@ namespace RocketJumper.Classes
                 rotation: rotation
                 );
 
-            RocketSprite.Physics.Velocity = 100 * this.direction;
+            RocketSprite.Physics.Velocity = 1000 * this.direction;
+
+            RocketSprite.Physics.Origin = RocketSprite.Physics.GetLocalCenter();
         }
 
         public void Update(GameTime gameTime)

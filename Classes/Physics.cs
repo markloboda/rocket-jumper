@@ -212,7 +212,7 @@ namespace RocketJumper.Classes
                 // top
                 for (int x = leftTile; x <= rightTile; ++x)
                 {
-                    if (layer.GetTileType(x, topTile) != 0)
+                    if (layer.GetTileTypeFromTile(x, topTile) != 0)
                     {
                         Rectangle tileBounds = level.Map.GetBounds(x, topTile);
                         if (boundingBox.Intersects(tileBounds))
@@ -223,7 +223,7 @@ namespace RocketJumper.Classes
                 // bottom
                 for (int x = leftTile; x <= rightTile; ++x)
                 {
-                    if (layer.GetTileType(x, bottomTile) != 0)
+                    if (layer.GetTileTypeFromTile(x, bottomTile) != 0)
                     {
                         Rectangle tileBounds = level.Map.GetBounds(x, bottomTile);
                         if (boundingBox.Intersects(tileBounds))
@@ -256,7 +256,7 @@ namespace RocketJumper.Classes
                 // left
                 for (int y = topTile; y <= bottomTile; ++y)
                 {
-                    if (layer.GetTileType(leftTile, y) != 0)
+                    if (layer.GetTileTypeFromTile(leftTile, y) != 0)
                     {
                         Rectangle tileBounds = level.Map.GetBounds(leftTile, y);
                         if (boundingBox.Intersects(tileBounds))
@@ -267,7 +267,7 @@ namespace RocketJumper.Classes
                 // right
                 for (int y = topTile; y <= bottomTile; ++y)
                 {
-                    if (layer.GetTileType(rightTile, y) != 0)
+                    if (layer.GetTileTypeFromTile(rightTile, y) != 0)
                     {
                         Rectangle tileBounds = level.Map.GetBounds(rightTile, y);
                         if (boundingBox.Intersects(tileBounds))
@@ -278,7 +278,7 @@ namespace RocketJumper.Classes
         }
         public Vector2 GetGlobalCenter()
         {
-            return new Vector2(Position.X + (Size.X / 2), Position.Y + (Size.Y / 2));
+            return Position + GetLocalCenter();
         }
 
         public Vector2 GetLocalCenter()

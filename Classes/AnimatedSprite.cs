@@ -22,6 +22,7 @@ namespace RocketJumper.Classes
         // if Sprite attached
         public Vector2 AttachmentOffset { get; set; }
         public Vector2 AttachmentOrigin { get; set; }
+        public bool MoveOnAttach { get; set; }
 
         // if Sprite from Tiled
         public string Name { get; set; }
@@ -33,7 +34,7 @@ namespace RocketJumper.Classes
         private Rectangle sourceRectangle;
         private float timer = 0.0f;
 
-        public AnimatedSprite(Dictionary<string, Animation_s> animationDict, Vector2 position, Level level, string currentAnimationId, float scale = 1.0f, bool isLooping = false, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, Vector2 attachmentOrigin = default)
+        public AnimatedSprite(Dictionary<string, Animation_s> animationDict, Vector2 position, Level level, string currentAnimationId, float scale = 1.0f, bool isLooping = false, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, Vector2 attachmentOrigin = default, bool moveOnAttach = false)
         {
             // default to first frame
             CurrentFrameId = 0;
@@ -46,6 +47,7 @@ namespace RocketJumper.Classes
 
             AttachmentOffset = attachmentOffset;
             AttachmentOrigin = attachmentOrigin;
+            MoveOnAttach = moveOnAttach;
 
             Level = level;
             Physics = new Physics(position, FrameSize * scale, level, gravityEnabled, rotation);
@@ -94,7 +96,11 @@ namespace RocketJumper.Classes
         }
         public void AddAttachmentOffset()
         {
-            Physics.MoveBy(AttachmentOffset + AttachmentOrigin);
+            Physics.MoveBy(AttachmentOffset);
+        }
+        public void AddOriginOffset()
+        {
+            Physics.MoveBy(Physics.Origin);
         }
 
         public void AddChild(Sprite sprite)
@@ -124,10 +130,11 @@ namespace RocketJumper.Classes
         private void MoveChildren()
         {
             foreach (Sprite child in Children)
-                if (child.Physics != null)
+                if (child.Physics != null && child.MoveOnAttach)
                 {
                     child.Physics.MoveTo(Physics.Position);
                     child.AddAttachmentOffset();
+                    child.AddOriginOffset();
                 }
         }
     }

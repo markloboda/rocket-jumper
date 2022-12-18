@@ -15,6 +15,7 @@ namespace RocketJumper.Classes
         public Physics Physics { get; set; }
 
         // if Sprite attached
+        public bool MoveOnAttach { get; internal set; }
         public Vector2 AttachmentOffset { get; internal set; }
         public Vector2 AttachmentOrigin { get; internal set; }
 
@@ -29,6 +30,7 @@ namespace RocketJumper.Classes
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch);
 
         public void AddAttachmentOffset();
+        public void AddOriginOffset();
         public void AddChild(Sprite child);
     }
 }

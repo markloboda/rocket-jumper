@@ -1,14 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using RocketJumper.Classes.MapData;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection.Metadata.Ecma335;
-using System.Reflection.Emit;
 
 namespace RocketJumper.Classes
 {
@@ -26,6 +19,7 @@ namespace RocketJumper.Classes
         // if Sprite attached
         public Vector2 AttachmentOffset { get; set; }
         public Vector2 AttachmentOrigin { get; set; }
+        public bool MoveOnAttach { get; set; }
 
         // if Sprite from Tiled
         public string Name { get; set; }
@@ -40,7 +34,7 @@ namespace RocketJumper.Classes
         public Physics Physics { get; set; }
 
 
-        public StaticSprite(Dictionary<string, Texture2D> textureDict, string currentTextureId, Vector2 position, Level level, Vector2 spriteSize, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, Vector2 attachmentOrigin = default)
+        public StaticSprite(Dictionary<string, Texture2D> textureDict, string currentTextureId, Vector2 position, Level level, Vector2 spriteSize, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, bool moveOnAttach = false, Vector2 attachmentOrigin = default)
         {
             CurrentAnimationId = currentTextureId;
             TextureDict = textureDict;
@@ -50,12 +44,13 @@ namespace RocketJumper.Classes
 
             AttachmentOffset = attachmentOffset;
             AttachmentOrigin = attachmentOrigin;
+            MoveOnAttach = moveOnAttach;
 
             Physics = new Physics(position, spriteSize, level, gravityEnabled, rotation);
 
         }
 
-        public StaticSprite(TileSet tileSet, int gid, int id, Vector2 position, Level level, Vector2 spriteSize, string name = default, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, Vector2 attachmentOrigin = default, int parentId = -1)
+        public StaticSprite(TileSet tileSet, int gid, int id, Vector2 position, Level level, Vector2 spriteSize, string name = default, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, bool moveOnAttach = false, Vector2 attachmentOrigin = default, int parentId = -1)
         {
             TileSet = tileSet;
             Name = name;
@@ -68,6 +63,7 @@ namespace RocketJumper.Classes
 
             AttachmentOffset = attachmentOffset;
             AttachmentOrigin = attachmentOrigin;
+            MoveOnAttach = moveOnAttach;
 
             Physics = new Physics(position, spriteSize, level, gravityEnabled, rotation);
         }
@@ -107,16 +103,22 @@ namespace RocketJumper.Classes
         private void MoveChildren()
         {
             foreach (Sprite child in Children)
-                if (child.Physics != null)
+                if (child.Physics != null && child.MoveOnAttach)
                 {
                     child.Physics.MoveTo(Physics.Position);
                     child.AddAttachmentOffset();
+                    child.AddOriginOffset();
                 }
         }
 
         public void AddAttachmentOffset()
         {
-            Physics.MoveBy(AttachmentOffset + Physics.Origin);
+            Physics.MoveBy(AttachmentOffset);
+        }
+
+        public void AddOriginOffset()
+        {
+            Physics.MoveBy(Physics.Origin);
         }
 
         public void AddChild(Sprite sprite)

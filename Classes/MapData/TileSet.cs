@@ -33,21 +33,18 @@ namespace RocketJumper.Classes.MapData
 
         public void DrawTile(int tileGID, Vector2 position, SpriteBatch spriteBatch, Vector2 size, SpriteEffects effects = SpriteEffects.None, float rotation = 0.0f, Vector2 origin = default)
         {
-            int xScale = (int)(size.X / TileSize.X);
-            int yScale = (int)(size.Y / TileSize.Y);
-
             Rectangle sourceRectangle = GetSourceRectangle(tileGID);
-            Rectangle destinationRectangle = new Rectangle((int)position.X, (int)position.Y, (int)(TileSize.X * xScale), (int)(TileSize.Y * yScale));
+            Rectangle destinationRectangle = new Rectangle((int)position.X, (int)position.Y, (int)size.X, (int)size.Y);
 
             spriteBatch.Draw(Texture, destinationRectangle, sourceRectangle, Color.White, rotation, origin, effects, 0.0f);
         }
 
-        public void DrawTile(int tileGID, Vector2 position, SpriteBatch spriteBatch, SpriteEffects effects = SpriteEffects.None, float rotation = 0.0f)
+        public void DrawTile(int tileGID, Vector2 position, SpriteBatch spriteBatch, SpriteEffects effects = SpriteEffects.None, float rotation = 0.0f, Vector2 origin = default)
         {
             Rectangle sourceRectangle = GetSourceRectangle(tileGID);
             Rectangle destinationRectangle = new Rectangle((int)position.X, (int)position.Y, (int)TileSize.X, (int)TileSize.Y);
 
-            spriteBatch.Draw(Texture, destinationRectangle, sourceRectangle, Color.White, rotation, Vector2.Zero, effects, 0.0f);
+            spriteBatch.Draw(Texture, destinationRectangle, sourceRectangle, Color.White, rotation, origin, effects, 0.0f);
         }
 
         public Rectangle GetSourceRectangle(int tileGID)

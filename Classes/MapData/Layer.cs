@@ -58,13 +58,9 @@ namespace RocketJumper.Classes.MapData
                 {
                     var property = customProperties[i];
                     if (property["name"].ToString() == "Collidable")
-                    {
                         Collidable = (bool)property["value"];
-                    }
                     else if (property["name"].ToString() == "Static")
-                    {
                         Static = (bool)property["value"];
-                    }
                 }
 
             }
@@ -80,7 +76,7 @@ namespace RocketJumper.Classes.MapData
                     }
 
                     // add children to parents
-                    foreach (Sprite sprite in Sprites.Values)
+                    foreach (Sprite sprite in ItemSprites.Values)
                     {
                         if (sprite.ParentId != -1)
                         {
@@ -109,7 +105,7 @@ namespace RocketJumper.Classes.MapData
             }
         }
 
-        public int GetTileType(int x, int y)
+        public int GetTileTypeFromTile(int x, int y)
         {
             if (x < 0 || x >= Width || y < 0 || y >= Height)
                 return 0;

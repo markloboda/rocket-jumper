@@ -71,6 +71,10 @@ namespace RocketJumper.Classes
                     else if (layer.Class == "map-objects")
                         Sprites = layer.Sprites.Values.ToList();
 
+            // initialize turrets
+            foreach (Sprite sprite in Sprites)
+                if (sprite.Name == "Turret")
+                    Turrets.Add(new Turret(sprite, this));
         }
 
         public void Update(GameTime gameTime)
@@ -113,13 +117,17 @@ namespace RocketJumper.Classes
 
         private void UpdateSprites(GameTime gameTime)
         {
+            // update turret objects before updating its sprites
+            foreach (Turret turret in Turrets)
+                turret.Update(gameTime);
+
+            // update sprites
+            foreach (Sprite sprite in Sprites)
+                sprite.Update(gameTime);
+
             // update all items
             foreach (Sprite item in ItemSprites)
                 item.Update(gameTime);
-
-            // update turrets
-            foreach (Turret turret in Turrets)
-                turret.Update(gameTime);
         }
 
         private void DrawSprites(GameTime gameTime, SpriteBatch spriteBatch)

@@ -118,8 +118,6 @@
                 0,
                 0,
                 0,
-                2,
-                2,
                 0,
                 0,
                 0,
@@ -158,10 +156,12 @@
                 0,
                 0,
                 0,
-                2,
-                2,
-                2,
-                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
                 0,
                 0,
                 0,
@@ -251,9 +251,9 @@
                 0,
                 0,
                 0,
-                1,
-                1,
-                1,
+                0,
+                0,
+                0,
                 0,
                 0,
                 1,
@@ -296,7 +296,7 @@
                 0,
                 0,
                 0,
-                0,
+                2,
                 0,
                 0,
                 0,
@@ -319,7 +319,7 @@
                 0,
                 0,
                 0,
-                0,
+                2,
                 0,
                 0,
                 0,
@@ -382,7 +382,7 @@
                 {
                     "class": "map-object",
                     "gid": 8,
-                    "height": 51.1111111111111,
+                    "height": 23,
                     "id": 10,
                     "name": "TurretTop",
                     "properties": [
@@ -394,21 +394,21 @@
                     ],
                     "rotation": 0,
                     "visible": true,
-                    "width": 80,
-                    "x": 511.636363636364,
-                    "y": 302.782828282828
+                    "width": 36,
+                    "x": 618.969696969697,
+                    "y": 439.449494949495
                 },
                 {
                     "class": "map-object",
                     "gid": 7,
-                    "height": 46,
+                    "height": 23,
                     "id": 11,
-                    "name": "TurretBase",
+                    "name": "Turret",
                     "rotation": 0,
                     "visible": true,
-                    "width": 72,
-                    "x": 516.181818181818,
-                    "y": 320.181818181818
+                    "width": 36,
+                    "x": 618.848484848485,
+                    "y": 448.181818181818
                 }
             ],
             "opacity": 1,
@@ -439,12 +439,17 @@
                             "name": "AttachOffsetY",
                             "type": "int",
                             "value": 20
+                        },
+                        {
+                            "name": "MoveOnAttach",
+                            "type": "bool",
+                            "value": true
                         }
                     ],
                     "rotation": 0,
                     "visible": true,
                     "width": 60,
-                    "x": 461.999999999999,
+                    "x": 309.333333333332,
                     "y": 450
                 }
             ],
@@ -456,7 +461,7 @@
         }
     ],
     "nextlayerid": 4,
-    "nextobjectid": 12,
+    "nextobjectid": 14,
     "orientation": "orthogonal",
     "renderorder": "right-down",
     "tiledversion": "1.9.2",
