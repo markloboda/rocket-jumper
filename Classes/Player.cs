@@ -112,7 +112,7 @@ namespace RocketJumper.Classes
                 inputMovement = 0.0f;
 
             // jumping
-            if ((keyboardState.IsKeyDown(Keys.Space) || keyboardState.IsKeyDown(Keys.W)) && PlayerSprite.Physics.BottomCollision)
+            if ((keyboardState.IsKeyDown(Keys.Space) || keyboardState.IsKeyDown(Keys.W)) && PlayerSprite.Physics.IsOnGround)
                 PlayerSprite.Physics.AddTempForce(jumpingForce);
 
             // bazooka

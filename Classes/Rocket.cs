@@ -81,7 +81,7 @@ namespace RocketJumper.Classes
             }
 
             RocketSprite.Update(gameTime);
-            if (RocketSprite.Physics.TopCollision || RocketSprite.Physics.BottomCollision || RocketSprite.Physics.LeftCollision || RocketSprite.Physics.RightCollision)
+            if (RocketSprite.Physics.Collided)
                 Collided = true;
 
             // check if player is hit

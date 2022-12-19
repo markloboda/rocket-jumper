@@ -110,7 +110,7 @@ namespace RocketJumper.Classes
                     // find the tileset for this Tile and draw it
                     foreach (TileSet tileSet in Map.TileSets)
                         if (tileGID >= tileSet.FirstGID)
-                            tileSet.DrawTile(tileGID, new Vector2(x * Map.TileWidth + layer.X, y * Map.TileHeight + layer.Y), spriteBatch);
+                            tileSet.DrawTile(tileGID, new Vector2(x * Map.TileWidth, y * Map.TileHeight), spriteBatch);
                 }
             }
         }

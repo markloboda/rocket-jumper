@@ -42,5 +42,23 @@ namespace RocketJumper.Classes.MapData
         {
             return new Rectangle(x * TileWidth, y * TileHeight, TileWidth, TileHeight);
         }
+
+        public int GetTileId(int x, int y)
+        {
+            foreach (Layer layer in Layers) {
+                if (layer.Type == "tilelayer") {
+                    if (x < 0 || x >= Width || y < 0 || y >= Height) {
+                        return 0;
+                    }
+
+                    int id = layer.Data[x + y * Width];
+                    if (id != 0) {
+                        return id;
+                    }
+                    // else check next layer
+                }
+            }
+            return 0;
+        }
     }
 }

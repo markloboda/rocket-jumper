@@ -26,13 +26,10 @@ namespace RocketJumper.Classes
 
         public Rectangle BoundingBox
         {
-            get { return boundingBox; }
-            set
-            {
-                boundingBox = value;
-            }
+            get { return Tools.RectangleMoveTo(boundingBox, Position); }
+            private set { boundingBox = value; }
         }
-        public Rectangle boundingBox;
+        private Rectangle boundingBox;
 
         public bool IsBoundingBoxVisible = false;
 
@@ -52,9 +49,6 @@ namespace RocketJumper.Classes
             get { return (int)Size.X; }
         }
 
-        public bool TopCollision, BottomCollision, LeftCollision, RightCollision;
-
-        // flags
         public bool GravityEnabled
         {
             get
@@ -71,6 +65,8 @@ namespace RocketJumper.Classes
             }
         }
         private bool gravityEnabled;
+
+        public bool Collided, IsOnGround;
 
         public Physics(Vector2 Position, Vector2 Size, Level level, bool gravityEnabled, float rotation)
         {
@@ -108,39 +104,71 @@ namespace RocketJumper.Classes
 
 
             // apply Velocity to deltaMove
-            this.deltaMove = Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            deltaMove = Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // apply inputVelocity to deltaMove
-            this.deltaMove += inputVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            deltaMove += inputVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            // move object in Y direction and check for collision on Y axis
-            MoveBy(new Vector2(0, this.deltaMove.Y));
-            SetHorizontalCollisionFlags();
-            if (BottomCollision && Velocity.Y > 0)
+            // COLLISION DETECTION
+            // get surrounding tiles of BoundingBox
+            int leftTile = (int)Math.Floor((float)BoundingBox.Left / level.Map.TileWidth);
+            int rightTile = (int)Math.Ceiling(((float)BoundingBox.Right / level.Map.TileWidth)) - 1;
+            int topTile = (int)Math.Floor((float)BoundingBox.Top / level.Map.TileHeight);
+            int bottomTile = (int)Math.Ceiling(((float)BoundingBox.Bottom / level.Map.TileHeight)) - 1;
+
+            // reset collision flags
+            Collided = false;
+            IsOnGround = false;
+
+            // for each potentially colliding tile
+            for (int y = topTile; y <= bottomTile; ++y)
             {
-                Velocity.Y = 0;
-                MoveBy(new Vector2(0, -this.deltaMove.Y));
-            }
-            else if (TopCollision && Velocity.Y < 0)
-            {
-                Velocity.Y = 0;
-                MoveBy(new Vector2(0, -this.deltaMove.Y));
+                for (int x = leftTile; x <= rightTile; ++x)
+                {
+                    // if this tile is collidable
+                    if (level.Map.GetTileId(x, y) != 0)
+                    {
+                        // determine collision depth (with direction) and magnitude
+                        Rectangle tileBounds = level.Map.GetBounds(x, y);
+
+                        if (deltaMove.Y > 0 && IsTouchingTop(tileBounds))
+                        {
+                            IsOnGround = true;
+                            Collided = true;
+                            deltaMove.Y = 0;
+                            Velocity.Y = 0;
+
+                            // check if player clipped into ground
+                            if (BoundingBox.Bottom > tileBounds.Top)
+                            {
+                                Position.Y = tileBounds.Top - BoundingBox.Height;
+                            }
+                        }
+                        if (deltaMove.Y < 0 && IsTouchingBottom(tileBounds))
+                        {
+                            Collided = true;
+                            deltaMove.Y = 0;
+                            Velocity.Y = 0;
+
+                            // check if player clipped into ceiling
+                            if (BoundingBox.Top < tileBounds.Bottom)
+                            {
+                                Position.Y = tileBounds.Bottom;
+                            }
+                        }
+                        if (deltaMove.X > 0 && IsTouchingLeft(tileBounds) ||
+                            deltaMove.X < 0 && IsTouchingRight(tileBounds))
+                        {
+                            Collided = true;
+                            deltaMove.X = 0;
+                            Velocity.X = 0;
+                        }
+                    }
+                }
             }
 
-            // move object in X direction and check for collision on X axis
-            MoveBy(new Vector2(this.deltaMove.X, 0));
-            SetVerticalCollisionFlags();
-            if (LeftCollision && Velocity.X < 0)
-            {
-                Velocity.X = 0;
-                MoveBy(new Vector2(-this.deltaMove.X, 0));
-            }
-            else if (RightCollision && Velocity.X > 0)
-            {
-                Velocity.X = 0;
-                MoveBy(new Vector2(-this.deltaMove.X, 0));
-            }
-
+            // apply deltaMove to position
+            Position += deltaMove;
 
             // clear temp forces
             tempForcesY.Clear();
@@ -150,7 +178,7 @@ namespace RocketJumper.Classes
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             if (IsBoundingBoxVisible)
-                Tools.DrawRectangle(boundingBox, Color.Red, spriteBatch);
+                Tools.DrawRectangle(BoundingBox, Color.Red, spriteBatch);
         }
 
 
@@ -182,6 +210,38 @@ namespace RocketJumper.Classes
             tempForcesY.Add(force.Y);
         }
 
+        public bool IsTouchingLeft(Rectangle other)
+        {
+            return BoundingBox.Right + deltaMove.X > other.Left &&
+                   BoundingBox.Left < other.Left &&
+                   BoundingBox.Bottom > other.Top &&
+                   BoundingBox.Top < other.Bottom;
+        }
+
+        public bool IsTouchingRight(Rectangle other)
+        {
+            return BoundingBox.Left + deltaMove.X < other.Right &&
+                   BoundingBox.Right > other.Right &&
+                   BoundingBox.Bottom > other.Top &&
+                   BoundingBox.Top < other.Bottom;
+        }
+
+        public bool IsTouchingTop(Rectangle other)
+        {
+            return BoundingBox.Bottom + deltaMove.Y > other.Top &&
+                   BoundingBox.Top < other.Top &&
+                   BoundingBox.Right > other.Left &&
+                   BoundingBox.Left < other.Right;
+        }
+
+        public bool IsTouchingBottom(Rectangle other)
+        {
+            return BoundingBox.Top + deltaMove.Y < other.Bottom &&
+                   BoundingBox.Bottom > other.Bottom &&
+                   BoundingBox.Right > other.Left &&
+                   BoundingBox.Left < other.Right;
+        }
+
         public void AddBoundingBox()
         {
             BoundingBox = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
@@ -190,103 +250,13 @@ namespace RocketJumper.Classes
         public void MoveTo(Vector2 position)
         {
             Position = position;
-            boundingBox = Tools.RectangleMove(boundingBox, Position);
         }
 
         public void MoveBy(Vector2 move)
         {
             Position += move;
-            boundingBox = Tools.RectangleMove(boundingBox, Position);
         }
 
-
-        private void SetVerticalCollisionFlags()
-        {
-            // get surrounding tiles of boundingBox
-            int leftTile = (int)Math.Floor((float)boundingBox.Left / level.Map.TileWidth);
-            int rightTile = (int)Math.Ceiling(((float)boundingBox.Right / level.Map.TileWidth)) - 1;
-            int topTile = (int)Math.Floor((float)boundingBox.Top / level.Map.TileHeight);
-            int bottomTile = (int)Math.Ceiling(((float)boundingBox.Bottom / level.Map.TileHeight)) - 1;
-
-            // reset collision flags
-            TopCollision = false;
-            BottomCollision = false;
-
-
-            foreach (Layer layer in level.Map.Layers)
-            {
-                // skip uncollidable layers
-                if (!layer.Collidable)
-                    continue;
-
-                // check for collision with each side
-                // top
-                for (int x = leftTile; x <= rightTile; ++x)
-                {
-                    if (layer.GetTileTypeFromTile(x, topTile) != 0)
-                    {
-                        Rectangle tileBounds = level.Map.GetBounds(x, topTile);
-                        if (boundingBox.Intersects(tileBounds))
-                            TopCollision = true;
-                    }
-                }
-
-                // bottom
-                for (int x = leftTile; x <= rightTile; ++x)
-                {
-                    if (layer.GetTileTypeFromTile(x, bottomTile) != 0)
-                    {
-                        Rectangle tileBounds = level.Map.GetBounds(x, bottomTile);
-                        if (boundingBox.Intersects(tileBounds))
-                            BottomCollision = true;
-                    }
-                }
-            }
-        }
-
-        public void SetHorizontalCollisionFlags()
-        {
-            // get surrounding tiles of boundingBox
-            int leftTile = (int)Math.Floor((float)boundingBox.Left / level.Map.TileWidth);
-            int rightTile = (int)Math.Ceiling(((float)boundingBox.Right / level.Map.TileWidth)) - 1;
-            int topTile = (int)Math.Floor((float)boundingBox.Top / level.Map.TileHeight);
-            int bottomTile = (int)Math.Ceiling(((float)boundingBox.Bottom / level.Map.TileHeight)) - 1;
-
-            // reset collision flags
-            LeftCollision = false;
-            RightCollision = false;
-
-
-            foreach (Layer layer in level.Map.Layers)
-            {
-                // skip uncollidable layers
-                if (!layer.Collidable)
-                    continue;
-
-                // check for collision with each side
-                // left
-                for (int y = topTile; y <= bottomTile; ++y)
-                {
-                    if (layer.GetTileTypeFromTile(leftTile, y) != 0)
-                    {
-                        Rectangle tileBounds = level.Map.GetBounds(leftTile, y);
-                        if (boundingBox.Intersects(tileBounds))
-                            LeftCollision = true;
-                    }
-                }
-
-                // right
-                for (int y = topTile; y <= bottomTile; ++y)
-                {
-                    if (layer.GetTileTypeFromTile(rightTile, y) != 0)
-                    {
-                        Rectangle tileBounds = level.Map.GetBounds(rightTile, y);
-                        if (boundingBox.Intersects(tileBounds))
-                            RightCollision = true;
-                    }
-                }
-            }
-        }
         public Vector2 GetGlobalCenter()
         {
             return Position + GetLocalCenter();

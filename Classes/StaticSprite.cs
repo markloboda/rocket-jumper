@@ -129,7 +129,7 @@ namespace RocketJumper.Classes
         
         public bool CollidesWith(Sprite other)
         {
-            return Physics.boundingBox.Intersects(other.Physics.boundingBox);
+            return Physics.BoundingBox.Intersects(other.Physics.BoundingBox);
         }
 
         public void ChangeTexture()

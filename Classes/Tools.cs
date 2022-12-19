@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace RocketJumper.Classes
 {
@@ -34,11 +35,36 @@ namespace RocketJumper.Classes
             return new Vector2(intersection.Width, intersection.Height);
         }
 
-        public static Rectangle RectangleMove(Rectangle rectangle, Vector2 position)
+        public static Rectangle RectangleMoveTo(Rectangle rectangle, Vector2 position)
         {
             rectangle.X = (int)position.X;
             rectangle.Y = (int)position.Y;
             return rectangle;
+        }
+
+        public static Rectangle RectangleMoveBy(Rectangle rectangle, Vector2 delta)
+        {
+            rectangle.X += (int)delta.X;
+            rectangle.Y += (int)delta.Y;
+            return rectangle;
+        }
+
+        public static Vector2 RectangleCollisionDepth(Rectangle rec1, Rectangle rec2)
+        {
+            Vector2 depth = Vector2.Zero;
+
+            if (rec1.Left < rec2.Right && rec1.Right > rec2.Left)
+            {
+                if (rec1.Top < rec2.Bottom && rec1.Bottom > rec2.Top)
+                {
+                    depth = new Vector2(
+                        rec1.Left < rec2.Right ? rec1.Right - rec2.Left : rec1.Left - rec2.Right,
+                        rec1.Top < rec2.Bottom ? rec1.Bottom - rec2.Top : rec1.Top - rec2.Bottom
+                    );
+                }
+            }
+
+            return depth;
         }
     }
 }

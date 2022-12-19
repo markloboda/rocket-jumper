@@ -11,15 +11,7 @@ namespace RocketJumper.Classes.MapData
         public string Name;                                 // name of the layer
         public int Opacity;                                 // opacity of the layer
         public bool Visible;                                // visibility of the layer
-        public int X;                                       // x position of the layer
-        public int Y;                                       // y position of the layer
         public int Id;                                      // id of the layer
-
-        public Vector2 Position
-        {
-            get { return new Vector2(X, Y); }
-        }
-
 
         // tile layer specific
         public int[] Data;                                  // data of tiles
@@ -40,8 +32,6 @@ namespace RocketJumper.Classes.MapData
             Name = (string)layerJson["name"];
             Opacity = (int)layerJson["opacity"];
             Visible = (bool)layerJson["visible"];
-            X = (int)layerJson["x"];
-            Y = (int)layerJson["y"];
             Id = (int)layerJson["id"];
 
 
