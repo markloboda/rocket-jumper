@@ -41,6 +41,7 @@ namespace RocketJumper.Classes
         {
             PlayerSprite = playerSprite;
             Level = PlayerSprite.Level;
+            playerSprite.Physics.IsBoundingBoxVisible = true;
         }
 
         public void Update(GameTime gameTime)

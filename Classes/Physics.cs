@@ -130,12 +130,29 @@ namespace RocketJumper.Classes
             // move object in X direction and check for collision on X axis
             MoveBy(new Vector2(this.deltaMove.X, 0));
             SetVerticalCollisionFlags();
+            if (LeftCollision && Velocity.X < 0)
+            {
+                Velocity.X = 0;
+                MoveBy(new Vector2(-this.deltaMove.X, 0));
+            }
+            else if (RightCollision && Velocity.X > 0)
+            {
+                Velocity.X = 0;
+                MoveBy(new Vector2(-this.deltaMove.X, 0));
+            }
 
 
             // clear temp forces
             tempForcesY.Clear();
             tempForcesX.Clear();
         }
+
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            if (IsBoundingBoxVisible)
+                Tools.DrawRectangle(boundingBox, Color.Red, spriteBatch);
+        }
+
 
         public void EnableGravity()
         {
@@ -145,12 +162,6 @@ namespace RocketJumper.Classes
         public void DisableGravity()
         {
             forcesY.Remove(gravityAccel);
-        }
-
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            if (IsBoundingBoxVisible)
-                Tools.DrawRectangle(boundingBox, Color.Red, spriteBatch);
         }
 
         public void AddInputMovement(GameTime gameTime, Vector2 inputSpeed)
