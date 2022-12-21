@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using RocketJumper.Classes.MapData;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace RocketJumper.Classes
 {
@@ -18,6 +19,7 @@ namespace RocketJumper.Classes
         public int CurrentFrameId { get; private set; }
         public Physics Physics { get; set; }
         public Level Level { get; }
+        public float Scale { get { return Physics.Size.X / FrameSize.X; } }
 
         // if Sprite attached
         public Vector2 AttachmentOffset { get; set; }
@@ -76,17 +78,19 @@ namespace RocketJumper.Classes
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            Rectangle destinationRectangle = new Rectangle((int)Physics.Position.X, (int)Physics.Position.Y, (int)Physics.Size.X, (int)Physics.Size.Y);
+            Physics.Position = new Vector2((int)Physics.Position.X, (int)Physics.Position.Y);
 
             spriteBatch.Draw(
                 texture: CurrentAnimation.Texture,
+                position: Physics.Position,
                 sourceRectangle: sourceRectangle,
-                destinationRectangle: destinationRectangle,
                 color: Color.White,
                 rotation: Physics.Rotation,
                 origin: Physics.Origin,
+                scale: Scale,
                 effects: Effects,
-                layerDepth: 0);
+                0
+                );
 
             // draw children
             foreach (Sprite child in Children)
@@ -137,7 +141,7 @@ namespace RocketJumper.Classes
                     child.AddOriginOffset();
                 }
         }
-        
+
         public bool CollidesWith(Sprite other)
         {
             return Physics.BoundingBox.Intersects(other.Physics.BoundingBox);

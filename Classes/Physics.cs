@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using RocketJumper.Classes.MapData;
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
@@ -111,10 +110,10 @@ namespace RocketJumper.Classes
 
             // COLLISION DETECTION
             // get surrounding tiles of BoundingBox
-            int leftTile = (int)Math.Floor((float)BoundingBox.Left / level.Map.TileWidth);
-            int rightTile = (int)Math.Ceiling(((float)BoundingBox.Right / level.Map.TileWidth)) - 1;
-            int topTile = (int)Math.Floor((float)BoundingBox.Top / level.Map.TileHeight);
-            int bottomTile = (int)Math.Ceiling(((float)BoundingBox.Bottom / level.Map.TileHeight)) - 1;
+            int leftTile = (int)Math.Floor((float)BoundingBox.Left / level.Map.TileWidth) - 1;
+            int rightTile = (int)Math.Ceiling((float)BoundingBox.Right / level.Map.TileWidth);
+            int topTile = (int)Math.Floor((float)BoundingBox.Top / level.Map.TileHeight) - 1;
+            int bottomTile = (int)Math.Ceiling((float)BoundingBox.Bottom / level.Map.TileHeight);
 
             // reset collision flags
             Collided = false;
