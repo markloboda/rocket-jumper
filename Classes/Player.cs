@@ -17,7 +17,7 @@ namespace RocketJumper.Classes
         private Vector2 jumpingForce = new Vector2(0.0f, -200.0f);
 
         // components
-        public Level Level;
+        public Gameplay Level;
 
         public List<Sprite> Items = new();           // list of mapobject that draw onto the player
 
@@ -142,7 +142,7 @@ namespace RocketJumper.Classes
         {
             foreach (Sprite item in Level.ItemSprites)
             {
-                if (item.Physics.BoundingBox.Intersects(PlayerSprite.Physics.BoundingBox))
+                if (item.Physics.AABB.Intersects(PlayerSprite.Physics.AABB))
                 {
                     AddItemToPlayer(item);
                     break;

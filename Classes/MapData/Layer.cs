@@ -25,7 +25,7 @@ namespace RocketJumper.Classes.MapData
         public Dictionary<int, Sprite> ItemSprites = new Dictionary<int, Sprite>();
         public Dictionary<int, Sprite> Sprites = new Dictionary<int, Sprite>();
 
-        public Layer(JObject layerJson, Level level, Map map)
+        public Layer(JObject layerJson, Gameplay level, Map map)
         {
             Type = (string)layerJson["type"];
             Class = (string)layerJson["class"];

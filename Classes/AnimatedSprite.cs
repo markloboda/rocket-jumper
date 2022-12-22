@@ -18,7 +18,7 @@ namespace RocketJumper.Classes
         public bool IsLooping { get; set; }
         public int CurrentFrameId { get; private set; }
         public Physics Physics { get; set; }
-        public Level Level { get; }
+        public Gameplay Level { get; }
         public float Scale { get { return Physics.Size.X / FrameSize.X; } }
 
         // if Sprite attached
@@ -36,7 +36,7 @@ namespace RocketJumper.Classes
         private Rectangle sourceRectangle;
         private float timer = 0.0f;
 
-        public AnimatedSprite(Dictionary<string, Animation_s> animationDict, Vector2 position, Level level, string currentAnimationId, float scale = 1.0f, bool isLooping = false, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, Vector2 attachmentOrigin = default, bool moveOnAttach = false)
+        public AnimatedSprite(Dictionary<string, Animation_s> animationDict, Vector2 position, Gameplay level, string currentAnimationId, float scale = 1.0f, bool isLooping = false, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, Vector2 attachmentOrigin = default, bool moveOnAttach = false)
         {
             // default to first frame
             CurrentFrameId = 0;
@@ -144,7 +144,7 @@ namespace RocketJumper.Classes
 
         public bool CollidesWith(Sprite other)
         {
-            return Physics.BoundingBox.Intersects(other.Physics.BoundingBox);
+            return Physics.AABB.Intersects(other.Physics.AABB);
         }
     }
 }

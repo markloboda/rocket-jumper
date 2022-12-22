@@ -18,7 +18,7 @@ namespace RocketJumper.Classes.MapData
         public int FirstGID;  // id of the first tile in the set
 
 
-        public TileSet(JObject tileSetJson, Level level)
+        public TileSet(JObject tileSetJson, Gameplay level)
         {
             Texture = level.Content.Load<Texture2D>(tileSetJson["image"].ToString());
             TileSize = new Vector2((int)tileSetJson["tilewidth"], (int)tileSetJson["tileheight"]);

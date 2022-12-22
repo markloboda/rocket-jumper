@@ -9,7 +9,7 @@ namespace RocketJumper.Classes
     public class Rocket
     {
         private Animation_s rocketAnimation;
-        private Level level;
+        private Gameplay level;
         public bool HitsPlayer = false;
 
         public AnimatedSprite RocketSprite;
@@ -22,7 +22,7 @@ namespace RocketJumper.Classes
 
         public float Speed = 1000.0f;
 
-        public Rocket(Vector2 position, Vector2 direction, Level level, bool hitsPlayer = false)
+        public Rocket(Vector2 position, Vector2 direction, Gameplay level, bool hitsPlayer = false)
         {
             this.level = level;
             this.direction = direction;
@@ -45,7 +45,7 @@ namespace RocketJumper.Classes
             HitsPlayer = hitsPlayer;
         }
 
-        public Rocket(Vector2 position, Vector2 direction, Level level, Sprite targetSprite, bool hitsPlayer = false)
+        public Rocket(Vector2 position, Vector2 direction, Gameplay level, Sprite targetSprite, bool hitsPlayer = false)
         {
             this.level = level;
             this.direction = direction;

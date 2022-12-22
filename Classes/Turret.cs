@@ -7,7 +7,7 @@ namespace RocketJumper.Classes
     public class Turret
     {
         public Sprite baseSprite;
-        private Level level;
+        private Gameplay level;
         private Sprite shootingSprite;
 
         public Vector2 ShootingPosition;
@@ -19,7 +19,7 @@ namespace RocketJumper.Classes
         // parameters
         private const float fireRate = 1000.0f;
 
-        public Turret(Sprite baseSprite, Level level)
+        public Turret(Sprite baseSprite, Gameplay level)
         {
             this.baseSprite = baseSprite;
             this.level = level;

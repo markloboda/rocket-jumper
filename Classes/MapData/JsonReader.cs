@@ -6,7 +6,7 @@ namespace RocketJumper.Classes.MapData
 {
     public class JsonReader
     {
-        public static Sprite GetSpriteFromJson(JObject objectJson, Level level, List<TileSet> tileSets)
+        public static Sprite GetSpriteFromJson(JObject objectJson, Gameplay level, List<TileSet> tileSets)
         {
             string name = objectJson["name"].ToString();
             int gid = (int)objectJson["gid"];

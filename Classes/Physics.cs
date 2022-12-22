@@ -7,7 +7,7 @@ namespace RocketJumper.Classes
 {
     public class Physics
     {
-        private Level level;
+        private Gameplay level;
 
         // forces
         private readonly float gravityAccel = 10.0f;
@@ -23,12 +23,19 @@ namespace RocketJumper.Classes
         // movement per frame
         private Vector2 deltaMove;
 
-        public Rectangle BoundingBox
+        public Rectangle AABB
         {
-            get { return Tools.RectangleMoveTo(boundingBox, Position); }
-            private set { boundingBox = value; }
+            get { return Tools.RectangleMoveTo(aabb, Position); }
+            private set { aabb = value; }
         }
-        private Rectangle boundingBox;
+        private Rectangle aabb;
+
+        public RotatedRectangle RBB
+        {
+            get { return rbb.MoveTo(Position); }
+            private set { rbb = value; }
+        }
+        private RotatedRectangle rbb;
 
         public bool IsBoundingBoxVisible = false;
 
@@ -67,14 +74,14 @@ namespace RocketJumper.Classes
 
         public bool Collided, IsOnGround;
 
-        public Physics(Vector2 Position, Vector2 Size, Level level, bool gravityEnabled, float rotation)
+        public Physics(Vector2 Position, Vector2 Size, Gameplay level, bool gravityEnabled, float rotation, string boundingBoxType = "AABB")
         {
             this.Position = Position;
             this.Size = Size;
             this.level = level;
             Rotation = rotation;
             GravityEnabled = gravityEnabled;
-            AddBoundingBox();
+            AddBoundingBox(boundingBoxType);
         }
 
         public void Update(GameTime gameTime)
@@ -110,10 +117,10 @@ namespace RocketJumper.Classes
 
             // COLLISION DETECTION
             // get surrounding tiles of BoundingBox
-            int leftTile = (int)Math.Floor((float)BoundingBox.Left / level.Map.TileWidth) - 1;
-            int rightTile = (int)Math.Ceiling((float)BoundingBox.Right / level.Map.TileWidth);
-            int topTile = (int)Math.Floor((float)BoundingBox.Top / level.Map.TileHeight) - 1;
-            int bottomTile = (int)Math.Ceiling((float)BoundingBox.Bottom / level.Map.TileHeight);
+            int leftTile = (int)Math.Floor((float)AABB.Left / level.Map.TileWidth) - 1;
+            int rightTile = (int)Math.Ceiling((float)AABB.Right / level.Map.TileWidth);
+            int topTile = (int)Math.Floor((float)AABB.Top / level.Map.TileHeight) - 1;
+            int bottomTile = (int)Math.Ceiling((float)AABB.Bottom / level.Map.TileHeight);
 
             // reset collision flags
             Collided = false;
@@ -138,9 +145,9 @@ namespace RocketJumper.Classes
                             Velocity.Y = 0;
 
                             // check if player clipped into ground
-                            if (BoundingBox.Bottom > tileBounds.Top)
+                            if (AABB.Bottom > tileBounds.Top)
                             {
-                                Position.Y = tileBounds.Top - BoundingBox.Height;
+                                Position.Y = tileBounds.Top - AABB.Height;
                             }
                         }
                         if (deltaMove.Y < 0 && IsTouchingBottom(tileBounds))
@@ -150,7 +157,7 @@ namespace RocketJumper.Classes
                             Velocity.Y = 0;
 
                             // check if player clipped into ceiling
-                            if (BoundingBox.Top < tileBounds.Bottom)
+                            if (AABB.Top < tileBounds.Bottom)
                             {
                                 Position.Y = tileBounds.Bottom;
                             }
@@ -177,7 +184,7 @@ namespace RocketJumper.Classes
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             if (IsBoundingBoxVisible)
-                Tools.DrawRectangle(BoundingBox, Color.Red, spriteBatch);
+                Tools.DrawRectangle(AABB, Color.Red, spriteBatch);
         }
 
 
@@ -211,39 +218,42 @@ namespace RocketJumper.Classes
 
         public bool IsTouchingLeft(Rectangle other)
         {
-            return BoundingBox.Right + deltaMove.X > other.Left &&
-                   BoundingBox.Left < other.Left &&
-                   BoundingBox.Bottom > other.Top &&
-                   BoundingBox.Top < other.Bottom;
+            return AABB.Right + deltaMove.X > other.Left &&
+                   AABB.Left < other.Left &&
+                   AABB.Bottom > other.Top &&
+                   AABB.Top < other.Bottom;
         }
 
         public bool IsTouchingRight(Rectangle other)
         {
-            return BoundingBox.Left + deltaMove.X < other.Right &&
-                   BoundingBox.Right > other.Right &&
-                   BoundingBox.Bottom > other.Top &&
-                   BoundingBox.Top < other.Bottom;
+            return AABB.Left + deltaMove.X < other.Right &&
+                   AABB.Right > other.Right &&
+                   AABB.Bottom > other.Top &&
+                   AABB.Top < other.Bottom;
         }
 
         public bool IsTouchingTop(Rectangle other)
         {
-            return BoundingBox.Bottom + deltaMove.Y > other.Top &&
-                   BoundingBox.Top < other.Top &&
-                   BoundingBox.Right > other.Left &&
-                   BoundingBox.Left < other.Right;
+            return AABB.Bottom + deltaMove.Y > other.Top &&
+                   AABB.Top < other.Top &&
+                   AABB.Right > other.Left &&
+                   AABB.Left < other.Right;
         }
 
         public bool IsTouchingBottom(Rectangle other)
         {
-            return BoundingBox.Top + deltaMove.Y < other.Bottom &&
-                   BoundingBox.Bottom > other.Bottom &&
-                   BoundingBox.Right > other.Left &&
-                   BoundingBox.Left < other.Right;
+            return AABB.Top + deltaMove.Y < other.Bottom &&
+                   AABB.Bottom > other.Bottom &&
+                   AABB.Right > other.Left &&
+                   AABB.Left < other.Right;
         }
 
-        public void AddBoundingBox()
+        public void AddBoundingBox(string type)
         {
-            BoundingBox = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
+            if (type == "AABB")
+                AABB = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
+            else if (type == "RBB")
+                RBB = new RotatedRectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y, (int)Rotation);
         }
 
         public void MoveTo(Vector2 position)

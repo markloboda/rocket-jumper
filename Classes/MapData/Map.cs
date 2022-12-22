@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
+using System.Reflection.Emit;
 
 namespace RocketJumper.Classes.MapData
 {
     public struct Map
     {
+        public string MapPath;
+        private Gameplay gameplay;
+
         public int Height;              // Number of tile rows
         public int Width;               // Number of tile columns
         public int TileHeight;          // Height of grid (1 tile)
@@ -14,9 +18,15 @@ namespace RocketJumper.Classes.MapData
         public List<TileSet> TileSets;      // Array of tile sets
         public List<Layer> Layers;          // Array of layers
 
-        public Map(string filePath, Level level)
+        public Map(string filePath, Gameplay gameplay)
         {
-            dynamic json = JObject.Parse(File.ReadAllText(filePath));
+            MapPath = filePath;
+            this.gameplay = gameplay;
+        }
+
+        public void LoadContent()
+        {
+            dynamic json = JObject.Parse(File.ReadAllText(MapPath));
 
             Width = json.width;
             Height = json.height;
@@ -27,14 +37,14 @@ namespace RocketJumper.Classes.MapData
             TileSets = new List<TileSet>();
             foreach (dynamic tileSetJson in json.tilesets)
             {
-                TileSets.Add(new TileSet(tileSetJson, level));
+                TileSets.Add(new TileSet(tileSetJson, gameplay));
             }
 
             // load Layers (data)
             Layers = new List<Layer>();
             foreach (dynamic layerJson in json.layers)
             {
-                Layers.Add(new Layer(layerJson, level, this));
+                Layers.Add(new Layer(layerJson, gameplay, this));
             }
         }
 

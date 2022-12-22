@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using RocketJumper.Classes.MapData;
 
 namespace RocketJumper.Classes
 {
-    public class Level : IDisposable
+    public class Gameplay : IDisposable
     {
         // const
         public const float PlayerScale = 2.5f;
@@ -28,6 +24,7 @@ namespace RocketJumper.Classes
 
         public Map Map;
         public Player Player;
+        public GUIRenderer GUIRenderer;
 
         // content
         public ContentManager Content;
@@ -39,7 +36,7 @@ namespace RocketJumper.Classes
 
 
 
-        public Level(IServiceProvider serviceProvider, String filePath)
+        public Gameplay(IServiceProvider serviceProvider, String filePath)
         {
             Content = new ContentManager(serviceProvider, "Content");
             Map = new Map(filePath, this);
@@ -62,6 +59,8 @@ namespace RocketJumper.Classes
             // ROCKETS
             RocketAnimation = new Animation_s(Content.Load<Texture2D>("Sprites/Rocket"), 5, 0.2f);
 
+            // load Map
+            Map.LoadContent();
 
             // load all items and mapObjects
             foreach (Layer layer in Map.Layers)
@@ -75,6 +74,7 @@ namespace RocketJumper.Classes
             foreach (Sprite sprite in Sprites)
                 if (sprite.Name == "Turret")
                     Turrets.Add(new Turret(sprite, this));
+
         }
 
         public void Update(GameTime gameTime)
@@ -94,6 +94,11 @@ namespace RocketJumper.Classes
                     DrawTileLayer(gameTime, spriteBatch, layer);
 
             DrawSprites(gameTime, spriteBatch);
+        }
+
+        public void AddGUIRenderer(GUIRenderer guiRenderer)
+        {
+            GUIRenderer = guiRenderer;
         }
 
         private void DrawTileLayer(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)

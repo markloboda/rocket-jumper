@@ -2,16 +2,18 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using RocketJumper.Classes;
-using System.IO;
 
 namespace RocketJumper
 {
     public class MyGame : Game
     {
-        Level currentLevel;
+        Gameplay currentLevel;
 
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
+
+        private GUIRenderer GUIRenderer;
+        private SpriteBatch GUIBatch;
 
         public static int ScreenWidth;
         public static int ScreenHeight;
@@ -38,8 +40,11 @@ namespace RocketJumper
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            LoadLevel("Content/Levels/test-map-2.json");
+            GUIRenderer = new GUIRenderer(Content.Load<SpriteFont>("Fonts/Font"));
+
+            LoadGame("Content/Levels/test-map-2.json");
             camera = new Camera(currentLevel.Map.Width * currentLevel.Map.TileWidth);
+
         }
 
         protected override void Update(GameTime gameTime)
@@ -57,6 +62,7 @@ namespace RocketJumper
             camera.Follow(currentLevel.Player.PlayerSprite);
             currentLevel.CameraTransform = camera.Transform;
             currentLevel.Update(gameTime);
+            GUIRenderer.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -65,19 +71,24 @@ namespace RocketJumper
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            // game
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.Transform);
-
             currentLevel.Draw(gameTime, spriteBatch);
+            spriteBatch.End();
 
+            // GUI
+            spriteBatch.Begin();
+            GUIRenderer.Draw(gameTime, spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
-        private void LoadLevel(string fileName)
+        private void LoadGame(string fileName)
         {
-            currentLevel = new Level(Services, fileName);
+            currentLevel = new Gameplay(Services, fileName);
             currentLevel.LoadContent();
+            currentLevel.AddGUIRenderer(GUIRenderer);
         }
 
         private void ToggleFullscreen()
