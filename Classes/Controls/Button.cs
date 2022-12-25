@@ -27,7 +27,7 @@ namespace RocketJumper.Classes.Controls
             get
             {
                 if (!string.IsNullOrEmpty(Text))
-                    return new Vector2((int)font.MeasureString(Text).X, (int)font.MeasureString(Text).Y);
+                    return new Vector2(font.MeasureString(Text).X / 2, font.MeasureString(Text).Y / 2);
                 else
                     return new Vector2(texture.Width / 2, texture.Height / 2);
             }
@@ -40,9 +40,9 @@ namespace RocketJumper.Classes.Controls
             get
             {
                 if (!string.IsNullOrEmpty(Text))
-                    return new Rectangle((int)(Position.X - Origin.Y - Padding.X), (int)(Position.Y - Origin.Y - Padding.Y), (int)(font.MeasureString(Text).X + Padding.X), (int)(font.MeasureString(Text).Y + Padding.Y));
+                    return new Rectangle((int)(Position.X - Origin.X - Padding.X), (int)(Position.Y - Origin.Y - Padding.Y), (int)(font.MeasureString(Text).X + 2 * Padding.X), (int)(font.MeasureString(Text).Y + 2 * Padding.Y));
                 else
-                    return new Rectangle((int)(Position.X - Origin.Y - Padding.X), (int)(Position.Y - Origin.Y - Padding.Y), (int)(texture.Width + Padding.X), (int)(texture.Height + Padding.Y));
+                    return new Rectangle((int)(Position.X - Origin.X), (int)(Position.Y - Origin.Y), texture.Width, texture.Height);
             }
         }
 

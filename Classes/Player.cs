@@ -28,9 +28,11 @@ namespace RocketJumper.Classes
         // bazooka
         public Sprite Bazooka;
         public bool HasBazooka = false;
-        public bool HasRocket = true;
         public const int FireRate = 1000;           // time between shots in milliseconds
         public int FireTimer = FireRate;
+        public const int ReloadRate = 3000;         // time between reloads in milliseconds
+        public int ReloadTimer = ReloadRate;
+        public int AmmoCount = 2;
         public List<Rocket> RocketList = new();
 
         // inputs
@@ -50,6 +52,12 @@ namespace RocketJumper.Classes
         public void Update(GameTime gameTime)
         {
             FireTimer -= gameTime.ElapsedGameTime.Milliseconds;
+            if (AmmoCount != 2)
+                ReloadTimer -= gameTime.ElapsedGameTime.Milliseconds;
+
+            // handle reload
+            if (HasBazooka && AmmoCount != 2 && ReloadTimer <= 0)
+                ReloadBazooka();
 
             HandleInputs();
             CheckItemCollision();
@@ -96,6 +104,12 @@ namespace RocketJumper.Classes
             PlayerSprite.Draw(gameTime, spriteBatch);
         }
 
+        public void ReloadBazooka()
+        {
+            AmmoCount = 2;
+            ReloadTimer = ReloadRate;
+        }
+
         private void HandleInputs()
         {
             GetInputs();
@@ -133,10 +147,11 @@ namespace RocketJumper.Classes
                 Bazooka.Physics.Rotation = angle;
 
                 // shooting
-                if (HasRocket && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
+                if (AmmoCount > 0 && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
                 {
                     RocketList.Add(new Rocket(PlayerSprite.Physics.Position, direction, GameState)); ;
                     FireTimer = FireRate;
+                    AmmoCount--;
                 }
             }
         }
@@ -173,6 +188,5 @@ namespace RocketJumper.Classes
             mouseState = Mouse.GetState();
             gamePadState = GamePad.GetState(PlayerIndex.One);
         }
-
     }
 }

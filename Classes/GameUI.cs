@@ -6,14 +6,18 @@ namespace RocketJumper.Classes
 {
     public class GameUI
     {
-        private SpriteFont timerFont;
+        private Player player;
+
+        // content
+        public SpriteFont TimerFont;
+        public Texture2D AmmoTexture;
 
         // vars
         BigInteger Timer;
 
-        public GameUI(SpriteFont timerFont, int timer = 0)
+        public GameUI(Player player, int timer = 0)
         {
-            this.timerFont = timerFont;
+            this.player = player;
 
             Timer = timer;
         }
@@ -34,9 +38,9 @@ namespace RocketJumper.Classes
             else
                 timerString = $"{Timer / 1000}:{Timer % 1000}";
 
-            Vector2 timerSize = timerFont.MeasureString(timerString);
+            Vector2 timerSize = TimerFont.MeasureString(timerString);
             spriteBatch.DrawString(
-                spriteFont: timerFont,
+                spriteFont: TimerFont,
                 text: timerString,
                 position: new Vector2(MyGame.ScreenWidth / 2,
                 MyGame.ScreenHeight - 5),
@@ -46,6 +50,23 @@ namespace RocketJumper.Classes
                 scale: 1,
                 effects: SpriteEffects.None,
                 layerDepth: 0);
+
+            // draw ammo
+            int ammoCount = player.AmmoCount;
+            for (int i = 0; i < ammoCount; i++)
+            {
+                // bottom right
+                spriteBatch.Draw(
+                    texture: AmmoTexture,
+                    position: new Vector2(MyGame.ScreenWidth - 5 - i * 20, MyGame.ScreenHeight - 5),
+                    sourceRectangle: null,
+                    color: Color.White,
+                    rotation: 10,
+                    origin: Vector2.Zero,
+                    scale: 1,
+                    effects: SpriteEffects.None,
+                    layerDepth: 0);
+            }
         }
     }
 }

@@ -45,10 +45,6 @@ namespace RocketJumper.Classes.States
         {
             Map = new Map(MapFilePath, content);
 
-            // load game
-
-            GUIRenderer = new GameUI(game.Font);
-
             camera = new Camera(this.Map.Width * this.Map.TileWidth);
 
             // PLAYER
@@ -59,9 +55,12 @@ namespace RocketJumper.Classes.States
             };
             AnimatedSprite playerSprite = new AnimatedSprite(playerAnimationDict, start, this, "idle", PlayerScale, true, true);
 
-            // Create Player Physics
             // Load Player
             Player = new Player(playerSprite);
+            GUIRenderer = new GameUI(Player) {
+                TimerFont = game.Font,
+                AmmoTexture = content.Load<Texture2D>("UI/Ammo")
+            };
 
             // ROCKETS
             RocketAnimation = new Animation_s(content.Load<Texture2D>("Sprites/Rocket"), 5, 0.2f);
@@ -92,8 +91,6 @@ namespace RocketJumper.Classes.States
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-
-
             // game
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.Transform);
 
