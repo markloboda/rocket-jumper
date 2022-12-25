@@ -2,22 +2,28 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using RocketJumper.Classes;
+using RocketJumper.Classes.States;
+using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace RocketJumper
 {
     public class MyGame : Game
     {
-        Gameplay currentLevel;
+        private State currentState;
+        private State nextState;
+
+        // content
+        public SpriteFont Font;
+
 
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        private GUIRenderer GUIRenderer;
-        private SpriteBatch GUIBatch;
 
         public static int ScreenWidth;
         public static int ScreenHeight;
-        private Camera camera;
+
 
         public MyGame()
         {
@@ -40,29 +46,23 @@ namespace RocketJumper
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            GUIRenderer = new GUIRenderer(Content.Load<SpriteFont>("Fonts/Font"));
+            Font = Content.Load<SpriteFont>("Fonts/TimerFont");
 
-            LoadGame("Content/Levels/test-map-2.json");
-            camera = new Camera(currentLevel.Map.Width * currentLevel.Map.TileWidth);
-
+            currentState = new MenuState(this, Content);
+            currentState.LoadContent();
+            nextState = null;
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // fullscreen
-            if (Keyboard.GetState().IsKeyDown(Keys.F11))
+            if (nextState != null)
             {
-                graphics.ToggleFullScreen();
+                currentState = nextState;
+                currentState.LoadContent();
+                nextState = null;
             }
 
-
-            camera.Follow(currentLevel.Player.PlayerSprite);
-            currentLevel.CameraTransform = camera.Transform;
-            currentLevel.Update(gameTime);
-            GUIRenderer.Update(gameTime);
+            currentState.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -70,31 +70,13 @@ namespace RocketJumper
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            // game
-            spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.Transform);
-            currentLevel.Draw(gameTime, spriteBatch);
-            spriteBatch.End();
-
-            // GUI
-            spriteBatch.Begin();
-            GUIRenderer.Draw(gameTime, spriteBatch);
-            spriteBatch.End();
-
+            currentState.Draw(gameTime, spriteBatch);
             base.Draw(gameTime);
         }
 
-        private void LoadGame(string fileName)
+        public void ChangeState(State state)
         {
-            currentLevel = new Gameplay(Services, fileName);
-            currentLevel.LoadContent();
-            currentLevel.AddGUIRenderer(GUIRenderer);
-        }
-
-        private void ToggleFullscreen()
-        {
-            graphics.IsFullScreen = !graphics.IsFullScreen;
-            graphics.ApplyChanges();
+            nextState = state;
         }
     }
 }

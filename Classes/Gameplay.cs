@@ -1,154 +1,153 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
-using RocketJumper.Classes.MapData;
+﻿// using System;
+// using System.Collections.Generic;
+// using System.Linq;
+// using Microsoft.Xna.Framework;
+// using Microsoft.Xna.Framework.Content;
+// using Microsoft.Xna.Framework.Graphics;
+// using RocketJumper.Classes.MapData;
 
-namespace RocketJumper.Classes
-{
-    public class Gameplay : IDisposable
-    {
-        // const
-        public const float PlayerScale = 2.5f;
-
-
-        // camera
-        public Matrix CameraTransform;
+// namespace RocketJumper.Classes
+// {
+//     public class Gameplay : IDisposable
+//     {
+//         // const
+//         public const float PlayerScale = 2.5f;
 
 
-        // vars
-        private Vector2 start;
+//         // camera
+//         public Matrix CameraTransform;
 
 
-        public Map Map;
-        public Player Player;
-        public GUIRenderer GUIRenderer;
-
-        // content
-        public ContentManager Content;
-        public Animation_s RocketAnimation;
-
-        public List<Sprite> ItemSprites = new();
-        public List<Sprite> Sprites = new();
-        public List<Turret> Turrets = new();
+//         // vars
+//         private Vector2 start;
 
 
+//         public Map Map;
+//         public Player Player;
+//         public GameUI GUIRenderer;
 
-        public Gameplay(IServiceProvider serviceProvider, String filePath)
-        {
-            Content = new ContentManager(serviceProvider, "Content");
-            Map = new Map(filePath, this);
-        }
+//         // content
+//         public Animation_s RocketAnimation;
 
-        public void LoadContent()
-        {
-            // PLAYER
-            Dictionary<string, Animation_s> playerAnimationDict = new()
-            {
-                ["idle"] = new Animation_s(Content.Load<Texture2D>("Sprites/Player/Idle"), 5, 0.2f),
-                ["run"] = new Animation_s(Content.Load<Texture2D>("Sprites/Player/Run"), 4, 0.2f)
-            };
-            AnimatedSprite playerSprite = new AnimatedSprite(playerAnimationDict, start, this, "idle", PlayerScale, true, true);
+//         public List<Sprite> ItemSprites = new();
+//         public List<Sprite> Sprites = new();
+//         public List<Turret> Turrets = new();
 
-            // Create Player Physics
-            // Load Player
-            Player = new Player(playerSprite);
 
-            // ROCKETS
-            RocketAnimation = new Animation_s(Content.Load<Texture2D>("Sprites/Rocket"), 5, 0.2f);
 
-            // load Map
-            Map.LoadContent();
+//         public Gameplay(String filePath)
+//         {
+//             Content = new ContentManager(serviceProvider, "Content");
+//             Map = new Map(filePath, this);
+//         }
 
-            // load all items and mapObjects
-            foreach (Layer layer in Map.Layers)
-                if (layer.Type == "objectgroup")
-                    if (layer.Class == "items")
-                        ItemSprites = layer.ItemSprites.Values.ToList();
-                    else if (layer.Class == "map-objects")
-                        Sprites = layer.Sprites.Values.ToList();
+//         public void LoadContent()
+//         {
+//             // PLAYER
+//             Dictionary<string, Animation_s> playerAnimationDict = new()
+//             {
+//                 ["idle"] = new Animation_s(Content.Load<Texture2D>("Sprites/Player/Idle"), 5, 0.2f),
+//                 ["run"] = new Animation_s(Content.Load<Texture2D>("Sprites/Player/Run"), 4, 0.2f)
+//             };
+//             AnimatedSprite playerSprite = new AnimatedSprite(playerAnimationDict, start, this, "idle", PlayerScale, true, true);
 
-            // initialize turrets
-            foreach (Sprite sprite in Sprites)
-                if (sprite.Name == "Turret")
-                    Turrets.Add(new Turret(sprite, this));
+//             // Create Player Physics
+//             // Load Player
+//             Player = new Player(playerSprite);
 
-        }
+//             // ROCKETS
+//             RocketAnimation = new Animation_s(Content.Load<Texture2D>("Sprites/Rocket"), 5, 0.2f);
 
-        public void Update(GameTime gameTime)
-        {
-            Player.Update(gameTime);
-            UpdateSprites(gameTime);
-        }
+//             // load Map
+//             Map.LoadMap();
 
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            // Draw player
-            Player.Draw(gameTime, spriteBatch);
+//             // load all items and mapObjects
+//             foreach (Layer layer in Map.Layers)
+//                 if (layer.Type == "objectgroup")
+//                     if (layer.Class == "items")
+//                         ItemSprites = layer.ItemSprites.Values.ToList();
+//                     else if (layer.Class == "map-objects")
+//                         Sprites = layer.Sprites.Values.ToList();
 
-            // draw Layers
-            foreach (Layer layer in Map.Layers)
-                if (layer.Type == "tilelayer")
-                    DrawTileLayer(gameTime, spriteBatch, layer);
+//             // initialize turrets
+//             foreach (Sprite sprite in Sprites)
+//                 if (sprite.Name == "Turret")
+//                     Turrets.Add(new Turret(sprite, this));
 
-            DrawSprites(gameTime, spriteBatch);
-        }
+//         }
 
-        public void AddGUIRenderer(GUIRenderer guiRenderer)
-        {
-            GUIRenderer = guiRenderer;
-        }
+//         public void Update(GameTime gameTime)
+//         {
+//             Player.Update(gameTime);
+//             UpdateSprites(gameTime);
+//         }
 
-        private void DrawTileLayer(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)
-        {
-            for (int y = 0; y < layer.Height; y++)
-            {
-                for (int x = 0; x < layer.Width; x++)
-                {
-                    int tileGID = layer.Data[x + y * layer.Width];
+//         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+//         {
+//             // Draw player
+//             Player.Draw(gameTime, spriteBatch);
 
-                    if (tileGID == 0)
-                        continue;
+//             // draw Layers
+//             foreach (Layer layer in Map.Layers)
+//                 if (layer.Type == "tilelayer")
+//                     DrawTileLayer(gameTime, spriteBatch, layer);
 
-                    // find the tileset for this Tile and draw it
-                    foreach (TileSet tileSet in Map.TileSets)
-                        if (tileGID >= tileSet.FirstGID)
-                            tileSet.DrawTile(tileGID, new Vector2(x * Map.TileWidth, y * Map.TileHeight), spriteBatch);
-                }
-            }
-        }
+//             DrawSprites(gameTime, spriteBatch);
+//         }
 
-        private void UpdateSprites(GameTime gameTime)
-        {
-            // update turret objects before updating its sprites
-            foreach (Turret turret in Turrets)
-                turret.Update(gameTime);
+//         public void AddGUIRenderer(GameUI guiRenderer)
+//         {
+//             GUIRenderer = guiRenderer;
+//         }
 
-            // update sprites
-            foreach (Sprite sprite in Sprites)
-                sprite.Update(gameTime);
+//         private void DrawTileLayer(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)
+//         {
+//             for (int y = 0; y < layer.Height; y++)
+//             {
+//                 for (int x = 0; x < layer.Width; x++)
+//                 {
+//                     int tileGID = layer.Data[x + y * layer.Width];
 
-            // update all items
-            foreach (Sprite item in ItemSprites)
-                item.Update(gameTime);
-        }
+//                     if (tileGID == 0)
+//                         continue;
 
-        private void DrawSprites(GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            // draw sprites
-            foreach (Sprite mapObject in Sprites)
-                mapObject.Draw(gameTime, spriteBatch);
+//                     // find the tileset for this Tile and draw it
+//                     foreach (TileSet tileSet in Map.TileSets)
+//                         if (tileGID >= tileSet.FirstGID)
+//                             tileSet.DrawTile(tileGID, new Vector2(x * Map.TileWidth, y * Map.TileHeight), spriteBatch);
+//                 }
+//             }
+//         }
 
-            // draw items
-            foreach (Sprite item in ItemSprites)
-                item.Draw(gameTime, spriteBatch);
-        }
+//         private void UpdateSprites(GameTime gameTime)
+//         {
+//             // update turret objects before updating its sprites
+//             foreach (Turret turret in Turrets)
+//                 turret.Update(gameTime);
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-    }
-}
+//             // update sprites
+//             foreach (Sprite sprite in Sprites)
+//                 sprite.Update(gameTime);
+
+//             // update all items
+//             foreach (Sprite item in ItemSprites)
+//                 item.Update(gameTime);
+//         }
+
+//         private void DrawSprites(GameTime gameTime, SpriteBatch spriteBatch)
+//         {
+//             // draw sprites
+//             foreach (Sprite mapObject in Sprites)
+//                 mapObject.Draw(gameTime, spriteBatch);
+
+//             // draw items
+//             foreach (Sprite item in ItemSprites)
+//                 item.Draw(gameTime, spriteBatch);
+//         }
+
+//         public void Dispose()
+//         {
+//             throw new NotImplementedException();
+//         }
+//     }
+// }

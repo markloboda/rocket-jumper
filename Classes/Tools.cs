@@ -26,6 +26,13 @@ namespace RocketJumper.Classes
             spriteBatch.Draw(recTexture, new Vector2(rec.X, rec.Y), color);
         }
 
+        public static Texture2D GetSingleColorTexture(GraphicsDevice graphicsDevice, Color color)
+        {
+            Texture2D texture = new Texture2D(graphicsDevice, 1, 1);
+            texture.SetData(new Color[] { color });
+            return texture;
+        }
+
         public static Vector2 GetRectangleIntersectionDepth(Rectangle rectangle1, Rectangle rectangle2)
         {
             Rectangle intersection = Rectangle.Intersect(rectangle1, rectangle2);

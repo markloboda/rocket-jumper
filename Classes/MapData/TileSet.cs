@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json.Linq;
+using RocketJumper.Classes.States;
 using System.Reflection.Metadata.Ecma335;
 
 namespace RocketJumper.Classes.MapData
@@ -18,9 +20,9 @@ namespace RocketJumper.Classes.MapData
         public int FirstGID;  // id of the first tile in the set
 
 
-        public TileSet(JObject tileSetJson, Gameplay level)
+        public TileSet(JObject tileSetJson, Texture2D texture)
         {
-            Texture = level.Content.Load<Texture2D>(tileSetJson["image"].ToString());
+            Texture = texture;
             TileSize = new Vector2((int)tileSetJson["tilewidth"], (int)tileSetJson["tileheight"]);
             TileSizeX = (int)tileSetJson["tilewidth"];
             TileSizeY = (int)tileSetJson["tileheight"];

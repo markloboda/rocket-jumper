@@ -2,12 +2,13 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
+using RocketJumper.Classes.States;
 
 namespace RocketJumper.Classes
 {
     public class Physics
     {
-        private Gameplay level;
+        private GameState gameState;
 
         // forces
         private readonly float gravityAccel = 10.0f;
@@ -74,11 +75,11 @@ namespace RocketJumper.Classes
 
         public bool Collided, IsOnGround;
 
-        public Physics(Vector2 Position, Vector2 Size, Gameplay level, bool gravityEnabled, float rotation, string boundingBoxType = "AABB")
+        public Physics(Vector2 Position, Vector2 Size, GameState gameState, bool gravityEnabled, float rotation, string boundingBoxType = "AABB")
         {
             this.Position = Position;
             this.Size = Size;
-            this.level = level;
+            this.gameState = gameState;
             Rotation = rotation;
             GravityEnabled = gravityEnabled;
             AddBoundingBox(boundingBoxType);
@@ -117,10 +118,10 @@ namespace RocketJumper.Classes
 
             // COLLISION DETECTION
             // get surrounding tiles of BoundingBox
-            int leftTile = (int)Math.Floor((float)AABB.Left / level.Map.TileWidth) - 1;
-            int rightTile = (int)Math.Ceiling((float)AABB.Right / level.Map.TileWidth);
-            int topTile = (int)Math.Floor((float)AABB.Top / level.Map.TileHeight) - 1;
-            int bottomTile = (int)Math.Ceiling((float)AABB.Bottom / level.Map.TileHeight);
+            int leftTile = (int)Math.Floor((float)AABB.Left / gameState.Map.TileWidth) - 1;
+            int rightTile = (int)Math.Ceiling((float)AABB.Right / gameState.Map.TileWidth);
+            int topTile = (int)Math.Floor((float)AABB.Top / gameState.Map.TileHeight) - 1;
+            int bottomTile = (int)Math.Ceiling((float)AABB.Bottom / gameState.Map.TileHeight);
 
             // reset collision flags
             Collided = false;
@@ -132,10 +133,10 @@ namespace RocketJumper.Classes
                 for (int x = leftTile; x <= rightTile; ++x)
                 {
                     // if this tile is collidable
-                    if (level.Map.GetTileId(x, y) != 0)
+                    if (gameState.Map.GetTileId(x, y) != 0)
                     {
                         // determine collision depth (with direction) and magnitude
-                        Rectangle tileBounds = level.Map.GetBounds(x, y);
+                        Rectangle tileBounds = gameState.Map.GetBounds(x, y);
 
                         if (deltaMove.Y > 0 && IsTouchingTop(tileBounds))
                         {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using RocketJumper.Classes.MapData;
+using RocketJumper.Classes.States;
 using System;
 
 namespace RocketJumper.Classes
@@ -7,7 +8,7 @@ namespace RocketJumper.Classes
     public class Turret
     {
         public Sprite baseSprite;
-        private Gameplay level;
+        private GameState level;
         private Sprite shootingSprite;
 
         public Vector2 ShootingPosition;
@@ -19,7 +20,7 @@ namespace RocketJumper.Classes
         // parameters
         private const float fireRate = 1000.0f;
 
-        public Turret(Sprite baseSprite, Gameplay level)
+        public Turret(Sprite baseSprite, GameState level)
         {
             this.baseSprite = baseSprite;
             this.level = level;

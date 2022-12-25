@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using RocketJumper.Classes.MapData;
+using RocketJumper.Classes.States;
 using System;
 using System.Collections.Generic;
 
@@ -17,7 +18,10 @@ namespace RocketJumper.Classes
         private Vector2 jumpingForce = new Vector2(0.0f, -200.0f);
 
         // components
-        public Gameplay Level;
+        public GameState GameState
+        {
+            get { return PlayerSprite.GameState; }
+        }
 
         public List<Sprite> Items = new();           // list of mapobject that draw onto the player
 
@@ -40,7 +44,6 @@ namespace RocketJumper.Classes
         public Player(AnimatedSprite playerSprite)
         {
             PlayerSprite = playerSprite;
-            Level = PlayerSprite.Level;
             playerSprite.Physics.IsBoundingBoxVisible = true;
         }
 
@@ -123,7 +126,7 @@ namespace RocketJumper.Classes
                 Vector2 direction = mousePosition - playerPosition;
 
                 // take into account the transformation of the camera
-                direction = Vector2.Transform(direction, Matrix.Invert(Level.CameraTransform));
+                direction = Vector2.Transform(direction, Matrix.Invert(GameState.CameraTransform));
                 direction.Normalize();
 
                 float angle = MathF.Atan2(direction.Y, direction.X);
@@ -132,7 +135,7 @@ namespace RocketJumper.Classes
                 // shooting
                 if (HasRocket && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
                 {
-                    RocketList.Add(new Rocket(PlayerSprite.Physics.Position, direction, Level)); ;
+                    RocketList.Add(new Rocket(PlayerSprite.Physics.Position, direction, GameState)); ;
                     FireTimer = FireRate;
                 }
             }
@@ -140,7 +143,7 @@ namespace RocketJumper.Classes
 
         private void CheckItemCollision()
         {
-            foreach (Sprite item in Level.ItemSprites)
+            foreach (Sprite item in GameState.ItemSprites)
             {
                 if (item.Physics.AABB.Intersects(PlayerSprite.Physics.AABB))
                 {
@@ -159,7 +162,7 @@ namespace RocketJumper.Classes
                 Bazooka.AttachmentOrigin = new Vector2(PlayerSprite.Physics.Width / 2, Bazooka.AttachmentOffset.Y);
             }
 
-            Level.ItemSprites.Remove(item);
+            GameState.ItemSprites.Remove(item);
             Items.Add(item);
             PlayerSprite.AddChild(item);
         }

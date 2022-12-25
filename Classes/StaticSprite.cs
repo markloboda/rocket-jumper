@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using RocketJumper.Classes.MapData;
 using System.Collections.Generic;
+using RocketJumper.Classes.States;
 
 namespace RocketJumper.Classes
 {
@@ -35,7 +36,7 @@ namespace RocketJumper.Classes
         public float Scale { get { return Physics.Size.Y / Texture.Height; } }
 
 
-        public StaticSprite(Dictionary<string, Texture2D> textureDict, string currentTextureId, Vector2 position, Gameplay level, Vector2 spriteSize, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, bool moveOnAttach = false, Vector2 attachmentOrigin = default)
+        public StaticSprite(Dictionary<string, Texture2D> textureDict, string currentTextureId, Vector2 position, GameState level, Vector2 spriteSize, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, bool moveOnAttach = false, Vector2 attachmentOrigin = default)
         {
             CurrentAnimationId = currentTextureId;
             TextureDict = textureDict;
@@ -51,7 +52,7 @@ namespace RocketJumper.Classes
 
         }
 
-        public StaticSprite(TileSet tileSet, int gid, int id, Vector2 position, Gameplay level, Vector2 spriteSize, string name = default, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, bool moveOnAttach = false, Vector2 attachmentOrigin = default, int parentId = -1)
+        public StaticSprite(TileSet tileSet, int gid, int id, Vector2 position, GameState level, Vector2 spriteSize, string name = default, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, bool moveOnAttach = false, Vector2 attachmentOrigin = default, int parentId = -1)
         {
             TileSet = tileSet;
             Name = name;

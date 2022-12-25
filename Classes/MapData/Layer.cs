@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using RocketJumper.Classes.States;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -25,7 +26,7 @@ namespace RocketJumper.Classes.MapData
         public Dictionary<int, Sprite> ItemSprites = new Dictionary<int, Sprite>();
         public Dictionary<int, Sprite> Sprites = new Dictionary<int, Sprite>();
 
-        public Layer(JObject layerJson, Gameplay level, Map map)
+        public Layer(JObject layerJson, States.GameState gameState, Map map)
         {
             Type = (string)layerJson["type"];
             Class = (string)layerJson["class"];
@@ -61,7 +62,7 @@ namespace RocketJumper.Classes.MapData
                     JArray objects = layerJson["objects"].ToObject<JArray>();
                     for (int i = 0; i < objects.Count; i++)
                     {
-                        Sprite sprite = JsonReader.GetSpriteFromJson(objects[i].ToObject<JObject>(), level, map.TileSets);
+                        Sprite sprite = JsonReader.GetSpriteFromJson(objects[i].ToObject<JObject>(), gameState, map.TileSets);
                         ItemSprites.Add(sprite.GID, sprite);
                     }
 
@@ -80,7 +81,7 @@ namespace RocketJumper.Classes.MapData
                     JArray objects = layerJson["objects"].ToObject<JArray>();
                     for (int i = 0; i < objects.Count; i++)
                     {
-                        Sprite sprite = JsonReader.GetSpriteFromJson(objects[i].ToObject<JObject>(), level, map.TileSets);
+                        Sprite sprite = JsonReader.GetSpriteFromJson(objects[i].ToObject<JObject>(), gameState, map.TileSets);
                         Sprites.Add(sprite.ID, sprite);
                     }
 

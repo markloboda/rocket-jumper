@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RocketJumper.Classes.MapData;
+using RocketJumper.Classes.States;
 
 namespace RocketJumper.Classes
 {
@@ -9,7 +10,7 @@ namespace RocketJumper.Classes
     public class Rocket
     {
         private Animation_s rocketAnimation;
-        private Gameplay level;
+        private GameState gameState;
         public bool HitsPlayer = false;
 
         public AnimatedSprite RocketSprite;
@@ -22,17 +23,17 @@ namespace RocketJumper.Classes
 
         public float Speed = 1000.0f;
 
-        public Rocket(Vector2 position, Vector2 direction, Gameplay level, bool hitsPlayer = false)
+        public Rocket(Vector2 position, Vector2 direction, GameState gameState, bool hitsPlayer = false)
         {
-            this.level = level;
+            this.gameState = gameState;
             this.direction = direction;
 
-            rocketAnimation = level.RocketAnimation;
+            rocketAnimation = gameState.RocketAnimation;
 
             RocketSprite = new AnimatedSprite(
                 new() { ["fly"] = rocketAnimation },
                 position,
-                level,
+                gameState,
                 "fly",
                 isLooping: true,
                 rotation: (float)Math.Atan2(direction.Y, direction.X)
@@ -45,9 +46,9 @@ namespace RocketJumper.Classes
             HitsPlayer = hitsPlayer;
         }
 
-        public Rocket(Vector2 position, Vector2 direction, Gameplay level, Sprite targetSprite, bool hitsPlayer = false)
+        public Rocket(Vector2 position, Vector2 direction, GameState level, Sprite targetSprite, bool hitsPlayer = false)
         {
-            this.level = level;
+            this.gameState = level;
             this.direction = direction;
             Speed = 500.0f;
 
@@ -85,7 +86,7 @@ namespace RocketJumper.Classes
                 Collided = true;
 
             // check if player is hit
-            if (HitsPlayer && RocketSprite.CollidesWith(level.Player.PlayerSprite))
+            if (HitsPlayer && RocketSprite.CollidesWith(gameState.Player.PlayerSprite))
                 Collided = true;
         }
 

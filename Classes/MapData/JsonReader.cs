@@ -1,12 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Newtonsoft.Json.Linq;
+using RocketJumper.Classes.States;
 using System.Collections.Generic;
 
 namespace RocketJumper.Classes.MapData
 {
     public class JsonReader
     {
-        public static Sprite GetSpriteFromJson(JObject objectJson, Gameplay level, List<TileSet> tileSets)
+        public static Sprite GetSpriteFromJson(JObject objectJson, GameState level, List<TileSet> tileSets)
         {
             string name = objectJson["name"].ToString();
             int gid = (int)objectJson["gid"];

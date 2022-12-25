@@ -25,12 +25,12 @@
 /processorParam:TextureFormat=Color
 /build:../../art/items/Turret.png;Sprites/Turret.png
 
-#begin Fonts/Font.spritefont
+#begin Fonts/TimerFont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:Fonts/Font.spritefont
+/build:Fonts/TimerFont.spritefont
 
 #begin Levels/test-map-2.json
 /copy:Levels/test-map-2.json
