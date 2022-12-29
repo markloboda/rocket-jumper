@@ -34,6 +34,11 @@ namespace RocketJumper.Classes
         public int ReloadTimer = ReloadRate;
         public int AmmoCount = 2;
         public List<Rocket> RocketList = new();
+        public Vector2 ShootingPosition {
+            get {
+                return PlayerSprite.Physics.Position + Bazooka.AttachmentOrigin + new Vector2(0, 15);
+            }
+        }
 
         // inputs
         KeyboardState keyboardState;
@@ -145,11 +150,19 @@ namespace RocketJumper.Classes
 
                 float angle = MathF.Atan2(direction.Y, direction.X);
                 Bazooka.Physics.Rotation = angle;
+                
+                // if bazooka is facing left, flip it
+                if (angle > MathF.PI / 2 || angle < -MathF.PI / 2)
+                    Bazooka.Effects = SpriteEffects.FlipVertically;
+                else
+                    Bazooka.Effects = SpriteEffects.None;
 
                 // shooting
                 if (AmmoCount > 0 && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
                 {
-                    RocketList.Add(new Rocket(PlayerSprite.Physics.Position, direction, GameState)); ;
+                    Rocket rocket = new Rocket(ShootingPosition, direction, GameState);
+                    rocket.RocketSprite.Physics.Origin = new Vector2(rocket.RocketSprite.Physics.Width / 2, rocket.RocketSprite.Physics.Height / 2);
+                    RocketList.Add(rocket);
                     FireTimer = FireRate;
                     AmmoCount--;
                 }
