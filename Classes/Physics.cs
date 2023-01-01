@@ -25,9 +25,14 @@ namespace RocketJumper.Classes
         // movement per frame
         private Vector2 deltaMove;
 
+        public string BoundingBoxType
+        {
+            get;
+            private set;
+        }
         public Rectangle AABB
         {
-            get { return Tools.RectangleMoveTo(aabb, Position); }
+            get { return Tools.RectangleMoveTo(aabb, Position - Origin); }
             private set { aabb = value; }
         }
         private Rectangle aabb;
@@ -129,60 +134,61 @@ namespace RocketJumper.Classes
             Collided = false;
             IsOnGround = false;
 
-            // for each potentially colliding tile
-            for (int y = topTile; y <= bottomTile; ++y)
-            {
-                for (int x = leftTile; x <= rightTile; ++x)
+            if (BoundingBoxType == "AABB")
+                // for each potentially colliding tile
+                for (int y = topTile; y <= bottomTile; ++y)
                 {
-                    // if this tile is collidable
-                    if (gameState.Map.GetTileId(x, y) != 0)
+                    for (int x = leftTile; x <= rightTile; ++x)
                     {
-                        // determine collision depth (with direction) and magnitude
-                        Rectangle tileBounds = gameState.Map.GetBounds(x, y);
-
-                        if (deltaMove.Y >= 0 && IsTouchingTop(tileBounds))
+                        // if this tile is collidable
+                        if (gameState.Map.GetTileId(x, y) != 0)
                         {
-                            IsOnGround = true;
-                            Collided = true;
-                            deltaMove.Y = 0;
-                            Velocity.Y = 0;
+                            // determine collision depth (with direction) and magnitude
+                            Rectangle tileBounds = gameState.Map.GetBounds(x, y);
 
-                            Position.Y = tileBounds.Top - AABB.Height;
-
-                            // add friction
-                            if (Math.Abs(Velocity.X) > 100)
+                            if (deltaMove.Y >= 0 && AABBIsTouchingTop(tileBounds))
                             {
-                                if (Velocity.X > 0)
-                                    Velocity.X -= 100;
+                                IsOnGround = true;
+                                Collided = true;
+                                deltaMove.Y = 0;
+                                Velocity.Y = 0;
+
+                                Position.Y = tileBounds.Top - AABB.Height;
+
+                                // add friction
+                                if (Math.Abs(Velocity.X) > 100)
+                                {
+                                    if (Velocity.X > 0)
+                                        Velocity.X -= 100;
+                                    else
+                                        Velocity.X += 100;
+                                }
                                 else
-                                    Velocity.X += 100;
+                                    Velocity.X = 0;
                             }
-                            else
-                                Velocity.X = 0;
-                        }
-                        if (deltaMove.Y < 0 && IsTouchingBottom(tileBounds))
-                        {
-                            Collided = true;
-                            deltaMove.Y = 0;
-                            Velocity.Y = 0;
-
-                            // check if player clipped into ceiling
-                            if (AABB.Top < tileBounds.Bottom)
+                            if (deltaMove.Y < 0 && AABBIsTouchingBottom(tileBounds))
                             {
-                                Position.Y = tileBounds.Bottom;
+                                Collided = true;
+                                deltaMove.Y = 0;
+                                Velocity.Y = 0;
+
+                                // check if player clipped into ceiling
+                                if (AABB.Top < tileBounds.Bottom)
+                                {
+                                    Position.Y = tileBounds.Bottom;
+                                }
                             }
-                        }
-                        // left right collision with tiles
-                        if (deltaMove.X > 0 && (IsTouchingLeft(tileBounds) || AABB.Right + deltaMove.X > gameState.Map.WidthInPixels) ||
-                            deltaMove.X < 0 && (IsTouchingRight(tileBounds) || AABB.Left + deltaMove.X < 0))
-                        {
-                            Collided = true;
-                            deltaMove.X = 0;
-                            Velocity.X = 0;
+                            // left right collision with tiles
+                            if (deltaMove.X > 0 && (AABBIsTouchingLeft(tileBounds) || AABB.Right + deltaMove.X > gameState.Map.WidthInPixels) ||
+                                deltaMove.X < 0 && (AABBIsTouchingRight(tileBounds) || AABB.Left + deltaMove.X < 0))
+                            {
+                                Collided = true;
+                                deltaMove.X = 0;
+                                Velocity.X = 0;
+                            }
                         }
                     }
                 }
-            }
 
             // side of map collision
             if (deltaMove.X > 0 && AABB.Right + deltaMove.X > gameState.Map.WidthInPixels ||
@@ -236,7 +242,7 @@ namespace RocketJumper.Classes
             tempForcesY.Add(force.Y);
         }
 
-        public bool IsTouchingLeft(Rectangle other)
+        public bool AABBIsTouchingLeft(Rectangle other)
         {
             return AABB.Right + deltaMove.X >= other.Left &&
                    AABB.Left < other.Left &&
@@ -244,7 +250,7 @@ namespace RocketJumper.Classes
                    AABB.Top < other.Bottom;
         }
 
-        public bool IsTouchingRight(Rectangle other)
+        public bool AABBIsTouchingRight(Rectangle other)
         {
             return AABB.Left + deltaMove.X <= other.Right &&
                    AABB.Right > other.Right &&
@@ -252,7 +258,7 @@ namespace RocketJumper.Classes
                    AABB.Top < other.Bottom;
         }
 
-        public bool IsTouchingTop(Rectangle other)
+        public bool AABBIsTouchingTop(Rectangle other)
         {
             return AABB.Bottom + deltaMove.Y >= other.Top &&
                    AABB.Top < other.Top &&
@@ -260,7 +266,7 @@ namespace RocketJumper.Classes
                    AABB.Left < other.Right;
         }
 
-        public bool IsTouchingBottom(Rectangle other)
+        public bool AABBIsTouchingBottom(Rectangle other)
         {
             return AABB.Top + deltaMove.Y <= other.Bottom &&
                    AABB.Bottom > other.Bottom &&
@@ -270,6 +276,7 @@ namespace RocketJumper.Classes
 
         public void AddBoundingBox(string type)
         {
+            BoundingBoxType = type;
             if (type == "AABB")
                 AABB = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
             else if (type == "RBB")
@@ -293,7 +300,7 @@ namespace RocketJumper.Classes
 
         public Vector2 GetLocalCenter()
         {
-            return new Vector2(Size.X / 2, Size.Y / 2);
+            return new Vector2(Size.X / 2, Size.Y / 2) - Origin;
         }
     }
 }
