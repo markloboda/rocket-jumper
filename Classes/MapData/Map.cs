@@ -22,6 +22,11 @@ namespace RocketJumper.Classes.MapData
         public List<TileSet> TileSets;      // Array of tile sets
         public List<Layer> Layers;          // Array of layers
 
+        public int WidthInPixels
+        {
+            get { return Width * TileWidth; }
+        }
+
         public Map(string filePath, ContentManager content)
         {
             MapPath = filePath;

@@ -14,8 +14,7 @@ namespace RocketJumper.Classes
 
         // movement vars
         private float inputMovement;
-        private float horizontalSpeed = 300.0f;
-        private Vector2 jumpingForce = new Vector2(0.0f, -200.0f);
+        public static float HorizontalSpeed = 300;
 
         // components
         public GameState GameState
@@ -73,12 +72,22 @@ namespace RocketJumper.Classes
                 RocketList[i].Update(gameTime);
                 if (RocketList[i].Collided)
                 {
+                    // calcualte direction from rocket to player
+                    Vector2 direction = PlayerSprite.Physics.GetGlobalCenter() - RocketList[i].RocketSprite.Physics.GetGlobalCenter();
+                    // get length of direction and calculate force based on it where the closer the player is the more force is applied
+                    float length = direction.Length();
+                    float force = 10000.0f / length;
+                    // normalize direction
+                    direction.Normalize();
+                    // add force to player
+                    PlayerSprite.Physics.AddTempForce(direction * force);
+
                     RocketList.RemoveAt(i--);
                 }
             }
 
             // add horizontal movement
-            PlayerSprite.AddInputToPhysics(gameTime, new Vector2(inputMovement, 0.0f) * horizontalSpeed);
+            PlayerSprite.AddInputToPhysics(new Vector2(inputMovement, 0.0f) * HorizontalSpeed);
             PlayerSprite.Update(gameTime);
         }
 
@@ -132,10 +141,6 @@ namespace RocketJumper.Classes
                 inputMovement = 1.0f;
             else
                 inputMovement = 0.0f;
-
-            // jumping
-            if ((keyboardState.IsKeyDown(Keys.Space) || keyboardState.IsKeyDown(Keys.W)) && PlayerSprite.Physics.IsOnGround)
-                PlayerSprite.Physics.AddTempForce(jumpingForce);
 
             // bazooka
             if (HasBazooka)

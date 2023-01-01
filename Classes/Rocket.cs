@@ -42,6 +42,7 @@ namespace RocketJumper.Classes
             RocketSprite.Physics.Velocity = Speed * this.direction;
 
             RocketSprite.Physics.Origin = RocketSprite.Physics.GetLocalCenter();
+            RocketSprite.Physics.IsBoundingBoxVisible = true;
 
             HitsPlayer = hitsPlayer;
         }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using RocketJumper.Classes.States;
+using System.Diagnostics;
 
 namespace RocketJumper.Classes
 {
@@ -87,6 +88,8 @@ namespace RocketJumper.Classes
 
         public void Update(GameTime gameTime)
         {
+            deltaMove = Vector2.Zero;
+
             // calculate resulting vertical force
             float fYRes = 0.0f;
             foreach (float force in forcesY)
@@ -106,15 +109,14 @@ namespace RocketJumper.Classes
             fXRes *= 200;
 
             // apply acceleration to speed of object
-            Velocity.Y = Velocity.Y + fYRes * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Velocity.X = Velocity.X + fXRes * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-
-            // apply Velocity to deltaMove
-            deltaMove = Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Velocity.Y += fYRes * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Velocity.X += fXRes * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // apply inputVelocity to deltaMove
             deltaMove += inputVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // apply Velocity to deltaMove
+            deltaMove += Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // COLLISION DETECTION
             // get surrounding tiles of BoundingBox
@@ -138,18 +140,25 @@ namespace RocketJumper.Classes
                         // determine collision depth (with direction) and magnitude
                         Rectangle tileBounds = gameState.Map.GetBounds(x, y);
 
-                        if (deltaMove.Y > 0 && IsTouchingTop(tileBounds))
+                        if (deltaMove.Y >= 0 && IsTouchingTop(tileBounds))
                         {
                             IsOnGround = true;
                             Collided = true;
                             deltaMove.Y = 0;
                             Velocity.Y = 0;
 
-                            // check if player clipped into ground
-                            if (AABB.Bottom > tileBounds.Top)
+                            Position.Y = tileBounds.Top - AABB.Height;
+
+                            // add friction
+                            if (Math.Abs(Velocity.X) > 100)
                             {
-                                Position.Y = tileBounds.Top - AABB.Height;
+                                if (Velocity.X > 0)
+                                    Velocity.X -= 100;
+                                else
+                                    Velocity.X += 100;
                             }
+                            else
+                                Velocity.X = 0;
                         }
                         if (deltaMove.Y < 0 && IsTouchingBottom(tileBounds))
                         {
@@ -163,8 +172,9 @@ namespace RocketJumper.Classes
                                 Position.Y = tileBounds.Bottom;
                             }
                         }
-                        if (deltaMove.X > 0 && IsTouchingLeft(tileBounds) ||
-                            deltaMove.X < 0 && IsTouchingRight(tileBounds))
+                        // left right collision with tiles
+                        if (deltaMove.X > 0 && (IsTouchingLeft(tileBounds) || AABB.Right + deltaMove.X > gameState.Map.WidthInPixels) ||
+                            deltaMove.X < 0 && (IsTouchingRight(tileBounds) || AABB.Left + deltaMove.X < 0))
                         {
                             Collided = true;
                             deltaMove.X = 0;
@@ -172,6 +182,15 @@ namespace RocketJumper.Classes
                         }
                     }
                 }
+            }
+
+            // side of map collision
+            if (deltaMove.X > 0 && AABB.Right + deltaMove.X > gameState.Map.WidthInPixels ||
+                deltaMove.X < 0 && AABB.Left + deltaMove.X < 0)
+            {
+                Collided = true;
+                deltaMove.X = 0;
+                Velocity.X = 0;
             }
 
             // apply deltaMove to position
@@ -199,7 +218,7 @@ namespace RocketJumper.Classes
             forcesY.Remove(gravityAccel);
         }
 
-        public void AddInputMovement(GameTime gameTime, Vector2 inputSpeed)
+        public void AddInputMovement(Vector2 inputSpeed)
         {
             inputVelocity = inputSpeed;
         }
@@ -219,7 +238,7 @@ namespace RocketJumper.Classes
 
         public bool IsTouchingLeft(Rectangle other)
         {
-            return AABB.Right + deltaMove.X > other.Left &&
+            return AABB.Right + deltaMove.X >= other.Left &&
                    AABB.Left < other.Left &&
                    AABB.Bottom > other.Top &&
                    AABB.Top < other.Bottom;
@@ -227,7 +246,7 @@ namespace RocketJumper.Classes
 
         public bool IsTouchingRight(Rectangle other)
         {
-            return AABB.Left + deltaMove.X < other.Right &&
+            return AABB.Left + deltaMove.X <= other.Right &&
                    AABB.Right > other.Right &&
                    AABB.Bottom > other.Top &&
                    AABB.Top < other.Bottom;
@@ -235,7 +254,7 @@ namespace RocketJumper.Classes
 
         public bool IsTouchingTop(Rectangle other)
         {
-            return AABB.Bottom + deltaMove.Y > other.Top &&
+            return AABB.Bottom + deltaMove.Y >= other.Top &&
                    AABB.Top < other.Top &&
                    AABB.Right > other.Left &&
                    AABB.Left < other.Right;
@@ -243,7 +262,7 @@ namespace RocketJumper.Classes
 
         public bool IsTouchingBottom(Rectangle other)
         {
-            return AABB.Top + deltaMove.Y < other.Bottom &&
+            return AABB.Top + deltaMove.Y <= other.Bottom &&
                    AABB.Bottom > other.Bottom &&
                    AABB.Right > other.Left &&
                    AABB.Left < other.Right;
