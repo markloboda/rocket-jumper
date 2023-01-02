@@ -36,6 +36,10 @@ namespace RocketJumper.Classes.States
 
         private Camera camera;
 
+        public KeyboardState KeyboardState;
+        public MouseState MouseState;
+        public GamePadState GamePadState;
+
         public GameState(MyGame game, ContentManager content)
             : base(game, content)
         {
@@ -45,7 +49,7 @@ namespace RocketJumper.Classes.States
         {
             Map = new Map(MapFilePath, content);
 
-            camera = new Camera(this.Map.Width * this.Map.TileWidth);
+            camera = new Camera(Map.WidthInPixels);
 
             // PLAYER
             Dictionary<string, Animation_s> playerAnimationDict = new()
@@ -57,7 +61,8 @@ namespace RocketJumper.Classes.States
 
             // Load Player
             Player = new Player(playerSprite);
-            GUIRenderer = new GameUI(Player) {
+            GUIRenderer = new GameUI(Player)
+            {
                 TimerFont = game.Font,
                 AmmoTexture = content.Load<Texture2D>("UI/Ammo")
             };
@@ -78,10 +83,19 @@ namespace RocketJumper.Classes.States
                 if (sprite.Name == "Turret")
                     Turrets.Add(new Turret(sprite, this));
 
+            // screen sizes
+            MyGame.VirtualWidth = Map.WidthInPixels;
+            MyGame.VirtualHeight = Map.HeightInPixels;
         }
 
         public override void Update(GameTime gameTime)
         {
+            GetInputs();
+
+            // handle state inputs
+            if (KeyboardState.IsKeyDown(Keys.Escape))
+                PauseGame();
+
             Player.Update(gameTime);
             UpdateSprites(gameTime);
             camera.Follow(this.Player.PlayerSprite);
@@ -160,6 +174,24 @@ namespace RocketJumper.Classes.States
             // draw items
             foreach (Sprite item in ItemSprites)
                 item.Draw(gameTime, spriteBatch);
+        }
+
+        private void PauseGame()
+        {
+            IsPaused = true;
+            PauseState pauseState = new PauseState(game, content, this);
+
+            // set background to last frame
+            // pauseState.Background = game.GetFrame();
+
+            game.ChangeState(pauseState);
+        }
+
+        private void GetInputs()
+        {
+            KeyboardState = Keyboard.GetState();
+            MouseState = Mouse.GetState();
+            GamePadState = GamePad.GetState(PlayerIndex.One);
         }
 
         public void Dispose()

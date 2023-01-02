@@ -7,34 +7,36 @@ using RocketJumper.Classes.Controls;
 
 namespace RocketJumper.Classes.States
 {
-    public class MenuState : State
+    public class PauseState : State
     {
         private List<Component> components;
 
-        private List<Component> mainMenuComponents;
+        private List<Component> pauseComponents;
         private List<Component> optionsComponents;
 
-        private Texture2D background;
+        public Texture2D Background;
 
-        public MenuState(MyGame game, ContentManager content)
-            : base(game, content)
+        GameState gameState;
+
+        public PauseState(MyGame game, ContentManager content, GameState gameState) : base(game, content)
         {
+            this.gameState = gameState;
         }
 
         public override void LoadContent()
         {
             var buttonFont = game.Font;
 
-            mainMenuComponents = new List<Component>();
-            mainMenuComponents.Add(
+            pauseComponents = new List<Component>();
+            pauseComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
                 Position = new Vector2(MyGame.ActualWidth / 2, 100),
-                Text = "Play",
-                Click = new EventHandler(Button_Play_Clicked)
+                Text = "Resume",
+                Click = new EventHandler(Button_Resume_Clicked)
             });
 
-            mainMenuComponents.Add(
+            pauseComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
                 Position = new Vector2(MyGame.ActualWidth / 2, 200),
@@ -42,24 +44,15 @@ namespace RocketJumper.Classes.States
                 Click = new EventHandler(Button_Options_Clicked)
             });
 
-            mainMenuComponents.Add(
+            pauseComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
                 Position = new Vector2(MyGame.ActualWidth / 2, 300),
-                Text = "Exit",
-                Click = new EventHandler(Button_Exit_Clicked)
+                Text = "Quit",
+                Click = new EventHandler(Button_Quit_Clicked)
             });
 
-            components = mainMenuComponents;
-
-            optionsComponents = new List<Component>();
-            optionsComponents.Add(
-            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
-            {
-                Position = new Vector2(MyGame.ActualWidth / 2, 100),
-                Text = "Back",
-                Click = new EventHandler(Button_Options_Back_Clicked)
-            });
+            components = pauseComponents;
         }
 
         public override void Update(GameTime gameTime)
@@ -72,6 +65,7 @@ namespace RocketJumper.Classes.States
         {
             spriteBatch.Begin();
 
+            // spriteBatch.Draw(Background, new Rectangle(0, 0, MyGame.VirtualWidth, MyGame.VirtualHeight), Color.White);
             foreach (var component in components)
                 component.Draw(gameTime, spriteBatch);
 
@@ -83,24 +77,18 @@ namespace RocketJumper.Classes.States
         * Button Events
         */
 
-        private void Button_Play_Clicked(object sender, EventArgs e)
+        private void Button_Resume_Clicked(object sender, EventArgs e)
         {
-            game.ChangeState(new GameState(game, content));
+            game.ChangeState(gameState);
         }
 
         private void Button_Options_Clicked(object sender, EventArgs e)
         {
-            components = optionsComponents;
         }
 
-        private void Button_Exit_Clicked(object sender, EventArgs e)
+        private void Button_Quit_Clicked(object sender, EventArgs e)
         {
-            game.Exit();
-        }
-
-        private void Button_Options_Back_Clicked(object sender, EventArgs e)
-        {
-            components = mainMenuComponents;
+            game.ChangeState(new MenuState(game, content));
         }
     }
 }

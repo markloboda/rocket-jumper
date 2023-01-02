@@ -39,11 +39,6 @@ namespace RocketJumper.Classes
             }
         }
 
-        // inputs
-        KeyboardState keyboardState;
-        MouseState mouseState;
-        GamePadState gamePadState;
-
         // other
         public const float PlayerSizeScale = 2.5f;
 
@@ -126,18 +121,10 @@ namespace RocketJumper.Classes
 
         private void HandleInputs()
         {
-            GetInputs();
-
-            // gamepad input
-
-            //
-            // keyboard and mouse input
-            //
-
             // basic moving
-            if (keyboardState.IsKeyDown(Keys.A) || keyboardState.IsKeyDown(Keys.Left))
+            if (GameState.KeyboardState.IsKeyDown(Keys.A) || GameState.KeyboardState.IsKeyDown(Keys.Left))
                 inputMovement = -1.0f;
-            else if (keyboardState.IsKeyDown(Keys.D) || keyboardState.IsKeyDown(Keys.Right))
+            else if (GameState.KeyboardState.IsKeyDown(Keys.D) || GameState.KeyboardState.IsKeyDown(Keys.Right))
                 inputMovement = 1.0f;
             else
                 inputMovement = 0.0f;
@@ -145,7 +132,7 @@ namespace RocketJumper.Classes
             // bazooka
             if (HasBazooka)
             {
-                Vector2 mousePosition = mouseState.Position.ToVector2();
+                Vector2 mousePosition = GameState.MouseState.Position.ToVector2();
                 Vector2 playerPosition = PlayerSprite.Physics.GetGlobalCenter();
                 Vector2 direction = mousePosition - playerPosition;
 
@@ -163,7 +150,7 @@ namespace RocketJumper.Classes
                     Bazooka.Effects = SpriteEffects.None;
 
                 // shooting
-                if (AmmoCount > 0 && FireTimer <= 0 && mouseState.LeftButton == ButtonState.Pressed)
+                if (AmmoCount > 0 && FireTimer <= 0 && GameState.MouseState.LeftButton == ButtonState.Pressed)
                 {
                     Rocket rocket = new Rocket(ShootingPosition, direction, GameState);
                     rocket.RocketSprite.Physics.Origin = new Vector2(rocket.RocketSprite.Physics.Width / 2, rocket.RocketSprite.Physics.Height / 2);
@@ -198,13 +185,6 @@ namespace RocketJumper.Classes
             GameState.ItemSprites.Remove(item);
             Items.Add(item);
             PlayerSprite.AddChild(item);
-        }
-
-        private void GetInputs()
-        {
-            keyboardState = Keyboard.GetState();
-            mouseState = Mouse.GetState();
-            gamePadState = GamePad.GetState(PlayerIndex.One);
         }
     }
 }

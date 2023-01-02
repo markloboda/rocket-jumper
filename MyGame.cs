@@ -20,10 +20,10 @@ namespace RocketJumper
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-
-        public static int ScreenWidth;
-        public static int ScreenHeight;
-
+        public static int VirtualWidth;
+        public static int VirtualHeight;
+        public static int ActualWidth;
+        public static int ActualHeight;
 
         public MyGame()
         {
@@ -36,8 +36,12 @@ namespace RocketJumper
             IsMouseVisible = true;
 
             // screen properties
-            ScreenWidth = graphics.PreferredBackBufferWidth;
-            ScreenHeight = graphics.PreferredBackBufferHeight;
+            graphics.PreferredBackBufferWidth = 1600;
+            graphics.PreferredBackBufferHeight = 900;
+            graphics.ApplyChanges();
+
+            ActualWidth = graphics.PreferredBackBufferWidth;
+            ActualHeight = graphics.PreferredBackBufferHeight;
 
             base.Initialize();
         }
@@ -58,7 +62,8 @@ namespace RocketJumper
             if (nextState != null)
             {
                 currentState = nextState;
-                currentState.LoadContent();
+                if (!nextState.IsPaused)
+                    currentState.LoadContent();
                 nextState = null;
             }
 
@@ -77,6 +82,15 @@ namespace RocketJumper
         public void ChangeState(State state)
         {
             nextState = state;
+        }
+
+        public Texture2D GetFrame()
+        {
+            Texture2D texture = new Texture2D(GraphicsDevice, ActualWidth, ActualHeight);
+            Color[] data = new Color[ActualWidth * ActualHeight];
+            GraphicsDevice.GetBackBufferData(data);
+            texture.SetData(data);
+            return texture;
         }
     }
 }

@@ -42,8 +42,8 @@ namespace RocketJumper.Classes
             spriteBatch.DrawString(
                 spriteFont: TimerFont,
                 text: timerString,
-                position: new Vector2(MyGame.ScreenWidth / 2,
-                MyGame.ScreenHeight - 5),
+                position: new Vector2(MyGame.ActualWidth / 2,
+                MyGame.ActualHeight - 5),
                 color: Color.Wheat,
                 rotation: 0,
                 origin: new Vector2(timerSize.X / 2, timerSize.Y),
@@ -58,7 +58,7 @@ namespace RocketJumper.Classes
                 // bottom right
                 spriteBatch.Draw(
                     texture: AmmoTexture,
-                    position: new Vector2(MyGame.ScreenWidth - 5 - i * 20, MyGame.ScreenHeight - 5),
+                    position: new Vector2(MyGame.ActualWidth - 5 - i * 20, MyGame.ActualHeight - 5),
                     sourceRectangle: null,
                     color: Color.White,
                     rotation: 10,

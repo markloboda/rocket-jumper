@@ -27,6 +27,11 @@ namespace RocketJumper.Classes.MapData
             get { return Width * TileWidth; }
         }
 
+        public int HeightInPixels
+        {
+            get { return Height * TileHeight; }
+        }
+
         public Map(string filePath, ContentManager content)
         {
             MapPath = filePath;

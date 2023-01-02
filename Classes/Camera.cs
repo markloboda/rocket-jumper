@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using RocketJumper.Classes.States;
 
 namespace RocketJumper.Classes
 {
@@ -6,18 +7,17 @@ namespace RocketJumper.Classes
     {
 
         public Matrix Transform { get; private set; }
+        public Matrix Scale { get; private set; }
 
         public Camera(int levelWidth)
         {
-            // scale the camera to the level width
-            Transform = Matrix.CreateScale(new Vector3(levelWidth / MyGame.ScreenWidth, 1, 0));
         }
 
         public void Follow(Sprite targetSprite)
         {
             Matrix offset = Matrix.CreateTranslation(
                 0,
-                MyGame.ScreenHeight / 2,
+                MyGame.VirtualHeight / 2,
                 0);
 
             Matrix position = Matrix.CreateTranslation(
@@ -25,6 +25,15 @@ namespace RocketJumper.Classes
                 -targetSprite.Physics.Position.Y - (targetSprite.Physics.Height / 2),
                 0);
 
+
+            var scaleAmount = (float)MyGame.ActualWidth / MyGame.VirtualWidth;
+
+            Matrix scale = Matrix.CreateScale(
+                scaleAmount,
+                scaleAmount,
+                1.0f);
+
+            // Transform = position * offset * scale;
             Transform = position * offset;
         }
     }
