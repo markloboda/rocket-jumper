@@ -33,7 +33,7 @@ namespace RocketJumper.Classes.Controls
             }
         }
 
-        public Vector2 Position { get; set; }
+        public Vector2 Position;
 
         public Rectangle Bounds
         {

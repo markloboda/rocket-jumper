@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -30,12 +31,16 @@ namespace RocketJumper.Classes.States
         // content
         public Animation_s RocketAnimation;
 
+        public Dictionary<string, SoundEffect> SoundEffects = new() ;
+
         public List<Sprite> ItemSprites = new();
         public List<Sprite> Sprites = new();
         public List<Turret> Turrets = new();
-
+        
+        // camera
         private Camera camera;
 
+        // inputs
         public KeyboardState KeyboardState;
         public MouseState MouseState;
         public GamePadState GamePadState;
@@ -69,6 +74,8 @@ namespace RocketJumper.Classes.States
 
             // ROCKETS
             RocketAnimation = new Animation_s(content.Load<Texture2D>("Sprites/Rocket"), 5, 0.2f);
+            SoundEffects["woosh"] = content.Load<SoundEffect>("Audio/woosh");
+            SoundEffects["explosion"] = content.Load<SoundEffect>("Audio/explosion");
 
             // load all items and mapObjects
             foreach (Layer layer in Map.Layers)

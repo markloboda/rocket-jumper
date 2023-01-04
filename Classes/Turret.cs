@@ -8,7 +8,7 @@ namespace RocketJumper.Classes
     public class Turret
     {
         public Sprite baseSprite;
-        private GameState level;
+        private GameState gameState;
         private Sprite shootingSprite;
 
         public Vector2 ShootingPosition;
@@ -23,14 +23,14 @@ namespace RocketJumper.Classes
         public Turret(Sprite baseSprite, GameState level)
         {
             this.baseSprite = baseSprite;
-            this.level = level;
+            this.gameState = level;
 
             SetTurretTop(baseSprite.Children[0]);
         }
 
         public void Update(GameTime gameTime)
         {
-            AimAt(level.Player.PlayerSprite.Physics.GetGlobalCenter());
+            AimAt(gameState.Player.PlayerSprite.Physics.GetGlobalCenter());
             if (!hasLineOfSightNow)
                 return;
 
@@ -38,8 +38,11 @@ namespace RocketJumper.Classes
             fireTimer -= gameTime.ElapsedGameTime.Milliseconds;
             if (fireTimer <= 0)
             {
-                level.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, level, level.Player.PlayerSprite, hitsPlayer: true));
+                gameState.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, gameState, gameState.Player.PlayerSprite, hitsPlayer: true));
                 fireTimer = fireRate;
+
+                // play sound
+                gameState.SoundEffects["woosh"].CreateInstance().Play();
             }
         }
 
@@ -67,7 +70,7 @@ namespace RocketJumper.Classes
             float distance = distanceVec2.Length();
 
             // check if ray intersects with tile layer
-            foreach (Layer layer in level.Map.Layers)
+            foreach (Layer layer in gameState.Map.Layers)
             {
                 // skip uncollidable layers
                 if (!layer.Collidable)
@@ -76,12 +79,12 @@ namespace RocketJumper.Classes
                 // check on each point of the ray if it intersects with a tile
                 Vector3 point;
                 int i = 0;
-                while (i * level.Map.TileHeight <= distance)
+                while (i * gameState.Map.TileHeight <= distance)
                 {
-                    point = ray.Position + ray.Direction * i * level.Map.TileHeight;
+                    point = ray.Position + ray.Direction * i * gameState.Map.TileHeight;
                     // get tile at point
-                    int tileX = (int)(point.X / level.Map.TileWidth);
-                    int tileY = (int)(point.Y / level.Map.TileHeight);
+                    int tileX = (int)(point.X / gameState.Map.TileWidth);
+                    int tileY = (int)(point.Y / gameState.Map.TileHeight);
 
                     // check if point is inside tile
                     if (tileX >= 0 && tileX < layer.Width && tileY >= 0 && tileY < layer.Height)

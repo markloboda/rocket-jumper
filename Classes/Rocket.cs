@@ -89,6 +89,9 @@ namespace RocketJumper.Classes
             // check if player is hit
             if (HitsPlayer && RocketSprite.CollidesWith(gameState.Player.PlayerSprite))
                 Collided = true;
+
+            if (Collided)
+                gameState.SoundEffects["explosion"].CreateInstance().Play();
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)

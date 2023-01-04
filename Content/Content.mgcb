@@ -25,6 +25,24 @@
 /processorParam:TextureFormat=Color
 /build:../../art/items/Turret.png;Sprites/Turret.png
 
+#begin Audio/explosion.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/explosion.mp3
+
+#begin Audio/gameStart.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/gameStart.mp3
+
+#begin Audio/woosh.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/woosh.mp3
+
 #begin Fonts/TimerFont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor

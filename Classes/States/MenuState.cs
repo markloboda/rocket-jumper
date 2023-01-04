@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using RocketJumper.Classes.Controls;
@@ -14,6 +15,9 @@ namespace RocketJumper.Classes.States
         private List<Component> mainMenuComponents;
         private List<Component> optionsComponents;
 
+        // content
+        public Dictionary<string, SoundEffect> SoundEffects = new();
+
         private Texture2D background;
 
         public MenuState(MyGame game, ContentManager content)
@@ -24,6 +28,8 @@ namespace RocketJumper.Classes.States
         public override void LoadContent()
         {
             var buttonFont = game.Font;
+
+            SoundEffects["gameStart"] = content.Load<SoundEffect>("Audio/gameStart");
 
             mainMenuComponents = new List<Component>();
             mainMenuComponents.Add(
@@ -60,6 +66,13 @@ namespace RocketJumper.Classes.States
                 Text = "Back",
                 Click = new EventHandler(Button_Options_Back_Clicked)
             });
+
+
+
+
+            // optionsComponents.Add(
+            // new DropdownMenu(buttonFont, Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), new Vector2(MyGame.ActualWidth / 2, 200), new List<string> { "1", "2", "3", "4", "5" })
+            // );
         }
 
         public override void Update(GameTime gameTime)
@@ -85,6 +98,7 @@ namespace RocketJumper.Classes.States
 
         private void Button_Play_Clicked(object sender, EventArgs e)
         {
+            SoundEffects["gameStart"].Play();
             game.ChangeState(new GameState(game, content));
         }
 

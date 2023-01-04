@@ -157,6 +157,9 @@ namespace RocketJumper.Classes
                     RocketList.Add(rocket);
                     FireTimer = FireRate;
                     AmmoCount--;
+
+                    // play sound
+                    GameState.SoundEffects["woosh"].CreateInstance().Play();
                 }
             }
         }
