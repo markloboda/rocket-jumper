@@ -50,11 +50,11 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/TimerFont.spritefont
 
+#begin Levels/main_map.json
+/copy:Levels/main_map.json
+
 #begin Levels/test-map-2.json
 /copy:Levels/test-map-2.json
-
-#begin Levels/test-map.json
-/copy:Levels/test-map.json
 
 #begin Sprites/Bazooka.png
 /importer:TextureImporter

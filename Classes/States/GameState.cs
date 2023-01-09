@@ -15,14 +15,14 @@ namespace RocketJumper.Classes.States
     public class GameState : State
     {
         // const
-        public const string MapFilePath = "Content/Levels/test-map-2.json";
+        public const string MapFilePath = "Content/Levels/main_map.json";
         public const float PlayerScale = 2.5f;
 
         // camera
         public Matrix CameraTransform;
 
         // vars
-        private Vector2 start;
+        public Vector2 start;
 
         public Map Map;
         public Player Player;
@@ -54,7 +54,6 @@ namespace RocketJumper.Classes.States
         {
             Map = new Map(MapFilePath, content);
 
-            camera = new Camera(Map.WidthInPixels);
 
             // PLAYER
             Dictionary<string, Animation_s> playerAnimationDict = new()
@@ -63,6 +62,7 @@ namespace RocketJumper.Classes.States
                 ["run"] = new Animation_s(content.Load<Texture2D>("Sprites/Player/Run"), 4, 0.2f)
             };
             AnimatedSprite playerSprite = new AnimatedSprite(playerAnimationDict, start, this, "idle", PlayerScale, true, true);
+            camera = new Camera();
 
             // Load Player
             Player = new Player(playerSprite);

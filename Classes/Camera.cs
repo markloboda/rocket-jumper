@@ -9,7 +9,7 @@ namespace RocketJumper.Classes
         public Matrix Transform { get; private set; }
         public Matrix Scale { get; private set; }
 
-        public Camera(int levelWidth)
+        public Camera()
         {
         }
 
@@ -17,7 +17,7 @@ namespace RocketJumper.Classes
         {
             Matrix offset = Matrix.CreateTranslation(
                 0,
-                MyGame.VirtualHeight / 2,
+                MyGame.ActualHeight / 2,
                 0);
 
             Matrix position = Matrix.CreateTranslation(

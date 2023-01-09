@@ -47,7 +47,16 @@ namespace RocketJumper.Classes.MapData
             TileSets = new List<TileSet>();
             foreach (dynamic tileSetJson in json.tilesets)
             {
-                Texture2D tileSetTexture = content.Load<Texture2D>(tileSetJson["image"].ToString());
+                string tileSet = tileSetJson["image"].ToString();
+                // check if .png
+                if (tileSet.Contains(".png"))
+                {
+                    // remove .png
+                    tileSet = tileSet.Substring(0, tileSet.Length - 4);
+                }
+
+
+                Texture2D tileSetTexture = content.Load<Texture2D>(tileSet);
                 TileSets.Add(new TileSet(tileSetJson, tileSetTexture));
             }
 

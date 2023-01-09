@@ -47,7 +47,7 @@
          "objects":[
                 {
                  "class":"map-object",
-                 "gid":8,
+                 "gid":9,
                  "height":23,
                  "id":10,
                  "name":"TurretTop",
@@ -65,7 +65,7 @@
                 }, 
                 {
                  "class":"map-object",
-                 "gid":7,
+                 "gid":8,
                  "height":23,
                  "id":11,
                  "name":"Turret",
@@ -89,7 +89,7 @@
          "objects":[
                 {
                  "class":"item",
-                 "gid":6,
+                 "gid":7,
                  "height":32,
                  "id":1,
                  "name":"Bazooka",
@@ -129,21 +129,21 @@
  "tileheight":32,
  "tilesets":[
         {
-         "columns":5,
+         "columns":6,
          "firstgid":1,
          "image":"..\/Tiles\/basicTileset.png",
          "imageheight":32,
-         "imagewidth":160,
+         "imagewidth":192,
          "margin":0,
          "name":"basicTileset",
          "spacing":0,
-         "tilecount":5,
+         "tilecount":6,
          "tileheight":32,
          "tilewidth":32
         }, 
         {
          "columns":1,
-         "firstgid":6,
+         "firstgid":7,
          "image":"..\/Sprites\/Bazooka.png",
          "imageheight":32,
          "imagewidth":60,
@@ -156,7 +156,7 @@
         }, 
         {
          "columns":2,
-         "firstgid":7,
+         "firstgid":8,
          "image":"..\/Sprites\/Turret.png",
          "imageheight":23,
          "imagewidth":72,
