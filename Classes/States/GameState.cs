@@ -1,8 +1,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Reflection.Metadata;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -24,6 +24,8 @@ namespace RocketJumper.Classes.States
         public Map Map;
         public Player Player;
         public GameUI GUIRenderer;
+        public Stopwatch stopWatch;
+
 
         // content
         public Animation_s RocketAnimation;
@@ -51,7 +53,8 @@ namespace RocketJumper.Classes.States
         public override void LoadContent()
         {
             Map = new Map(MapFilePath, content, this);
-
+            
+            stopWatch = new Stopwatch();
 
             // PLAYER
             Dictionary<string, Animation_s> playerAnimationDict = new()
@@ -64,7 +67,7 @@ namespace RocketJumper.Classes.States
 
             // Load Player
             Player = new Player(playerSprite, this);
-            GUIRenderer = new GameUI(Player)
+            GUIRenderer = new GameUI(Player, this)
             {
                 TimerFont = game.Font,
                 AmmoTexture = content.Load<Texture2D>("UI/Ammo")
@@ -93,6 +96,10 @@ namespace RocketJumper.Classes.States
             // screen sizes
             MyGame.VirtualWidth = Map.WidthInPixels;
             MyGame.VirtualHeight = Map.HeightInPixels;
+
+
+
+            stopWatch.Start();
         }
 
         public override void Update(GameTime gameTime)
@@ -145,9 +152,10 @@ namespace RocketJumper.Classes.States
 
         public void Finished()
         {
-            // save the score
-            
-
+            stopWatch.Stop();
+            // save the time
+            game.SaveTime(MapFilePath, stopWatch.ElapsedMilliseconds);
+            // go to menu
             game.ChangeState(new MenuState(game, content));
         }
 

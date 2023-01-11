@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RocketJumper.Classes.States;
 using BigInteger = System.Numerics.BigInteger;
 
 namespace RocketJumper.Classes
@@ -7,36 +9,36 @@ namespace RocketJumper.Classes
     public class GameUI
     {
         private Player player;
+        private GameState gameState;
 
         // content
         public SpriteFont TimerFont;
         public Texture2D AmmoTexture;
 
-        // vars
-        BigInteger Timer;
+        private long timeMilliseconds;
 
-        public GameUI(Player player, int timer = 0)
+
+        public GameUI(Player player, GameState gameState)
         {
             this.player = player;
-
-            Timer = timer;
+            this.gameState = gameState;
         }
 
         public void Update(GameTime gameTime)
         {
-            Timer += gameTime.ElapsedGameTime.Milliseconds;
+            timeMilliseconds = gameState.stopWatch.ElapsedMilliseconds;
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             // draw timer in hours:minutes:seconds:milliseconds on the bottom center of the window
             string timerString;
-            if (Timer > 1000 * 60 * 60)
-                timerString = $"{Timer / 1000 / 60 / 60}:{Timer / 1000 / 60}:{Timer / 1000}:{Timer % 1000}";
-            else if (Timer > 1000 * 60)
-                timerString = $"{Timer / 1000 / 60}:{Timer / 1000}:{Timer % 1000}";
+            if (timeMilliseconds > 1000 * 60 * 60)
+                timerString = $"{timeMilliseconds / 1000 / 60 / 60}:{timeMilliseconds / 1000 / 60}:{timeMilliseconds / 1000}:{timeMilliseconds % 1000}";
+            else if (timeMilliseconds > 1000 * 60)
+                timerString = $"{timeMilliseconds / 1000 / 60}:{timeMilliseconds / 1000}:{timeMilliseconds % 1000}";
             else
-                timerString = $"{Timer / 1000}:{Timer % 1000}";
+                timerString = $"{timeMilliseconds / 1000}:{timeMilliseconds % 1000}";
 
             Vector2 timerSize = TimerFont.MeasureString(timerString);
             spriteBatch.DrawString(

@@ -1,15 +1,15 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.IO;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using RocketJumper.Classes;
-using RocketJumper.Classes.States;
 using Newtonsoft.Json.Linq;
-using System.IO;
+using RocketJumper.Classes.States;
 
 namespace RocketJumper
 {
     public class MyGame : Game
     {
+        string USERNAME = "mark";
+
         private State currentState;
         private State nextState;
 
@@ -91,6 +91,26 @@ namespace RocketJumper
             GraphicsDevice.GetBackBufferData(data);
             texture.SetData(data);
             return texture;
+        }
+
+        public void SaveTime(string mapPath, long milliseconds)
+        {
+            // save time to high_scores.json
+            dynamic json = JObject.Parse(File.ReadAllText("Content/high_scores.json"));
+
+            // make jobject to save time
+            JObject save = new JObject();
+            save["time"] = milliseconds;
+            save["date"] = System.DateTime.Now.ToString("dd/MM/yyyy");
+            save["map"] = mapPath;
+
+            if (json[USERNAME] == null)
+            {
+                json[USERNAME] = new JArray();
+            }
+            json[USERNAME].Add(save);
+
+            File.WriteAllText("Content/high_scores.json", json.ToString());
         }
     }
 }
