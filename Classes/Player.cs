@@ -10,6 +10,7 @@ namespace RocketJumper.Classes
 {
     public class Player
     {
+        private GameState gameState;
         public AnimatedSprite PlayerSprite;
 
         // movement vars
@@ -44,8 +45,9 @@ namespace RocketJumper.Classes
         // other
         public const float PlayerSizeScale = 2.5f;
 
-        public Player(AnimatedSprite playerSprite)
+        public Player(AnimatedSprite playerSprite, GameState gameState)
         {
+            this.gameState = gameState;
             PlayerSprite = playerSprite;
             playerSprite.Physics.IsBoundingBoxVisible = true;
         }
@@ -135,14 +137,8 @@ namespace RocketJumper.Classes
             if (HasBazooka)
             {
                 Vector2 mousePosition = GameState.MouseState.Position.ToVector2();
-                Vector2 playerPosition = PlayerSprite.Physics.GetGlobalCenter();
+                Vector2 playerPosition = gameState.GetScreenPosition(PlayerSprite.Physics.GetGlobalCenter());
                 Vector2 direction = mousePosition - playerPosition;
-
-                // take into account the transformation of the camera
-                direction = Vector2.Transform(direction, Matrix.Invert(GameState.CameraTransform));
-
-                // draw direction vector
-
 
                 direction.Normalize();
 

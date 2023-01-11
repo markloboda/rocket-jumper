@@ -292,7 +292,6 @@ namespace RocketJumper.Classes
         {
             Position += move;
         }
-
         public Vector2 GetGlobalCenter()
         {
             return Position + GetLocalCenter();

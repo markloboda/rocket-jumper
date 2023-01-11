@@ -15,54 +15,44 @@ namespace RocketJumper.Classes
 
         public void Follow(Sprite targetSprite)
         {
-            // make target sprite center
-            Matrix scaleOffset = Matrix.CreateTranslation(
-                -targetSprite.Physics.Position.X,
-                -targetSprite.Physics.Position.Y,
+            Matrix position = Matrix.CreateTranslation(
+                0,
+                -targetSprite.Physics.Position.Y - (targetSprite.Physics.Height / 2),
                 0);
 
-            // scale to fit screen
-            var scaleAmount = (float)MyGame.ActualWidth / MyGame.VirtualWidth;
-
-            Matrix scale = Matrix.CreateScale(
-                scaleAmount,
-                scaleAmount,
-                1.0f);
-
-            // offset to center vertically
             Matrix offset = Matrix.CreateTranslation(
                 0,
                 MyGame.ActualHeight / 2,
                 0);
 
-            Transform = scaleOffset * scale * offset;
+            float scaleAmount = (float)MyGame.ActualWidth / MyGame.VirtualWidth;
 
+            Matrix scale = Matrix.CreateScale(
+                scaleAmount,
+                scaleAmount,
+                1);
 
+            Transform = position * scale * offset;
+        }
 
+        public Rectangle GetVisibleArea()
+        {
+            float scaleAmount = (float)MyGame.ActualWidth / MyGame.VirtualWidth;
 
+            Rectangle visibleArea = new(
+                0,
+                (int)(-MyGame.ActualHeight / (2 * scaleAmount)),
+                MyGame.VirtualWidth,
+                MyGame.VirtualHeight);
 
+            return visibleArea;
+        }
 
+        public Vector2 GetScreenPosition(Vector2 worldPosition)
+        {
+            Vector2 screenPosition = Vector2.Transform(worldPosition, Transform);
 
-            // Matrix offset = Matrix.CreateTranslation(
-            //     0,
-            //     MyGame.ActualHeight / 2,
-            //     0);
-
-            // Matrix position = Matrix.CreateTranslation(
-            //     0,
-            //     -targetSprite.Physics.Position.Y - (targetSprite.Physics.Height / 2),
-            //     0);
-
-
-            // var scaleAmount = (float)MyGame.ActualWidth / MyGame.VirtualWidth;
-
-            // Matrix scale = Matrix.CreateScale(
-            //     scaleAmount,
-            //     scaleAmount,
-            //     1.0f);
-
-            // // Transform = position * scale * offset;
-            // Transform = position * scale * offset;
+            return screenPosition;
         }
     }
 }

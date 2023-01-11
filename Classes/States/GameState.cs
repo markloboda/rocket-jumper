@@ -50,7 +50,7 @@ namespace RocketJumper.Classes.States
 
         public override void LoadContent()
         {
-            Map = new Map(MapFilePath, content);
+            Map = new Map(MapFilePath, content, this);
 
 
             // PLAYER
@@ -63,7 +63,7 @@ namespace RocketJumper.Classes.States
             camera = new Camera();
 
             // Load Player
-            Player = new Player(playerSprite);
+            Player = new Player(playerSprite, this);
             GUIRenderer = new GameUI(Player)
             {
                 TimerFont = game.Font,
@@ -138,8 +138,16 @@ namespace RocketJumper.Classes.States
             GUIRenderer = guiRenderer;
         }
 
+        public Vector2 GetScreenPosition(Vector2 position)
+        {
+            return Vector2.Transform(position, camera.Transform);
+        }
+
         public void Finished()
         {
+            // save the score
+            
+
             game.ChangeState(new MenuState(game, content));
         }
 

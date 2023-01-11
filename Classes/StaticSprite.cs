@@ -52,7 +52,7 @@ namespace RocketJumper.Classes
 
         }
 
-        public StaticSprite(TileSet tileSet, int gid, int id, Vector2 position, GameState level, Vector2 spriteSize, string name = default, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, bool moveOnAttach = false, Vector2 attachmentOrigin = default, int parentId = -1)
+        public StaticSprite(TileSet tileSet, int gid, int id, Vector2 position, GameState gameState, Vector2 spriteSize, string name = default, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, bool moveOnAttach = false, Vector2 attachmentOrigin = default, int parentId = -1)
         {
             TileSet = tileSet;
             Name = name;
@@ -67,7 +67,7 @@ namespace RocketJumper.Classes
             AttachmentOrigin = attachmentOrigin;
             MoveOnAttach = moveOnAttach;
 
-            Physics = new Physics(position, spriteSize, level, gravityEnabled, rotation);
+            Physics = new Physics(position, spriteSize, gameState, gravityEnabled, rotation);
         }
 
         public void Update(GameTime gameTime)

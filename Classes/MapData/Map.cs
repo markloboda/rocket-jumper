@@ -35,9 +35,10 @@ namespace RocketJumper.Classes.MapData
             get { return Height * TileHeight; }
         }
 
-        public Map(string filePath, ContentManager content)
+        public Map(string filePath, ContentManager content, GameState gameState)
         {
             MapPath = filePath;
+            this.gameState = gameState;
 
             dynamic json = JObject.Parse(File.ReadAllText(MapPath));
 

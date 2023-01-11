@@ -49,7 +49,7 @@ namespace RocketJumper.Classes.MapData
                 gid: gid,
                 id: id,
                 position: position,
-                level: level,
+                gameState: level,
                 spriteSize: size,
                 name: name,
                 attachmentOffset: attachOffset,
