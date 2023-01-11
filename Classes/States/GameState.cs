@@ -15,7 +15,7 @@ namespace RocketJumper.Classes.States
     public class GameState : State
     {
         // const
-        public const string MapFilePath = "Content/Levels/main_map.json";
+        public const string MapFilePath = "Content/Levels/main_map-tiled.json";
         public const float PlayerScale = 2.5f;
 
         // camera
@@ -31,12 +31,12 @@ namespace RocketJumper.Classes.States
         // content
         public Animation_s RocketAnimation;
 
-        public Dictionary<string, SoundEffect> SoundEffects = new() ;
+        public Dictionary<string, SoundEffect> SoundEffects = new();
 
         public List<Sprite> ItemSprites = new();
         public List<Sprite> Sprites = new();
         public List<Turret> Turrets = new();
-        
+
         // camera
         private Camera camera;
 
@@ -81,7 +81,7 @@ namespace RocketJumper.Classes.States
             foreach (Layer layer in Map.Layers)
                 if (layer.Type == "objectgroup")
                     if (layer.Class == "items")
-                        ItemSprites = layer.ItemSprites.Values.ToList();
+                        ItemSprites = layer.Sprites.Values.ToList();
                     else if (layer.Class == "map-objects")
                         Sprites = layer.Sprites.Values.ToList();
 

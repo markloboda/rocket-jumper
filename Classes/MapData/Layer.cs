@@ -23,7 +23,6 @@ namespace RocketJumper.Classes.MapData
         public bool Static = true;                          // is the layer static (all the tiles are non moving)
 
         // object layer specific
-        public Dictionary<int, Sprite> ItemSprites = new Dictionary<int, Sprite>();
         public Dictionary<int, Sprite> Sprites = new Dictionary<int, Sprite>();
 
         public Layer(JObject layerJson, States.GameState gameState, Map map)
@@ -57,41 +56,26 @@ namespace RocketJumper.Classes.MapData
             }
             else if (Type == "objectgroup")
             {
-                if (Class == "items")
+                JArray objects = layerJson["objects"].ToObject<JArray>();
+                for (int i = 0; i < objects.Count; i++)
                 {
-                    JArray objects = layerJson["objects"].ToObject<JArray>();
-                    for (int i = 0; i < objects.Count; i++)
-                    {
-                        Sprite sprite = JsonReader.GetSpriteFromJson(objects[i].ToObject<JObject>(), gameState, map.TileSets);
-                        ItemSprites.Add(sprite.GID, sprite);
-                    }
-
-                    // add children to parents
-                    foreach (Sprite sprite in ItemSprites.Values)
-                    {
-                        if (sprite.ParentId != -1)
-                        {
-                            ItemSprites[sprite.ParentId] = sprite;
-                            ItemSprites.Remove(sprite.GID);
-                        }
-                    }
-                }
-                else if (Class == "map-objects")
-                {
-                    JArray objects = layerJson["objects"].ToObject<JArray>();
-                    for (int i = 0; i < objects.Count; i++)
-                    {
-                        Sprite sprite = JsonReader.GetSpriteFromJson(objects[i].ToObject<JObject>(), gameState, map.TileSets);
+                    Sprite sprite = JsonReader.GetSpriteFromJson(objects[i].ToObject<JObject>(), gameState, map.TileSets);
+                    if (Class == "items")
                         Sprites.Add(sprite.ID, sprite);
-                    }
+                    else if (Class == "map-objects")
+                        Sprites.Add(sprite.ID, sprite);
+                    else if (Class == "map-controls")
+                        Sprites.Add(sprite.ID, sprite);
+                }
 
-                    // add children to parents
-                    foreach (Sprite sprite in Sprites.Values)
-                        if (sprite.ParentId != -1)
-                        {
-                            Sprites[sprite.ParentId].AddChild(sprite);
-                            Sprites.Remove(sprite.ID);
-                        }
+                // add children to parents
+                foreach (Sprite sprite in Sprites.Values)
+                {
+                    if (sprite.ParentId != -1)
+                    {
+                        Sprites[sprite.ParentId].AddChild(sprite);
+                        Sprites.Remove(sprite.ID);
+                    }
                 }
             }
         }

@@ -22,6 +22,9 @@ namespace RocketJumper.Classes.MapData
         public List<TileSet> TileSets;      // Array of tile sets
         public List<Layer> Layers;          // Array of layers
 
+        public Vector2 start;
+        public Rectangle finish;
+
         public int WidthInPixels
         {
             get { return Width * TileWidth; }
@@ -54,6 +57,10 @@ namespace RocketJumper.Classes.MapData
                     // remove .png
                     tileSet = tileSet.Substring(0, tileSet.Length - 4);
                 }
+                // \/ to /
+                tileSet.Replace("\\/", "/");
+                // add content
+                tileSet = tileSet.Insert(2, "/Content");
 
 
                 Texture2D tileSetTexture = content.Load<Texture2D>(tileSet);
@@ -64,7 +71,13 @@ namespace RocketJumper.Classes.MapData
             Layers = new List<Layer>();
             foreach (dynamic layerJson in json.layers)
             {
-                Layers.Add(new Layer(layerJson, gameState, this));
+                var newLayer = new Layer(layerJson, gameState, this);
+                Layers.Add(newLayer);
+
+                if (newLayer.Class == "map-control") {
+                    // add finish
+                    
+                }
             }
         }
 

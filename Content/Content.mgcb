@@ -50,6 +50,9 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/TimerFont.spritefont
 
+#begin Levels/main_map-tiled.json
+/copy:Levels/main_map-tiled.json
+
 #begin Levels/main_map.json
 /copy:Levels/main_map.json
 
@@ -67,6 +70,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Sprites/Bazooka.png
+
+#begin Sprites/Finish.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Sprites/Finish.png
 
 #begin Sprites/Player/main-character-idle-atlas.png
 /importer:TextureImporter

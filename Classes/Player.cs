@@ -138,6 +138,10 @@ namespace RocketJumper.Classes
 
                 // take into account the transformation of the camera
                 direction = Vector2.Transform(direction, Matrix.Invert(GameState.CameraTransform));
+
+                // draw direction vector
+
+
                 direction.Normalize();
 
                 float angle = MathF.Atan2(direction.Y, direction.X);

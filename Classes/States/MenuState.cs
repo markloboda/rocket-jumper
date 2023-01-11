@@ -98,10 +98,10 @@ namespace RocketJumper.Classes.States
 
         private void Button_Play_Clicked(object sender, EventArgs e)
         {
-            SoundEffects["gameStart"].Play();
+            // SoundEffects["gameStart"].Play();
             game.ChangeState(new GameState(game, content)
             {
-                start = new Vector2(1, 287)
+                start = new Vector2(35, 2847)
             });
         }
 

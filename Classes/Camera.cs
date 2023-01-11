@@ -15,17 +15,13 @@ namespace RocketJumper.Classes
 
         public void Follow(Sprite targetSprite)
         {
-            Matrix offset = Matrix.CreateTranslation(
-                0,
-                MyGame.ActualHeight / 2,
+            // make target sprite center
+            Matrix scaleOffset = Matrix.CreateTranslation(
+                -targetSprite.Physics.Position.X,
+                -targetSprite.Physics.Position.Y,
                 0);
 
-            Matrix position = Matrix.CreateTranslation(
-                0,
-                -targetSprite.Physics.Position.Y - (targetSprite.Physics.Height / 2),
-                0);
-
-
+            // scale to fit screen
             var scaleAmount = (float)MyGame.ActualWidth / MyGame.VirtualWidth;
 
             Matrix scale = Matrix.CreateScale(
@@ -33,8 +29,40 @@ namespace RocketJumper.Classes
                 scaleAmount,
                 1.0f);
 
-            // Transform = position * offset * scale;
-            Transform = position * offset;
+            // offset to center vertically
+            Matrix offset = Matrix.CreateTranslation(
+                0,
+                MyGame.ActualHeight / 2,
+                0);
+
+            Transform = scaleOffset * scale * offset;
+
+
+
+
+
+
+
+            // Matrix offset = Matrix.CreateTranslation(
+            //     0,
+            //     MyGame.ActualHeight / 2,
+            //     0);
+
+            // Matrix position = Matrix.CreateTranslation(
+            //     0,
+            //     -targetSprite.Physics.Position.Y - (targetSprite.Physics.Height / 2),
+            //     0);
+
+
+            // var scaleAmount = (float)MyGame.ActualWidth / MyGame.VirtualWidth;
+
+            // Matrix scale = Matrix.CreateScale(
+            //     scaleAmount,
+            //     scaleAmount,
+            //     1.0f);
+
+            // // Transform = position * scale * offset;
+            // Transform = position * scale * offset;
         }
     }
 }
