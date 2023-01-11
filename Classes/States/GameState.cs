@@ -33,8 +33,9 @@ namespace RocketJumper.Classes.States
 
         public Dictionary<string, SoundEffect> SoundEffects = new();
 
+        public List<Sprite> ControlSprites = new();
         public List<Sprite> ItemSprites = new();
-        public List<Sprite> Sprites = new();
+        public List<Sprite> ObjectSprites = new();
         public List<Turret> Turrets = new();
 
         // camera
@@ -83,10 +84,12 @@ namespace RocketJumper.Classes.States
                     if (layer.Class == "items")
                         ItemSprites = layer.Sprites.Values.ToList();
                     else if (layer.Class == "map-objects")
-                        Sprites = layer.Sprites.Values.ToList();
+                        ObjectSprites = layer.Sprites.Values.ToList();
+                    else if (layer.Class == "map-controls")
+                        ControlSprites = layer.Sprites.Values.ToList();
 
             // initialize turrets
-            foreach (Sprite sprite in Sprites)
+            foreach (Sprite sprite in ObjectSprites)
                 if (sprite.Name == "Turret")
                     Turrets.Add(new Turret(sprite, this));
 
@@ -164,23 +167,26 @@ namespace RocketJumper.Classes.States
                 turret.Update(gameTime);
 
             // update sprites
-            foreach (Sprite sprite in Sprites)
+            foreach (Sprite sprite in ObjectSprites)
                 sprite.Update(gameTime);
 
-            // update all items
             foreach (Sprite item in ItemSprites)
                 item.Update(gameTime);
+
+            foreach (Sprite control in ControlSprites)
+                control.Update(gameTime);
         }
 
         private void DrawSprites(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            // draw sprites
-            foreach (Sprite mapObject in Sprites)
+            foreach (Sprite mapObject in ObjectSprites)
                 mapObject.Draw(gameTime, spriteBatch);
 
-            // draw items
             foreach (Sprite item in ItemSprites)
                 item.Draw(gameTime, spriteBatch);
+
+            foreach (Sprite control in ControlSprites)
+                control.Draw(gameTime, spriteBatch);
         }
 
         private void PauseGame()
