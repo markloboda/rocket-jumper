@@ -21,9 +21,6 @@ namespace RocketJumper.Classes.States
         // camera
         public Matrix CameraTransform;
 
-        // vars
-        public Vector2 start;
-
         public Map Map;
         public Player Player;
         public GameUI GUIRenderer;
@@ -62,7 +59,7 @@ namespace RocketJumper.Classes.States
                 ["idle"] = new Animation_s(content.Load<Texture2D>("Sprites/Player/Idle"), 5, 0.2f),
                 ["run"] = new Animation_s(content.Load<Texture2D>("Sprites/Player/Run"), 4, 0.2f)
             };
-            AnimatedSprite playerSprite = new AnimatedSprite(playerAnimationDict, start, this, "idle", PlayerScale, true, true);
+            AnimatedSprite playerSprite = new AnimatedSprite(playerAnimationDict, Map.start, this, "idle", PlayerScale, true, true);
             camera = new Camera();
 
             // Load Player
@@ -139,6 +136,11 @@ namespace RocketJumper.Classes.States
         public void AddGUIRenderer(GameUI guiRenderer)
         {
             GUIRenderer = guiRenderer;
+        }
+
+        public void Finished()
+        {
+            game.ChangeState(new MenuState(game, content));
         }
 
         private void DrawTileLayer(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)

@@ -33,8 +33,10 @@ namespace RocketJumper.Classes
         public int ReloadTimer = ReloadRate;
         public int AmmoCount = 2;
         public List<Rocket> RocketList = new();
-        public Vector2 ShootingPosition {
-            get {
+        public Vector2 ShootingPosition
+        {
+            get
+            {
                 return PlayerSprite.Physics.Position + Bazooka.AttachmentOrigin + new Vector2(0, 15);
             }
         }
@@ -59,7 +61,7 @@ namespace RocketJumper.Classes
                 ReloadBazooka();
 
             HandleInputs();
-            CheckItemCollision();
+            CheckSpriteCollision();
 
             // rockets
             for (int i = 0; i < RocketList.Count; i++)
@@ -146,7 +148,7 @@ namespace RocketJumper.Classes
 
                 float angle = MathF.Atan2(direction.Y, direction.X);
                 Bazooka.Physics.Rotation = angle;
-                
+
                 // if bazooka is facing left, flip it
                 if (angle > MathF.PI / 2 || angle < -MathF.PI / 2)
                     Bazooka.Effects = SpriteEffects.FlipVertically;
@@ -168,7 +170,7 @@ namespace RocketJumper.Classes
             }
         }
 
-        private void CheckItemCollision()
+        private void CheckSpriteCollision()
         {
             foreach (Sprite item in GameState.ItemSprites)
             {
@@ -176,6 +178,17 @@ namespace RocketJumper.Classes
                 {
                     AddItemToPlayer(item);
                     break;
+                }
+            }
+
+            foreach (Sprite mapControl in GameState.ControlSprites)
+            {
+                if (mapControl.Physics.AABB.Intersects(PlayerSprite.Physics.AABB))
+                {
+                    if (mapControl.Name == "Finish")
+                    {
+                        GameState.Finished();
+                    }
                 }
             }
         }

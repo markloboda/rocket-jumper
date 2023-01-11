@@ -22,7 +22,7 @@ namespace RocketJumper.Classes.MapData
         public List<TileSet> TileSets;      // Array of tile sets
         public List<Layer> Layers;          // Array of layers
 
-        public Vector2 start;
+        public Vector2 start = new Vector2(35, 2847);
         public Rectangle finish;
 
         public int WidthInPixels
@@ -76,7 +76,11 @@ namespace RocketJumper.Classes.MapData
 
                 if (newLayer.Class == "map-control") {
                     // add finish
-                    
+                    foreach (var sprite in newLayer.Sprites.Values) {
+                        if (sprite.Name == "Finish") {
+                            finish = sprite.Physics.AABB;
+                        }
+                    }                    
                 }
             }
         }
