@@ -36,6 +36,7 @@ namespace RocketJumper.Classes.States
         public List<Sprite> ItemSprites = new();
         public List<Sprite> ObjectSprites = new();
         public List<Turret> Turrets = new();
+        private Texture2D backgroundTexture;
 
         // camera
         private Camera camera;
@@ -97,6 +98,8 @@ namespace RocketJumper.Classes.States
             MyGame.VirtualWidth = Map.WidthInPixels;
             MyGame.VirtualHeight = Map.HeightInPixels;
 
+            backgroundTexture = content.Load<Texture2D>("Background/GameBackground");
+
             stopWatch.Start();
         }
 
@@ -125,6 +128,24 @@ namespace RocketJumper.Classes.States
         {
             // game
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.Transform);
+
+            // draw background
+            float xResize = (float)Map.WidthInPixels / backgroundTexture.Width;
+
+            int y = 0;
+            while (y < Map.HeightInPixels)
+            {
+                int x = 0; 
+                int xMax = (int)Math.Ceiling((decimal)(backgroundTexture.Width * xResize));
+                int yMax = (int)Math.Ceiling((decimal)(backgroundTexture.Height * xResize));
+                while (x < Map.WidthInPixels)
+                {
+                    spriteBatch.Draw(backgroundTexture, new Rectangle(x, y, xMax, yMax), Color.White);
+                    x += xMax;
+                }
+
+                y += yMax;
+            }
 
             // Draw player
             Player.Draw(gameTime, spriteBatch);
