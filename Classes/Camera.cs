@@ -35,17 +35,17 @@ namespace RocketJumper.Classes
             Transform = position * scale * offset;
         }
 
-        public Rectangle GetVisibleArea()
+        public Rectangle GetCameraRectangle()
         {
-            float scaleAmount = (float)MyGame.ActualWidth / MyGame.VirtualWidth;
+            Vector2 cameraPosition = Vector2.Transform(Vector2.Zero, Matrix.Invert(Transform));
 
-            Rectangle visibleArea = new(
-                0,
-                (int)(-MyGame.ActualHeight / (2 * scaleAmount)),
-                MyGame.VirtualWidth,
-                MyGame.VirtualHeight);
+            Rectangle cameraRectangle = new Rectangle(
+                (int)cameraPosition.X,
+                (int)cameraPosition.Y,
+                MyGame.ActualWidth,
+                MyGame.ActualHeight);
 
-            return visibleArea;
+            return cameraRectangle;
         }
 
         public Vector2 GetScreenPosition(Vector2 worldPosition)

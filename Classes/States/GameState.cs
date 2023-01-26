@@ -18,6 +18,12 @@ namespace RocketJumper.Classes.States
         public const string MapFilePath = "Content/Levels/main_map-tiled.json";
         public const float PlayerScale = 2.5f;
 
+
+        // debug variables
+        public int TilesDrawnCount = 0;
+
+
+
         // camera
         public Matrix CameraTransform;
 
@@ -129,31 +135,37 @@ namespace RocketJumper.Classes.States
             // game
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.Transform);
 
+            // get camera view rectangle
+            Rectangle cameraRectangle = camera.GetCameraRectangle();
+
             // draw background
             float xResize = (float)Map.WidthInPixels / backgroundTexture.Width;
 
             int y = 0;
-            while (y < Map.HeightInPixels)
-            {
-                int x = 0; 
-                int xMax = (int)Math.Ceiling((decimal)(backgroundTexture.Width * xResize));
-                int yMax = (int)Math.Ceiling((decimal)(backgroundTexture.Height * xResize));
-                while (x < Map.WidthInPixels)
-                {
-                    spriteBatch.Draw(backgroundTexture, new Rectangle(x, y, xMax, yMax), Color.White);
-                    x += xMax;
-                }
+            int backgroundHeight = (int)Math.Ceiling((decimal)(backgroundTexture.Height * xResize));
+            int backgroundWidth = (int)Math.Ceiling((decimal)(backgroundTexture.Width * xResize));
+            // increment y by the height of the background texture until it is in the camera view
+            while (y < cameraRectangle.Top)
+                y += backgroundHeight;
 
-                y += yMax;
+            // draw one background texture above the camera view also
+            y -= backgroundHeight;
+
+            // draw background until it is out of the camera view
+            while (y < cameraRectangle.Bottom)
+            {
+                spriteBatch.Draw(backgroundTexture, new Rectangle(0, y, backgroundWidth, backgroundHeight), Color.White);
+                y += backgroundHeight;
             }
 
             // Draw player
             Player.Draw(gameTime, spriteBatch);
 
             // draw Layers
+            TilesDrawnCount = 0;
             foreach (Layer layer in Map.Layers)
                 if (layer.Type == "tilelayer")
-                    DrawTileLayer(gameTime, spriteBatch, layer);
+                    DrawTileLayer(gameTime, spriteBatch, layer, cameraRectangle);
 
             DrawSprites(gameTime, spriteBatch);
 
@@ -162,6 +174,7 @@ namespace RocketJumper.Classes.States
             // GUI
             spriteBatch.Begin();
             GUIRenderer.Draw(gameTime, spriteBatch);
+
             spriteBatch.End();
         }
 
@@ -184,7 +197,7 @@ namespace RocketJumper.Classes.States
             game.ChangeState(new MenuState(game, content));
         }
 
-        private void DrawTileLayer(GameTime gameTime, SpriteBatch spriteBatch, Layer layer)
+        private void DrawTileLayer(GameTime gameTime, SpriteBatch spriteBatch, Layer layer, Rectangle cameraRectangle)
         {
             for (int y = 0; y < layer.Height; y++)
             {
@@ -197,8 +210,14 @@ namespace RocketJumper.Classes.States
 
                     // find the tileset for this Tile and draw it
                     foreach (TileSet tileSet in Map.TileSets)
-                        if (tileGID >= tileSet.FirstGID)
-                            tileSet.DrawTile(tileGID, new Vector2(x * Map.TileWidth, y * Map.TileHeight), spriteBatch);
+                    {
+                        Vector2 tilePosition = new Vector2(x * Map.TileWidth, y * Map.TileHeight);
+                        if (tileGID >= tileSet.FirstGID && cameraRectangle.Top <= tilePosition.Y + Map.TileHeight && cameraRectangle.Bottom >= tilePosition.Y)
+                        {
+                            tileSet.DrawTile(tileGID, tilePosition, spriteBatch);
+                            TilesDrawnCount++;
+                        }
+                    }
                 }
             }
         }

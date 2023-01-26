@@ -17,6 +17,9 @@ namespace RocketJumper.Classes
 
         private long timeMilliseconds;
 
+        // visible components
+        public bool AmountOfTilesDrawn = true;
+
 
         public GameUI(Player player, GameState gameState)
         {
@@ -65,6 +68,23 @@ namespace RocketJumper.Classes
                     color: Color.White,
                     rotation: 10,
                     origin: Vector2.Zero,
+                    scale: 1,
+                    effects: SpriteEffects.None,
+                    layerDepth: 0);
+            }
+
+            // draw amount of tiles drawn
+            if (AmountOfTilesDrawn)
+            {
+                string amountOfTilesDrawnString = $"Tiles drawn: {gameState.TilesDrawnCount}";
+                Vector2 amountOfTilesDrawnSize = TimerFont.MeasureString(amountOfTilesDrawnString);
+                spriteBatch.DrawString(
+                    spriteFont: TimerFont,
+                    text: amountOfTilesDrawnString,
+                    position: new Vector2(5, MyGame.ActualHeight - 5),
+                    color: Color.Black,
+                    rotation: 0,
+                    origin: new Vector2(0, amountOfTilesDrawnSize.Y),
                     scale: 1,
                     effects: SpriteEffects.None,
                     layerDepth: 0);

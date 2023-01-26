@@ -43,7 +43,7 @@ namespace RocketJumper
             ActualWidth = graphics.PreferredBackBufferWidth;
             ActualHeight = graphics.PreferredBackBufferHeight;
 
-            this.Window.IsBorderless = false;
+            this.Window.IsBorderless = true;
 
             base.Initialize();
         }
