@@ -74,7 +74,7 @@ namespace RocketJumper
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Gray);
+            GraphicsDevice.Clear(Color.CornflowerBlue);
             currentState.Draw(gameTime, spriteBatch);
             base.Draw(gameTime);
         }
