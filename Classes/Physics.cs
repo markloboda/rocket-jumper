@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using RocketJumper.Classes.States;
 using System.Diagnostics;
+using RocketJumper.Classes.MapData;
 
 namespace RocketJumper.Classes
 {
@@ -48,7 +49,8 @@ namespace RocketJumper.Classes
 
         public Vector2 Velocity;
 
-        private Vector2 inputVelocity;
+        private Vector2 horizontalInputSpeed;
+        private bool isOnIce = false;
         public Vector2 Position;
         public float Rotation;
         public Vector2 Origin;
@@ -80,6 +82,9 @@ namespace RocketJumper.Classes
         private bool gravityEnabled;
 
         public bool Collided, SideOfMapCollision, IsOnGround;
+
+        public int NormalFriction = 100;
+        public int IceFriction = 1;
 
         public Physics(Vector2 Position, Vector2 Size, GameState gameState, bool gravityEnabled, float rotation, string boundingBoxType = "AABB")
         {
@@ -117,8 +122,22 @@ namespace RocketJumper.Classes
             Velocity.Y += fYRes * (float)gameTime.ElapsedGameTime.TotalSeconds;
             Velocity.X += fXRes * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            // apply inputVelocity to deltaMove
-            deltaMove += inputVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            // apply horizontalInputSpeed to deltaMove
+            if (IsOnGround)
+            {
+                if (isOnIce)
+                {
+                    Velocity.X += horizontalInputSpeed.X * 0.05f;
+                }
+                else if (fXRes == 0)
+                {
+                    Velocity.X = horizontalInputSpeed.X;
+                } else {
+                    deltaMove.X += horizontalInputSpeed.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                }
+            }
+            else
+                Velocity.X += horizontalInputSpeed.X * 0.02f;
 
             // apply Velocity to deltaMove
             deltaMove += Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -142,13 +161,18 @@ namespace RocketJumper.Classes
                     for (int x = leftTile; x <= rightTile; ++x)
                     {
                         // if this tile is collidable
-                        if (gameState.Map.GetTileId(x, y) != 0)
+                        int tileGID = gameState.Map.GetTileId(x, y);
+                        if (tileGID != 0)
                         {
                             // determine collision depth (with direction) and magnitude
                             Rectangle tileBounds = gameState.Map.GetBounds(x, y);
 
                             if (deltaMove.Y >= 0 && AABBIsTouchingTop(tileBounds))
                             {
+                                // check tileset
+                                TileSet tileSet = gameState.Map.GetTileSet(tileGID);
+                                isOnIce = tileSet.IsIce;
+
                                 IsOnGround = true;
                                 Collided = true;
                                 deltaMove.Y = 0;
@@ -157,12 +181,18 @@ namespace RocketJumper.Classes
                                 Position.Y = tileBounds.Top - AABB.Height;
 
                                 // add friction
-                                if (Math.Abs(Velocity.X) > 100)
+                                int friction;
+                                if (isOnIce)
+                                    friction = IceFriction;
+                                else
+                                    friction = NormalFriction;
+
+                                if (Math.Abs(Velocity.X) > friction)
                                 {
                                     if (Velocity.X > 0)
-                                        Velocity.X -= 100;
+                                        Velocity.X -= friction;
                                     else
-                                        Velocity.X += 100;
+                                        Velocity.X += friction;
                                 }
                                 else
                                     Velocity.X = 0;
@@ -241,9 +271,9 @@ namespace RocketJumper.Classes
             forcesY.Remove(gravityAccel);
         }
 
-        public void AddInputMovement(Vector2 inputSpeed)
+        public void AddInputMovement(Vector2 horizontalMovement, float maxSpeed)
         {
-            inputVelocity = inputSpeed;
+            horizontalInputSpeed = horizontalMovement * maxSpeed;
         }
 
 

@@ -18,6 +18,7 @@ namespace RocketJumper.Classes.MapData
         public int ImageHeight;
         public int ImageWidth;
         public int FirstGID;  // id of the first tile in the set
+        public bool IsIce;
 
 
         public TileSet(JObject tileSetJson, Texture2D texture)
@@ -31,6 +32,20 @@ namespace RocketJumper.Classes.MapData
             ImageHeight = (int)tileSetJson["imageheight"];
             ImageWidth = (int)tileSetJson["imagewidth"];
             FirstGID = (int)tileSetJson["firstgid"];
+
+            // custom properties
+            if (tileSetJson.ContainsKey("tiles"))
+            {
+                foreach (var properties in tileSetJson["tiles"]) {
+                    if (properties["properties"] != null) {
+                        foreach (var property in properties["properties"]) {
+                            if (property["name"].ToString() == "IsIce") {
+                                IsIce = bool.Parse(property["value"].ToString());
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public void DrawTile(int tileGID, Vector2 position, SpriteBatch spriteBatch, Vector2 size, SpriteEffects effects = SpriteEffects.None, float rotation = 0.0f, Vector2 origin = default)

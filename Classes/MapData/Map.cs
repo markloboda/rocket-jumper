@@ -111,5 +111,17 @@ namespace RocketJumper.Classes.MapData
             }
             return 0;
         }
+
+        public TileSet GetTileSet(int id)
+        {
+            foreach (TileSet tileSet in TileSets)
+            {
+                if (id >= tileSet.FirstGID && id < tileSet.FirstGID + tileSet.TileCount)
+                {
+                    return tileSet;
+                }
+            }
+            throw new System.Exception("TileSet not found");
+        }
     }
 }

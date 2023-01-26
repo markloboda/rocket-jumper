@@ -77,7 +77,7 @@ namespace RocketJumper.Classes
         {
             if (PathFindingRocket)
             {
-                direction = TargetSprite.Physics.Position - RocketSprite.Physics.Position;
+                direction = TargetSprite.Physics.GetGlobalCenter() - RocketSprite.Physics.GetGlobalCenter();
                 direction.Normalize();
                 RocketSprite.Physics.Rotation = (float)Math.Atan2(direction.Y, direction.X);
                 RocketSprite.Physics.Velocity = Speed * direction;

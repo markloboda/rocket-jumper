@@ -114,9 +114,9 @@ namespace RocketJumper.Classes
             sprite.Physics.Origin = sprite.AttachmentOrigin;
         }
 
-        public void AddInputToPhysics(Vector2 movementVector)
+        public void AddInputToPhysics(Vector2 horizontalMovement, float MaxHorizontalSpeed)
         {
-            Physics.AddInputMovement(movementVector);
+            Physics.AddInputMovement(horizontalMovement, MaxHorizontalSpeed);
         }
 
         public void ChangeAnimation(string animationId)

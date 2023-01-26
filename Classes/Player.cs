@@ -15,7 +15,7 @@ namespace RocketJumper.Classes
 
         // movement vars
         private float inputMovement;
-        public static float HorizontalSpeed = 300;
+        public static float MaxHorizontalSpeed = 300;
 
         // components
         public GameState GameState
@@ -34,7 +34,7 @@ namespace RocketJumper.Classes
         public int ReloadTimer = ReloadRate;
         public int AmmoCount = 2;
         public List<Rocket> RocketList = new();
-        public float MaxExplosionForce = 300.0f;
+        public float MaxExplosionForce = 250.0f;
         public Vector2 ShootingPosition
         {
             get
@@ -83,13 +83,13 @@ namespace RocketJumper.Classes
                         {
                             force = 0.0f;
                         }
-                        else if (distance < 22.0f)
+                        else if (distance < 23.0f)
                         {
                             force = MaxExplosionForce;
                         }
                         else
                         {
-                            force = MaxExplosionForce * (1.0f - (distance / 100.0f));
+                            force = MaxExplosionForce * (1.0f - ((distance - 23.0f) / 100.0f));
                         }
                         // normalize direction
                         direction.Normalize();
@@ -101,7 +101,7 @@ namespace RocketJumper.Classes
             }
 
             // add horizontal movement
-            PlayerSprite.AddInputToPhysics(new Vector2(inputMovement, 0.0f) * HorizontalSpeed);
+            PlayerSprite.AddInputToPhysics(new Vector2(inputMovement, 0.0f), MaxHorizontalSpeed);
             PlayerSprite.Update(gameTime);
         }
 
