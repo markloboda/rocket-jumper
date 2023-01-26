@@ -4,6 +4,21 @@
       "time": 2860,
       "date": "11/01/2023",
       "map": "Content/Levels/main_map-tiled.json"
+    },
+    {
+      "time": 3972,
+      "date": "16/01/2023",
+      "map": "Content/Levels/main_map-tiled.json"
+    },
+    {
+      "time": 15724,
+      "date": "17/01/2023",
+      "map": "Content/Levels/main_map-tiled.json"
+    },
+    {
+      "time": 6235,
+      "date": "22/01/2023",
+      "map": "Content/Levels/main_map-tiled.json"
     }
   ]
 }

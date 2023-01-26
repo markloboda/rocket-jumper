@@ -59,6 +59,10 @@ namespace RocketJumper
 
         protected override void Update(GameTime gameTime)
         {
+            if (!this.IsActive && currentState is GameState) {
+                ((GameState)currentState).PauseGame();
+            }
+
             if (nextState != null)
             {
                 currentState = nextState;
@@ -74,7 +78,7 @@ namespace RocketJumper
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Gray);
             currentState.Draw(gameTime, spriteBatch);
             base.Draw(gameTime);
         }

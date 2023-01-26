@@ -16,6 +16,7 @@ namespace RocketJumper.Classes
         public AnimatedSprite RocketSprite;
 
         public bool Collided = false;
+        public bool SideOfMapCollision = false;
 
         private Vector2 direction;
         public Sprite TargetSprite;
@@ -83,14 +84,15 @@ namespace RocketJumper.Classes
             }
 
             RocketSprite.Update(gameTime);
-            if (RocketSprite.Physics.Collided)
-                Collided = true;
+            Collided = RocketSprite.Physics.Collided;
+            SideOfMapCollision = RocketSprite.Physics.SideOfMapCollision;
+            
 
             // check if player is hit
             if (HitsPlayer && RocketSprite.CollidesWith(gameState.Player.PlayerSprite))
                 Collided = true;
 
-            if (Collided)
+            if (Collided && !SideOfMapCollision)
                 gameState.SoundEffects["explosion"].CreateInstance().Play();
         }
 

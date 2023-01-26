@@ -207,7 +207,7 @@ namespace RocketJumper.Classes.States
                 control.Draw(gameTime, spriteBatch);
         }
 
-        private void PauseGame()
+        public void PauseGame()
         {
             IsPaused = true;
             PauseState pauseState = new PauseState(game, content, this);

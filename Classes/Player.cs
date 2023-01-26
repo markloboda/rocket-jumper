@@ -71,16 +71,18 @@ namespace RocketJumper.Classes
                 RocketList[i].Update(gameTime);
                 if (RocketList[i].Collided)
                 {
-                    // calcualte direction from rocket to player
-                    Vector2 direction = PlayerSprite.Physics.GetGlobalCenter() - RocketList[i].RocketSprite.Physics.GetGlobalCenter();
-                    // get length of direction and calculate force based on it where the closer the player is the more force is applied
-                    float length = direction.Length();
-                    float force = 10000.0f / length;
-                    // normalize direction
-                    direction.Normalize();
-                    // add force to player
-                    PlayerSprite.Physics.AddTempForce(direction * force);
-
+                    if (!RocketList[i].SideOfMapCollision)
+                    {
+                        // calcualte direction from rocket to player
+                        Vector2 direction = PlayerSprite.Physics.GetGlobalCenter() - RocketList[i].RocketSprite.Physics.GetGlobalCenter();
+                        // get length of direction and calculate force based on it where the closer the player is the more force is applied
+                        float length = direction.Length();
+                        float force = 10000.0f / length;
+                        // normalize direction
+                        direction.Normalize();
+                        // add force to player
+                        PlayerSprite.Physics.AddTempForce(direction * force);
+                    }
                     RocketList.RemoveAt(i--);
                 }
             }

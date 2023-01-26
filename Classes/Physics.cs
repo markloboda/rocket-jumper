@@ -79,7 +79,7 @@ namespace RocketJumper.Classes
         }
         private bool gravityEnabled;
 
-        public bool Collided, IsOnGround;
+        public bool Collided, SideOfMapCollision, IsOnGround;
 
         public Physics(Vector2 Position, Vector2 Size, GameState gameState, bool gravityEnabled, float rotation, string boundingBoxType = "AABB")
         {
@@ -132,6 +132,7 @@ namespace RocketJumper.Classes
 
             // reset collision flags
             Collided = false;
+            SideOfMapCollision = false;
             IsOnGround = false;
 
             if (BoundingBoxType == "AABB")
@@ -179,11 +180,18 @@ namespace RocketJumper.Classes
                                 }
                             }
                             // left right collision with tiles
-                            if (deltaMove.X > 0 && (AABBIsTouchingLeft(tileBounds) || AABB.Right + deltaMove.X > gameState.Map.WidthInPixels) ||
-                                deltaMove.X < 0 && (AABBIsTouchingRight(tileBounds) || AABB.Left + deltaMove.X < 0))
+                            if (deltaMove.X > 0 && AABBIsTouchingLeft(tileBounds) ||
+                                deltaMove.X < 0 && AABBIsTouchingRight(tileBounds))
                             {
+                                // calculate distance to tileBounds
+                                float distance = 0;
+                                if (deltaMove.X > 0)
+                                    distance = tileBounds.Left - AABB.Right;
+                                else
+                                    distance = tileBounds.Right - AABB.Left;
+
                                 Collided = true;
-                                deltaMove.X = 0;
+                                deltaMove.X = distance;
                                 Velocity.X = 0;
                             }
                         }
@@ -194,8 +202,17 @@ namespace RocketJumper.Classes
             if (deltaMove.X > 0 && AABB.Right + deltaMove.X > gameState.Map.WidthInPixels ||
                 deltaMove.X < 0 && AABB.Left + deltaMove.X < 0)
             {
+                // calculate distance to edge of map
+                float distance = 0;
+                if (deltaMove.X > 0)
+                    distance = gameState.Map.WidthInPixels - AABB.Right;
+                else
+                    distance = 0 - AABB.Left;
+
+
                 Collided = true;
-                deltaMove.X = 0;
+                SideOfMapCollision = true;
+                deltaMove.X = distance;
                 Velocity.X = 0;
             }
 
