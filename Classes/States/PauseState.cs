@@ -80,6 +80,7 @@ namespace RocketJumper.Classes.States
         private void Button_Resume_Clicked(object sender, EventArgs e)
         {
             game.ChangeState(gameState);
+            gameState.stopWatch.Start();
         }
 
         private void Button_Options_Clicked(object sender, EventArgs e)

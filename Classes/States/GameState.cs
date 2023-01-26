@@ -53,7 +53,7 @@ namespace RocketJumper.Classes.States
         public override void LoadContent()
         {
             Map = new Map(MapFilePath, content, this);
-            
+
             stopWatch = new Stopwatch();
 
             // PLAYER
@@ -97,13 +97,17 @@ namespace RocketJumper.Classes.States
             MyGame.VirtualWidth = Map.WidthInPixels;
             MyGame.VirtualHeight = Map.HeightInPixels;
 
-
-
             stopWatch.Start();
         }
 
         public override void Update(GameTime gameTime)
         {
+            if (!game.IsActive)
+            {
+                PauseGame();
+                return;
+            }
+
             GetInputs();
 
             // handle state inputs
@@ -210,6 +214,7 @@ namespace RocketJumper.Classes.States
         public void PauseGame()
         {
             IsPaused = true;
+            this.stopWatch.Stop();
             PauseState pauseState = new PauseState(game, content, this);
 
             // set background to last frame

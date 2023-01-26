@@ -59,10 +59,6 @@ namespace RocketJumper
 
         protected override void Update(GameTime gameTime)
         {
-            if (!this.IsActive && currentState is GameState) {
-                ((GameState)currentState).PauseGame();
-            }
-
             if (nextState != null)
             {
                 currentState = nextState;
