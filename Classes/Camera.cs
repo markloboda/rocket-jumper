@@ -22,7 +22,7 @@ namespace RocketJumper.Classes
 
             Matrix offset = Matrix.CreateTranslation(
                 0,
-                MyGame.ActualHeight / 2,
+                MyGame.ActualHeight / 1.5f,
                 0);
 
             float scaleAmount = (float)MyGame.ActualWidth / MyGame.VirtualWidth;

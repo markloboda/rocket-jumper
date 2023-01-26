@@ -28,12 +28,13 @@ namespace RocketJumper.Classes
         // bazooka
         public Sprite Bazooka;
         public bool HasBazooka = false;
-        public const int FireRate = 1000;           // time between shots in milliseconds
+        public const int FireRate = 500;           // time between shots in milliseconds
         public int FireTimer = FireRate;
-        public const int ReloadRate = 3000;         // time between reloads in milliseconds
+        public const int ReloadRate = 2000;         // time between reloads in milliseconds
         public int ReloadTimer = ReloadRate;
         public int AmmoCount = 2;
         public List<Rocket> RocketList = new();
+        public float MaxExplosionForce = 300.0f;
         public Vector2 ShootingPosition
         {
             get
@@ -73,15 +74,27 @@ namespace RocketJumper.Classes
                 {
                     if (!RocketList[i].SideOfMapCollision)
                     {
-                        // calcualte direction from rocket to player
+                        // calcualte vector from rocket to player
                         Vector2 direction = PlayerSprite.Physics.GetGlobalCenter() - RocketList[i].RocketSprite.Physics.GetGlobalCenter();
                         // get length of direction and calculate force based on it where the closer the player is the more force is applied
-                        float length = direction.Length();
-                        float force = 10000.0f / length;
+                        float distance = direction.Length();
+                        float force;
+                        if (distance > 100.0f)
+                        {
+                            force = 0.0f;
+                        }
+                        else if (distance < 22.0f)
+                        {
+                            force = MaxExplosionForce;
+                        }
+                        else
+                        {
+                            force = MaxExplosionForce * (1.0f - (distance / 100.0f));
+                        }
                         // normalize direction
                         direction.Normalize();
                         // add force to player
-                        PlayerSprite.Physics.AddTempForce(direction * force);
+                        PlayerSprite.Physics.AddTempForce(direction * force * new Vector2(1.0f, 1.2f));
                     }
                     RocketList.RemoveAt(i--);
                 }

@@ -36,12 +36,14 @@ namespace RocketJumper
             IsMouseVisible = true;
 
             // screen properties
-            graphics.PreferredBackBufferWidth = 1600;
-            graphics.PreferredBackBufferHeight = 900;
+            graphics.PreferredBackBufferWidth = 1920;
+            graphics.PreferredBackBufferHeight = 1080;
             graphics.ApplyChanges();
 
             ActualWidth = graphics.PreferredBackBufferWidth;
             ActualHeight = graphics.PreferredBackBufferHeight;
+
+            this.Window.IsBorderless = false;
 
             base.Initialize();
         }
