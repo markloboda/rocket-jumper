@@ -2,8 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json.Linq;
-using RocketJumper.Classes.States;
-using System.Reflection.Metadata.Ecma335;
+using System.Collections.Generic;
 
 namespace RocketJumper.Classes.MapData
 {
@@ -18,7 +17,7 @@ namespace RocketJumper.Classes.MapData
         public int ImageHeight;
         public int ImageWidth;
         public int FirstGID;  // id of the first tile in the set
-        public bool IsIce;
+        public Dictionary<int, List<string>> tileProperties;
 
 
         public TileSet(JObject tileSetJson, Texture2D texture)
@@ -34,15 +33,19 @@ namespace RocketJumper.Classes.MapData
             FirstGID = (int)tileSetJson["firstgid"];
 
             // custom properties
+            tileProperties = new Dictionary<int, List<string>>();
             if (tileSetJson.ContainsKey("tiles"))
             {
-                foreach (var properties in tileSetJson["tiles"]) {
-                    if (properties["properties"] != null) {
-                        foreach (var property in properties["properties"]) {
-                            if (property["name"].ToString() == "IsIce") {
-                                IsIce = bool.Parse(property["value"].ToString());
-                            }
+                foreach (var properties in tileSetJson["tiles"])
+                {
+                    if (properties["properties"] != null)
+                    {
+                        List<string> propertyList = new List<string>();
+                        foreach (var property in properties["properties"])
+                        {
+                            propertyList.Add((string)property["name"]);
                         }
+                        tileProperties[(int)properties["id"]] = propertyList;
                     }
                 }
             }
@@ -62,6 +65,14 @@ namespace RocketJumper.Classes.MapData
 
             //spriteBatch.Draw(Texture, destinationRectangle, sourceRectangle, Color.White, rotation, origin, effects, 0.0f);
             spriteBatch.Draw(Texture, position: position, sourceRectangle, Color.White, rotation, origin, scale: 1, effects, 0.0f);
+        }
+
+        public List<string> GetTileProperties(int tileGID) {
+            if (tileProperties.ContainsKey(tileGID - FirstGID))
+            {
+                return tileProperties[tileGID - FirstGID];
+            }
+            return null;
         }
 
         public Rectangle GetSourceRectangle(int tileGID)

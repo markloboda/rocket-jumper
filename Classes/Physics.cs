@@ -49,8 +49,14 @@ namespace RocketJumper.Classes
 
         public Vector2 Velocity;
 
-        private Vector2 horizontalInputSpeed;
+        // tile info
         private bool isOnIce = false;
+        private string slopeDirection;
+        private bool isOnSlope = false;
+        Vector2 slopeStart;
+        Vector2 slopeEnd;
+
+        private Vector2 horizontalInputSpeed;
         public Vector2 Position;
         public float Rotation;
         public Vector2 Origin;
@@ -132,7 +138,9 @@ namespace RocketJumper.Classes
                 else if (fXRes == 0)
                 {
                     Velocity.X = horizontalInputSpeed.X;
-                } else {
+                }
+                else
+                {
                     deltaMove.X += horizontalInputSpeed.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
                 }
             }
@@ -153,8 +161,11 @@ namespace RocketJumper.Classes
             Collided = false;
             SideOfMapCollision = false;
             IsOnGround = false;
+            isOnSlope = false;
+            slopeDirection = "";
 
             if (BoundingBoxType == "AABB")
+            {
                 // for each potentially colliding tile
                 for (int y = topTile; y <= bottomTile; ++y)
                 {
@@ -167,35 +178,72 @@ namespace RocketJumper.Classes
                             // determine collision depth (with direction) and magnitude
                             Rectangle tileBounds = gameState.Map.GetBounds(x, y);
 
+                            // check tileset
+                            TileSet tileSet = gameState.Map.GetTileSet(tileGID);
+
+                            // get tile properties
+                            isOnIce = false;
+
+                            bool isRightSlope = false;
+
+                            bool isLeftSlope = false;
+
+                            List<string> tileProperties = tileSet.GetTileProperties(tileGID);
+                            if (tileProperties != null)
+                            {
+                                if (tileProperties.Contains("IsIce"))
+                                    isOnIce = true;
+                                if (tileProperties.Contains("IsLeftSlope"))
+                                    isLeftSlope = true;
+                                if (tileProperties.Contains("IsRightSlope"))
+                                    isRightSlope = true;
+                            }
+
                             if (deltaMove.Y >= 0 && AABBIsTouchingTop(tileBounds))
                             {
-                                // check tileset
-                                TileSet tileSet = gameState.Map.GetTileSet(tileGID);
-                                isOnIce = tileSet.IsIce;
 
-                                IsOnGround = true;
-                                Collided = true;
-                                deltaMove.Y = 0;
-                                Velocity.Y = 0;
-
-                                Position.Y = tileBounds.Top - AABB.Height;
-
-                                // add friction
-                                int friction;
-                                if (isOnIce)
-                                    friction = IceFriction;
-                                else
-                                    friction = NormalFriction;
-
-                                if (Math.Abs(Velocity.X) > friction)
+                                if (isLeftSlope && !IsOnGround)
                                 {
-                                    if (Velocity.X > 0)
-                                        Velocity.X -= friction;
-                                    else
-                                        Velocity.X += friction;
+                                    isOnSlope = true;
+                                    slopeDirection = "left";
+                                    slopeStart = new Vector2(tileBounds.Left, tileBounds.Bottom);
+                                    slopeEnd = new Vector2(tileBounds.Right, tileBounds.Top);
+                                    continue;
+                                }
+                                else if (isRightSlope && !IsOnGround)
+                                {
+                                    isOnSlope = true;
+                                    slopeDirection = "right";
+                                    slopeStart = new Vector2(tileBounds.Left, tileBounds.Top);
+                                    slopeEnd = new Vector2(tileBounds.Right, tileBounds.Bottom);
+                                    continue;
                                 }
                                 else
-                                    Velocity.X = 0;
+                                {
+                                    IsOnGround = true;
+                                    Collided = true;
+                                    deltaMove.Y = 0;
+                                    Velocity.Y = 0;
+
+                                    Position.Y = tileBounds.Top - AABB.Height;
+
+                                    // add friction
+                                    int friction;
+                                    if (isOnIce)
+                                        friction = IceFriction;
+                                    else
+                                        friction = NormalFriction;
+
+                                    if (Math.Abs(Velocity.X) > friction)
+                                    {
+                                        if (Velocity.X > 0)
+                                            Velocity.X -= friction;
+                                        else
+                                            Velocity.X += friction;
+                                    }
+                                    else
+                                        Velocity.X = 0;
+                                }
                             }
                             if (deltaMove.Y < 0 && AABBIsTouchingBottom(tileBounds))
                             {
@@ -227,6 +275,39 @@ namespace RocketJumper.Classes
                         }
                     }
                 }
+                if (isOnSlope && !IsOnGround)
+                {
+                    // make player slip in slopeVector
+
+                    Vector2 slopeVector;
+                    Vector2 playerEdge;
+                    // calculate y where slope is at x 
+                    if (slopeDirection == "left")
+                    {
+                        slopeVector = slopeStart - slopeEnd;
+
+                        // right bottom edge
+                        playerEdge = new Vector2(Position.X + Width, Position.Y + Height);
+                    }
+                    else
+                    {
+                        slopeVector = slopeEnd - slopeStart;
+
+                        // left bottom edge
+                        playerEdge = new Vector2(Position.X, Position.Y + Height);
+                    }
+                    Vector2 slopeCoordinate = new Vector2(playerEdge.X, slopeStart.Y + (playerEdge.X - slopeStart.X));
+
+                    if (slopeCoordinate.Y >= playerEdge.Y)
+                    {
+                        // correct edge to slope
+                        float correctY = playerEdge.Y - slopeCoordinate.Y;
+
+                        slopeVector.Normalize();
+                        deltaMove = deltaMove.Length() * slopeVector;
+                    }
+                }
+            }
 
             // side of map collision
             if (deltaMove.X > 0 && AABB.Right + deltaMove.X > gameState.Map.WidthInPixels ||
