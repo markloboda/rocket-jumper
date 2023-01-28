@@ -12,6 +12,8 @@ namespace RocketJumper.Classes
     {
         private GameState gameState;
         public AnimatedSprite PlayerSprite;
+        public GameUI GUIRenderer;
+
 
         // movement vars
         private float inputMovement;
@@ -51,6 +53,13 @@ namespace RocketJumper.Classes
             this.gameState = gameState;
             PlayerSprite = playerSprite;
             playerSprite.Physics.IsBoundingBoxVisible = true;
+
+            GUIRenderer = new GameUI(this, this.gameState)
+            {
+                TimerFont = this.gameState.Font,
+                AmmoTexture = this.gameState.AmmoTexture
+            };
+
         }
 
         public void Update(GameTime gameTime)
@@ -103,6 +112,7 @@ namespace RocketJumper.Classes
             // add horizontal movement
             PlayerSprite.AddInputToPhysics(new Vector2(inputMovement, 0.0f), MaxHorizontalSpeed);
             PlayerSprite.Update(gameTime);
+            GUIRenderer.Update(gameTime);
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -126,10 +136,11 @@ namespace RocketJumper.Classes
             }
 
             // rockets
-            foreach (Rocket rocket in RocketList) 
+            foreach (Rocket rocket in RocketList)
                 rocket.Draw(gameTime, spriteBatch);
 
             PlayerSprite.Draw(gameTime, spriteBatch);
+
         }
 
         public void ReloadBazooka()

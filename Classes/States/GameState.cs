@@ -29,7 +29,6 @@ namespace RocketJumper.Classes.States
 
         public Map Map;
         public Player Player;
-        public GameUI GUIRenderer;
         public Stopwatch stopWatch;
 
 
@@ -52,6 +51,13 @@ namespace RocketJumper.Classes.States
         public MouseState MouseState;
         public GamePadState GamePadState;
 
+        // access to MyGame content
+        public SpriteFont Font
+        {
+            get { return game.Font; }
+        }
+        public Texture2D AmmoTexture;
+
         public GameState(MyGame game, ContentManager content)
             : base(game, content)
         {
@@ -73,12 +79,9 @@ namespace RocketJumper.Classes.States
             camera = new Camera();
 
             // Load Player
+            AmmoTexture = content.Load<Texture2D>("UI/Ammo");
             Player = new Player(playerSprite, this);
-            GUIRenderer = new GameUI(Player, this)
-            {
-                TimerFont = game.Font,
-                AmmoTexture = content.Load<Texture2D>("UI/Ammo")
-            };
+
 
             // ROCKETS
             RocketAnimation = new Animation_s(content.Load<Texture2D>("Sprites/Rocket"), 5, 0.2f);
@@ -127,7 +130,6 @@ namespace RocketJumper.Classes.States
             UpdateSprites(gameTime);
             camera.Follow(this.Player.PlayerSprite);
             CameraTransform = camera.Transform;
-            GUIRenderer.Update(gameTime);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -173,14 +175,8 @@ namespace RocketJumper.Classes.States
 
             // GUI
             spriteBatch.Begin();
-            GUIRenderer.Draw(gameTime, spriteBatch);
-
+            Player.GUIRenderer.Draw(gameTime, spriteBatch);
             spriteBatch.End();
-        }
-
-        public void AddGUIRenderer(GameUI guiRenderer)
-        {
-            GUIRenderer = guiRenderer;
         }
 
         public Vector2 GetScreenPosition(Vector2 position)
