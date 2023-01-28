@@ -14,6 +14,7 @@ namespace RocketJumper.Classes
         // content
         public SpriteFont TimerFont;
         public Texture2D AmmoTexture;
+        public Texture2D ProgressBar;
 
         private long timeMilliseconds;
 
@@ -68,10 +69,48 @@ namespace RocketJumper.Classes
                     color: Color.White,
                     rotation: 10,
                     origin: Vector2.Zero,
-                    scale: 1,
+                    scale: 3,
                     effects: SpriteEffects.None,
                     layerDepth: 0);
             }
+
+            // draw reload bar
+            if (this.player.AmmoCount <= 0)
+            {
+                float reloadProgress = 1.0f - ((float)this.player.ReloadTimer / this.player.ReloadRate);
+                Rectangle progressRectangle = new Rectangle(0, 0, (int)(reloadProgress * ProgressBar.Width), ProgressBar.Height);
+
+                Vector2 barPosition = Vector2.Transform(this.player.PlayerSprite.Physics.Position, this.gameState.camera.Transform) + new Vector2(this.player.PlayerSprite.Physics.Width * 1.5f, -20);
+
+                // draw outer part
+                spriteBatch.Draw(
+                    texture: ProgressBar,
+                    position: barPosition,
+                    sourceRectangle: null,
+                    color: Color.Black,
+                    rotation: 0.0f,
+                    origin: Vector2.Zero,
+                    scale: 1,
+                    effects: SpriteEffects.None,
+                    layerDepth: 0
+                );
+
+                Vector2 origin = new Vector2(ProgressBar.Width / 2, ProgressBar.Height / 2);
+                // draw inner part
+                spriteBatch.Draw(
+                    texture: ProgressBar,
+                    position: barPosition + origin,
+                    sourceRectangle: progressRectangle,
+                    color: Color.LimeGreen,
+                    rotation: 0.0f,
+                    origin: origin,
+                    scale: new Vector2(0.9f, 0.8f),
+                    effects: SpriteEffects.None,
+                    layerDepth: 0
+                );
+            }
+
+
 
             // draw amount of tiles drawn
             if (AmountOfTilesDrawn)

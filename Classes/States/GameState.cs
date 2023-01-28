@@ -44,19 +44,20 @@ namespace RocketJumper.Classes.States
         private Texture2D backgroundTexture;
 
         // camera
-        private Camera camera;
+        public Camera camera;
 
         // inputs
         public KeyboardState KeyboardState;
         public MouseState MouseState;
         public GamePadState GamePadState;
 
-        // access to MyGame content
+        // loaded content
         public SpriteFont Font
         {
             get { return game.Font; }
         }
         public Texture2D AmmoTexture;
+        public Texture2D ProgressBar;
 
         public GameState(MyGame game, ContentManager content)
             : base(game, content)
@@ -80,6 +81,7 @@ namespace RocketJumper.Classes.States
 
             // Load Player
             AmmoTexture = content.Load<Texture2D>("UI/Ammo");
+            ProgressBar = content.Load<Texture2D>("UI/ReloadBar");
             Player = new Player(playerSprite, this);
 
 
@@ -174,7 +176,7 @@ namespace RocketJumper.Classes.States
             spriteBatch.End();
 
             // GUI
-            spriteBatch.Begin();
+            spriteBatch.Begin(samplerState: SamplerState.PointClamp);
             Player.GUIRenderer.Draw(gameTime, spriteBatch);
             spriteBatch.End();
         }

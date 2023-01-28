@@ -30,19 +30,16 @@ namespace RocketJumper.Classes
         // bazooka
         public Sprite Bazooka;
         public bool HasBazooka = false;
-        public const int FireRate = 500;           // time between shots in milliseconds
-        public int FireTimer = FireRate;
-        public const int ReloadRate = 2000;         // time between reloads in milliseconds
-        public int ReloadTimer = ReloadRate;
+        public int FireRate = 500;           // time between shots in milliseconds
+        public int FireTimer;
+        public int ReloadRate = 2000;         // time between reloads in milliseconds
+        public int ReloadTimer;
         public int AmmoCount = 2;
         public List<Rocket> RocketList = new();
         public float MaxExplosionForce = 250.0f;
         public Vector2 ShootingPosition
         {
-            get
-            {
-                return PlayerSprite.Physics.Position + Bazooka.AttachmentOrigin + new Vector2(0, 15);
-            }
+            get { return PlayerSprite.Physics.Position + Bazooka.AttachmentOrigin + new Vector2(0, 15); }
         }
 
         // other
@@ -57,9 +54,12 @@ namespace RocketJumper.Classes
             GUIRenderer = new GameUI(this, this.gameState)
             {
                 TimerFont = this.gameState.Font,
-                AmmoTexture = this.gameState.AmmoTexture
+                AmmoTexture = this.gameState.AmmoTexture,
+                ProgressBar = this.gameState.ProgressBar
             };
 
+            FireTimer = FireRate;
+            ReloadTimer = ReloadRate;
         }
 
         public void Update(GameTime gameTime)
