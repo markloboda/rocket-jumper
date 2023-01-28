@@ -126,7 +126,7 @@ namespace RocketJumper.Classes
             }
 
             // rockets
-            foreach (Rocket rocket in RocketList)
+            foreach (Rocket rocket in RocketList) 
                 rocket.Draw(gameTime, spriteBatch);
 
             PlayerSprite.Draw(gameTime, spriteBatch);
@@ -170,6 +170,7 @@ namespace RocketJumper.Classes
                 if (AmmoCount > 0 && FireTimer <= 0 && GameState.MouseState.LeftButton == ButtonState.Pressed)
                 {
                     Rocket rocket = new Rocket(ShootingPosition, direction, GameState);
+                    ReloadTimer = ReloadRate;
                     rocket.RocketSprite.Physics.Origin = new Vector2(rocket.RocketSprite.Physics.Width / 2, rocket.RocketSprite.Physics.Height / 2);
                     RocketList.Add(rocket);
                     FireTimer = FireRate;
