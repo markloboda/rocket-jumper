@@ -33,7 +33,7 @@ namespace RocketJumper.Classes
         public float SpriteScale { get; set; }
 
         public Physics Physics { get; set; }
-        public float Scale { get { return Physics.Size.Y / Texture.Height; } }
+        public Vector2 Scale { get { return new Vector2(Physics.Size.X / Texture.Width, Physics.Size.Y / Texture.Height); } }
 
 
         public StaticSprite(Dictionary<string, Texture2D> textureDict, string currentTextureId, Vector2 position, GameState level, Vector2 spriteSize, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, bool moveOnAttach = false, Vector2 attachmentOrigin = default)

@@ -13,7 +13,7 @@ namespace RocketJumper.Classes
         public List<Sprite> Children { get; set; }           // list of mapobject that draw onto the player
         public SpriteEffects Effects { get; set; }
         public Physics Physics { get; set; }
-        public float Scale { get; }
+        public Vector2 Scale { get; }
 
         // if Sprite attached
         public bool MoveOnAttach { get; internal set; }

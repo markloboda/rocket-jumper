@@ -133,6 +133,21 @@ namespace RocketJumper.Classes
             return normals;
         }
 
+        public Vector2[] GetNormals(Vector2[] vertices)
+        {
+            Vector2[] normals = new Vector2[4];
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                int nextIndex = (i + 1) % vertices.Length;
+                Vector2 edge = vertices[nextIndex] - vertices[i];
+                normals[i] = new Vector2(-edge.Y, edge.X);
+                normals[i].Normalize();
+            }
+
+            return normals;
+        }
+
 
 
         public void DrawRectangle(Color color, SpriteBatch spriteBatch)

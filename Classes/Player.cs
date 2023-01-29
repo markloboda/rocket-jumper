@@ -18,6 +18,7 @@ namespace RocketJumper.Classes
         // movement vars
         private float inputMovement;
         public static float MaxHorizontalSpeed = 300;
+        public Rectangle BoundingBoxWidth;
 
         // components
         public GameState GameState
@@ -34,10 +35,10 @@ namespace RocketJumper.Classes
         public int FireTimer;
         public int ReloadRate = 2000;         // time between reloads in milliseconds
         public int ReloadTimer;
-        public int MaxAmmo = 10;
+        public int MaxAmmo = 2;
         public int AmmoCount;
         public List<Rocket> RocketList = new();
-        public float MaxExplosionForce = 250.0f;
+        public float MaxExplosionForce = 280.0f;
         public Vector2 ShootingPosition
         {
             get { return PlayerSprite.Physics.Position + Bazooka.AttachmentOrigin + new Vector2(0, 15); }

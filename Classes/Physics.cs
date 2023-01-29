@@ -33,17 +33,19 @@ namespace RocketJumper.Classes
         }
         public Rectangle AABB
         {
-            get { return Tools.RectangleMoveTo(aabb, Position - Origin); }
+            get { return Tools.RectangleMoveTo(aabb, Position - Origin + BoundingBoxOffset); }
             private set { aabb = value; }
         }
         private Rectangle aabb;
 
         public RotatedRectangle RBB
         {
-            get { return rbb.MoveTo(Position - Origin).RotateTo(Rotation); }
+            get { return rbb.MoveTo(Position - Origin + BoundingBoxOffset).RotateTo(Rotation); }
             private set { rbb = value; }
         }
         private RotatedRectangle rbb;
+
+        public Vector2 BoundingBoxOffset = Vector2.Zero;
 
         public bool IsBoundingBoxVisible = false;
 
@@ -92,7 +94,7 @@ namespace RocketJumper.Classes
         public int NormalFriction = 100;
         public int IceFriction = 1;
 
-        public Physics(Vector2 Position, Vector2 Size, GameState gameState, bool gravityEnabled, float rotation, string boundingBoxType = "AABB", Vector2 origin = default)
+        public Physics(Vector2 Position, Vector2 Size, GameState gameState, bool gravityEnabled, float rotation, string boundingBoxType = "AABB", Vector2 origin = default, Vector2 customBoundingBoxScale = default)
         {
             this.Position = Position;
             this.Size = Size;
@@ -103,7 +105,7 @@ namespace RocketJumper.Classes
                 Origin = Vector2.Zero;
             else
                 Origin = origin;
-            AddBoundingBox(boundingBoxType);
+            AddBoundingBox(boundingBoxType, customBoundingBoxScale);
         }
 
         public void Update(GameTime gameTime)
@@ -364,11 +366,6 @@ namespace RocketJumper.Classes
             // apply deltaMove to position
             Position += deltaMove;
 
-            if (BoundingBoxType == "RBB")
-            {
-                Console.WriteLine(deltaMove);
-            }
-
             // clear temp forces
             tempForcesY.Clear();
             tempForcesX.Clear();
@@ -388,7 +385,7 @@ namespace RocketJumper.Classes
             tileVertices[3] = new Vector2(tileBounds.Left, tileBounds.Bottom);
 
             // get normals of RBB and tileBounds
-            Vector2[] RBBNormals = RBB.GetNormals();
+            Vector2[] RBBNormals = RBB.GetNormals(RBBVertices);
             Vector2[] tileNormals = new Vector2[4];
             tileNormals[0] = new Vector2(0, 1);
             tileNormals[1] = new Vector2(1, 0);
@@ -502,13 +499,26 @@ namespace RocketJumper.Classes
                    AABB.Left < other.Right;
         }
 
-        public void AddBoundingBox(string type)
+        public void AddBoundingBox(string type, Vector2 customBoundingBoxScale = default)
         {
             BoundingBoxType = type;
-            if (type == "AABB")
-                AABB = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
-            else if (type == "RBB")
-                RBB = new RotatedRectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y, (int)Rotation, Origin);
+            if (customBoundingBoxScale == default)
+            {
+                if (type == "AABB")
+                    AABB = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
+                else if (type == "RBB")
+                    RBB = new RotatedRectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y, (int)Rotation, Origin);
+            }
+            else
+            {
+                int sizeX = (int)(Size.X * customBoundingBoxScale.X);
+                int sizeY = (int)(Size.Y * customBoundingBoxScale.Y);
+                BoundingBoxOffset = new Vector2((Size.X - sizeX) /2, (Size.Y - sizeY) /2);
+                if (type == "AABB")
+                    AABB = new Rectangle(0, 0, sizeX, sizeY);
+                else if (type == "RBB")
+                    RBB = new RotatedRectangle(0, 0, sizeX, sizeY, (int)Rotation, Origin);
+            }
         }
 
         public void MoveTo(Vector2 position)

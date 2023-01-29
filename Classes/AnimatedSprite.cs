@@ -20,7 +20,7 @@ namespace RocketJumper.Classes
         public int CurrentFrameId { get; private set; }
         public Physics Physics { get; set; }
         public GameState GameState { get; }
-        public float Scale { get { return Physics.Size.X / FrameSize.X; } }
+        public Vector2 Scale { get { return new Vector2(Physics.Size.X / FrameSize.X, Physics.Size.Y / FrameSize.Y); } }
 
         // if Sprite attached
         public Vector2 AttachmentOffset { get; set; }
@@ -50,11 +50,11 @@ namespace RocketJumper.Classes
             Vector2 attachmentOrigin = default,
             bool moveOnAttach = false,
             string boundingBoxType = "AABB",
-            Vector2 origin = default)
+            Vector2 origin = default,
+            Vector2 customBoundingBoxScale = default)
         {
             // default to first frame
             CurrentFrameId = 0;
-
 
             CurrentAnimationId = currentAnimationId;
             AnimationDict = animationDict;
@@ -67,7 +67,10 @@ namespace RocketJumper.Classes
             MoveOnAttach = moveOnAttach;
 
             GameState = gameState;
-            Physics = new Physics(position, FrameSize * scale, gameState, gravityEnabled, rotation, boundingBoxType: boundingBoxType, origin: origin);
+            if (customBoundingBoxScale == default)
+                Physics = new Physics(position, FrameSize * scale, gameState, gravityEnabled, rotation, boundingBoxType: boundingBoxType, origin: origin);
+            else
+                Physics = new Physics(position, FrameSize * scale, gameState, gravityEnabled, rotation, boundingBoxType: boundingBoxType, origin: origin, customBoundingBoxScale: customBoundingBoxScale);
         }
 
         public void Update(GameTime gameTime)
@@ -114,6 +117,7 @@ namespace RocketJumper.Classes
 
             Physics.Draw(gameTime, spriteBatch);
         }
+
         public void AddAttachmentOffset()
         {
             Physics.MoveBy(AttachmentOffset);

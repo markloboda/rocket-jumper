@@ -76,7 +76,7 @@ namespace RocketJumper.Classes.States
                 ["idle"] = new Animation_s(content.Load<Texture2D>("Sprites/Player/Idle"), 5, 0.2f),
                 ["run"] = new Animation_s(content.Load<Texture2D>("Sprites/Player/Run"), 4, 0.2f)
             };
-            AnimatedSprite playerSprite = new AnimatedSprite(playerAnimationDict, Map.start, this, "idle", PlayerScale, true, true);
+            AnimatedSprite playerSprite = new AnimatedSprite(playerAnimationDict, Map.start, this, "idle", PlayerScale, true, true, customBoundingBoxScale: new Vector2(0.5f, 1));
             camera = new Camera();
 
             // Load Player
