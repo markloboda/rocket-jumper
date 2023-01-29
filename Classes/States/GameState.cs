@@ -26,6 +26,10 @@ namespace RocketJumper.Classes.States
 
         // camera
         public Matrix CameraTransform;
+        public float currentYCameraOffset = 0;
+        public static float MAX_UP_CAMERA_OFFSET = 380;
+        public static float MAX_DOWN_CAMERA_OFFSET = -450;
+
 
         public Map Map;
         public Player Player;
@@ -130,7 +134,29 @@ namespace RocketJumper.Classes.States
 
             Player.Update(gameTime);
             UpdateSprites(gameTime);
+
+            // camera movement
             camera.Follow(this.Player.PlayerSprite);
+
+            if (KeyboardState.IsKeyDown(Keys.W))
+            {
+                if (currentYCameraOffset <= MAX_UP_CAMERA_OFFSET)
+                    currentYCameraOffset += 80;
+            }
+            else if (KeyboardState.IsKeyDown(Keys.S))
+            {
+                if (currentYCameraOffset >= MAX_DOWN_CAMERA_OFFSET)
+                    currentYCameraOffset -= 80;
+            }
+            else
+            {
+                if (currentYCameraOffset > 0)
+                    currentYCameraOffset -= 80;
+                else if (currentYCameraOffset < 0)
+                    currentYCameraOffset += 80;
+            }
+
+            camera.AddVerticalOffset(currentYCameraOffset);
             CameraTransform = camera.Transform;
         }
 

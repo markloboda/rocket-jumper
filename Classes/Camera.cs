@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using RocketJumper.Classes.States;
 
 namespace RocketJumper.Classes
@@ -33,6 +34,15 @@ namespace RocketJumper.Classes
                 1);
 
             Transform = position * scale * offset;
+        }
+
+        public void AddVerticalOffset(float yOffsetAmount)
+        {
+            Matrix offset = Matrix.CreateTranslation(
+                0,
+                yOffsetAmount,
+                0);
+            Transform *= offset;
         }
 
         public Rectangle GetCameraRectangle()
