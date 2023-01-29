@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace RocketJumper.Classes
 {
@@ -8,62 +9,81 @@ namespace RocketJumper.Classes
         // Position of the center of the bounding box
         public Vector2 Position;
 
+        public float X
+        {
+            get { return Position.X; }
+            set { Position.X = value; }
+        }
+        public float Y
+        {
+            get { return Position.Y; }
+            set { Position.Y = value; }
+        }
+
         // Width and height of the bounding box
         public int Width;
         public int Height;
 
-        // Rotation angle of the bounding box, in radians
-        public int Rotation;
+        public float Left
+        {
+            get
+            {
+                float cos = (float)Math.Cos(Rotation);
+                float sin = (float)Math.Sin(Rotation);
+                float x1 = (cos * (-Width / 2 - Origin.X)) - (sin * (-Height / 2 - Origin.Y)) + Position.X;
+                float x2 = (cos * (Width / 2 - Origin.X)) - (sin * (-Height / 2 - Origin.Y)) + Position.X;
+                return Math.Min(x1, x2);
+            }
+        }
 
-        public RotatedRectangle(int x, int y, int width, int height, int rotation)
+        public float Right
+        {
+            get
+            {
+                float cos = (float)Math.Cos(Rotation);
+                float sin = (float)Math.Sin(Rotation);
+                float x1 = (cos * (-Width / 2 - Origin.X)) - (sin * (-Height / 2 - Origin.Y)) + Position.X;
+                float x2 = (cos * (Width / 2 - Origin.X)) - (sin * (-Height / 2 - Origin.Y)) + Position.X;
+                return Math.Max(x1, x2);
+            }
+        }
+
+        public float Top
+        {
+            get
+            {
+                float cos = (float)Math.Cos(Rotation);
+                float sin = (float)Math.Sin(Rotation);
+                float y1 = (sin * (-Width / 2 - Origin.X)) + (cos * (-Height / 2 - Origin.Y)) + Position.Y;
+                float y2 = (sin * (Width / 2 - Origin.X)) + (cos * (-Height / 2 - Origin.Y)) + Position.Y;
+                return Math.Min(y1, y2);
+            }
+        }
+
+        public float Bottom
+        {
+            get
+            {
+                float cos = (float)Math.Cos(Rotation);
+                float sin = (float)Math.Sin(Rotation);
+                float y1 = (sin * (-Width / 2 - Origin.X)) + (cos * (Height / 2 - Origin.Y)) + Position.Y;
+                float y2 = (sin * (Width / 2 - Origin.X)) + (cos * (Height / 2 - Origin.Y)) + Position.Y;
+                return Math.Max(y1, y2);
+            }
+        }
+
+        // Rotation angle of the bounding box, in radians
+        public float Rotation;
+        public Vector2 Origin;
+
+        public RotatedRectangle(int x, int y, int width, int height, float rotation, Vector2 origin)
         {
             Position.X = x;
             Position.Y = y;
             Width = width;
             Height = height;
             Rotation = rotation;
-        }
-
-        // Calculates the corners of the bounding box
-        public Vector2[] GetCorners()
-        {
-            // Calculate the half-width and half-height of the bounding box
-            float halfWidth = Width / 2;
-            float halfHeight = Height / 2;
-
-            // Calculate the four corners of the bounding box
-            Vector2 topLeft = new Vector2(-halfWidth, -halfHeight);
-            Vector2 topRight = new Vector2(halfWidth, -halfHeight);
-            Vector2 bottomLeft = new Vector2(-halfWidth, halfHeight);
-            Vector2 bottomRight = new Vector2(halfWidth, halfHeight);
-
-            // Rotate the corners around the center of the bounding box
-            topLeft = RotatePoint(topLeft, Rotation);
-            topRight = RotatePoint(topRight, Rotation);
-            bottomLeft = RotatePoint(bottomLeft, Rotation);
-            bottomRight = RotatePoint(bottomRight, Rotation);
-
-            // Offset the corners by the position of the bounding box
-            topLeft += Position;
-            topRight += Position;
-            bottomLeft += Position;
-            bottomRight += Position;
-
-            // Return the corners as an array
-            return new Vector2[] { topLeft, topRight, bottomRight, bottomLeft };
-        }
-
-        public bool Contains(Vector2 point)
-        {
-            // Rotate the point around the center of the bounding box
-            point = RotatePoint(point - Position, -Rotation);
-
-            // Check if the point is contained within the bounding box
-            if (Math.Abs(point.X) <= Width / 2 && Math.Abs(point.Y) <= Height / 2)
-            {
-                return true;
-            }
-            return false;
+            Origin = origin;
         }
 
         public RotatedRectangle MoveTo(Vector2 position)
@@ -72,12 +92,76 @@ namespace RocketJumper.Classes
             return this;
         }
 
-        // Rotates a point around the origin by a given angle
-        private Vector2 RotatePoint(Vector2 point, float angle)
+        public RotatedRectangle RotateTo(float rotationRadinas)
         {
-            float cos = (float)Math.Cos(angle);
-            float sin = (float)Math.Sin(angle);
-            return new Vector2(point.X * cos - point.Y * sin, point.X * sin + point.Y * cos);
+            Rotation = rotationRadinas;
+            return this;
+        }
+
+        public Vector2[] GetVertices()
+        {
+            Vector2[] vertices = new Vector2[4];
+
+            vertices[0] = new Vector2(-Width / 2, -Height / 2);
+            vertices[1] = new Vector2(Width / 2, -Height / 2);
+            vertices[2] = new Vector2(Width / 2, Height / 2);
+            vertices[3] = new Vector2(-Width / 2, Height / 2);
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = Vector2.Transform(vertices[i], Matrix.CreateRotationZ(Rotation));
+                vertices[i] += Position;
+                vertices[i] += Origin;
+            }
+
+            return vertices;
+        }
+
+        public Vector2[] GetNormals()
+        {
+            Vector2[] vertices = GetVertices();
+            Vector2[] normals = new Vector2[4];
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                int nextIndex = (i + 1) % vertices.Length;
+                Vector2 edge = vertices[nextIndex] - vertices[i];
+                normals[i] = new Vector2(-edge.Y, edge.X);
+                normals[i].Normalize();
+            }
+
+            return normals;
+        }
+
+
+
+        public void DrawRectangle(Color color, SpriteBatch spriteBatch)
+        {
+            // setup Texture2D for bounding box
+            Texture2D recTexture = new Texture2D(spriteBatch.GraphicsDevice, Width, Height);
+            Color[] data = new Color[Width * Height];
+            for (int i = 0; i < Width; ++i)
+            {
+                data[i] = Color.White;
+                data[(Height - 1) * Width + i] = Color.White;
+            }
+            for (int i = 0; i < Height; ++i)
+            {
+                data[i * Width] = Color.White;
+                data[i * Width + Width - 1] = Color.White;
+            }
+            recTexture.SetData(data);
+
+            spriteBatch.Draw(
+                texture: recTexture,
+                position: new Vector2(X, Y) + Origin,
+                sourceRectangle: null,
+                color: color,
+                origin: Origin,
+                rotation: Rotation,
+                scale: 1,
+                effects: SpriteEffects.None,
+                layerDepth: 0);
         }
     }
 }

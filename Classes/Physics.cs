@@ -40,7 +40,7 @@ namespace RocketJumper.Classes
 
         public RotatedRectangle RBB
         {
-            get { return rbb.MoveTo(Position); }
+            get { return rbb.MoveTo(Position - Origin).RotateTo(Rotation); }
             private set { rbb = value; }
         }
         private RotatedRectangle rbb;
@@ -92,13 +92,17 @@ namespace RocketJumper.Classes
         public int NormalFriction = 100;
         public int IceFriction = 1;
 
-        public Physics(Vector2 Position, Vector2 Size, GameState gameState, bool gravityEnabled, float rotation, string boundingBoxType = "AABB")
+        public Physics(Vector2 Position, Vector2 Size, GameState gameState, bool gravityEnabled, float rotation, string boundingBoxType = "AABB", Vector2 origin = default)
         {
             this.Position = Position;
             this.Size = Size;
             this.gameState = gameState;
             Rotation = rotation;
             GravityEnabled = gravityEnabled;
+            if (origin == null)
+                Origin = Vector2.Zero;
+            else
+                Origin = origin;
             AddBoundingBox(boundingBoxType);
         }
 
@@ -151,11 +155,7 @@ namespace RocketJumper.Classes
             deltaMove += Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // COLLISION DETECTION
-            // get surrounding tiles of BoundingBox
-            int leftTile = (int)Math.Floor((float)AABB.Left / gameState.Map.TileWidth) - 1;
-            int rightTile = (int)Math.Ceiling((float)AABB.Right / gameState.Map.TileWidth);
-            int topTile = (int)Math.Floor((float)AABB.Top / gameState.Map.TileHeight) - 1;
-            int bottomTile = (int)Math.Ceiling((float)AABB.Bottom / gameState.Map.TileHeight);
+
 
             // reset collision flags
             Collided = false;
@@ -166,6 +166,11 @@ namespace RocketJumper.Classes
 
             if (BoundingBoxType == "AABB")
             {
+                // get surrounding tiles of BoundingBox
+                int leftTile = (int)Math.Floor((float)AABB.Left / gameState.Map.TileWidth) - 1;
+                int rightTile = (int)Math.Ceiling((float)AABB.Right / gameState.Map.TileWidth);
+                int topTile = (int)Math.Floor((float)AABB.Top / gameState.Map.TileHeight) - 1;
+                int bottomTile = (int)Math.Ceiling((float)AABB.Bottom / gameState.Map.TileHeight);
                 // for each potentially colliding tile
                 for (int y = topTile; y <= bottomTile; ++y)
                 {
@@ -308,6 +313,34 @@ namespace RocketJumper.Classes
                     }
                 }
             }
+            else if (BoundingBoxType == "RBB")
+            {
+                // get surrounding tiles of BoundingBox
+                int leftTile = (int)Math.Floor(RBB.Left / gameState.Map.TileWidth) - 1;
+                int rightTile = (int)Math.Ceiling(RBB.Right / gameState.Map.TileWidth);
+                int topTile = (int)Math.Floor(RBB.Top / gameState.Map.TileHeight) - 1;
+                int bottomTile = (int)Math.Ceiling(RBB.Bottom / gameState.Map.TileHeight);
+
+
+                // separating axis
+                // for each potentially colliding tile
+                for (int y = topTile; y <= bottomTile; ++y)
+                {
+                    for (int x = leftTile; x <= rightTile; ++x)
+                    {
+                        // if this tile is collidable
+                        int tileGID = gameState.Map.GetTileId(x, y);
+                        if (tileGID != 0)
+                        {
+                            // determine collision depth (with direction) and magnitude
+                            Rectangle tileBounds = gameState.Map.GetBounds(x, y);
+                            Collided = SeparatingAxisTheorem(RBB, tileBounds);
+                            if (Collided)
+                                goto endOfCollisionDetection;
+                        }
+                    }
+                }
+            }
 
             // side of map collision
             if (deltaMove.X > 0 && AABB.Right + deltaMove.X > gameState.Map.WidthInPixels ||
@@ -327,18 +360,85 @@ namespace RocketJumper.Classes
                 Velocity.X = 0;
             }
 
+        endOfCollisionDetection:
             // apply deltaMove to position
             Position += deltaMove;
+
+            if (BoundingBoxType == "RBB")
+            {
+                Console.WriteLine(deltaMove);
+            }
 
             // clear temp forces
             tempForcesY.Clear();
             tempForcesX.Clear();
         }
 
+
+        bool SeparatingAxisTheorem(RotatedRectangle RBB, Rectangle tileBounds)
+        {
+            // get corners of RBB
+            Vector2[] RBBVertices = RBB.GetVertices();
+
+            // get corners of tileBounds
+            Vector2[] tileVertices = new Vector2[4];
+            tileVertices[0] = new Vector2(tileBounds.Left, tileBounds.Top);
+            tileVertices[1] = new Vector2(tileBounds.Right, tileBounds.Top);
+            tileVertices[2] = new Vector2(tileBounds.Right, tileBounds.Bottom);
+            tileVertices[3] = new Vector2(tileBounds.Left, tileBounds.Bottom);
+
+            // get normals of RBB and tileBounds
+            Vector2[] RBBNormals = RBB.GetNormals();
+            Vector2[] tileNormals = new Vector2[4];
+            tileNormals[0] = new Vector2(0, 1);
+            tileNormals[1] = new Vector2(1, 0);
+            tileNormals[2] = new Vector2(0, -1);
+            tileNormals[3] = new Vector2(-1, 0);
+
+            Vector2[] normals = new Vector2[tileNormals.Length + RBBNormals.Length];
+            tileVertices.CopyTo(normals, 0);
+            RBBNormals.CopyTo(normals, tileVertices.Length);
+
+            // check overlap along all normals
+            foreach (Vector2 normal in normals)
+            {
+                float RBBMin = float.MaxValue, RBBMax = float.MinValue, tileMin = float.MaxValue, tileMax = float.MinValue;
+
+                foreach (Vector2 vertex in RBBVertices)
+                {
+                    float projection = Vector2.Dot(normal, vertex);
+                    if (projection < RBBMin) RBBMin = projection;
+                    if (projection > RBBMax) RBBMax = projection;
+                }
+
+                foreach (Vector2 vertex in tileVertices)
+                {
+                    float projection = Vector2.Dot(normal, vertex);
+                    if (projection < tileMin) tileMin = projection;
+                    if (projection > tileMax) tileMax = projection;
+                }
+
+                if (RBBMax < tileMin || RBBMin > tileMax)
+                {
+                    // no overlap along this normal
+                    return false;
+                }
+            }
+
+            // overlap along all normals
+            return true;
+        }
+
+
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             if (IsBoundingBoxVisible)
-                Tools.DrawRectangle(AABB, Color.Red, spriteBatch);
+            {
+                if (BoundingBoxType == "AABB")
+                    Tools.DrawRectangle(AABB, Color.Red, spriteBatch);
+                else if (BoundingBoxType == "RBB")
+                    RBB.DrawRectangle(Color.Red, spriteBatch);
+            }
         }
 
 
@@ -408,7 +508,7 @@ namespace RocketJumper.Classes
             if (type == "AABB")
                 AABB = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
             else if (type == "RBB")
-                RBB = new RotatedRectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y, (int)Rotation);
+                RBB = new RotatedRectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y, (int)Rotation, Origin);
         }
 
         public void MoveTo(Vector2 position)

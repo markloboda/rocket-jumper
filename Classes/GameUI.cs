@@ -16,6 +16,9 @@ namespace RocketJumper.Classes
         public Texture2D AmmoTexture;
         public Texture2D ProgressBar;
 
+        // flags
+        public bool ReloadBarVisible = false;
+
         private long timeMilliseconds;
 
         // visible components
@@ -75,7 +78,7 @@ namespace RocketJumper.Classes
             }
 
             // draw reload bar
-            if (this.player.AmmoCount <= 0)
+            if (ReloadBarVisible)
             {
                 float reloadProgress = 1.0f - ((float)this.player.ReloadTimer / this.player.ReloadRate);
                 Rectangle progressRectangle = new Rectangle(0, 0, (int)(reloadProgress * ProgressBar.Width), ProgressBar.Height);

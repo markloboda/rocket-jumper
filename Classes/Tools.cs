@@ -26,6 +26,36 @@ namespace RocketJumper.Classes
             spriteBatch.Draw(recTexture, new Vector2(rec.X, rec.Y), color);
         }
 
+        public static void DrawRectangle(RotatedRectangle rec, Color color, SpriteBatch spriteBatch)
+        {
+            // setup Texture2D for bounding box
+            Texture2D recTexture = new Texture2D(spriteBatch.GraphicsDevice, rec.Width, rec.Height);
+            Color[] data = new Color[rec.Width * rec.Height];
+            for (int i = 0; i < rec.Width; ++i)
+            {
+                data[i] = Color.White;
+                data[(rec.Height - 1) * rec.Width + i] = Color.White;
+            }
+            for (int i = 0; i < rec.Height; ++i)
+            {
+                data[i * rec.Width] = Color.White;
+                data[i * rec.Width + rec.Width - 1] = Color.White;
+            }
+            recTexture.SetData(data);
+
+            Vector2 origin = new Vector2(rec.Width / 2, rec.Height / 2);
+            spriteBatch.Draw(
+                texture: recTexture,
+                position: new Vector2(rec.X, rec.Y) + origin,
+                sourceRectangle: null,
+                color: color,
+                origin: origin,
+                rotation: rec.Rotation,
+                scale: 1,
+                effects: SpriteEffects.None,
+                layerDepth: 0);
+        }
+
         public static Texture2D GetSingleColorTexture(GraphicsDevice graphicsDevice, Color color)
         {
             Texture2D texture = new Texture2D(graphicsDevice, 1, 1);

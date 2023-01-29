@@ -34,7 +34,8 @@ namespace RocketJumper.Classes
         public int FireTimer;
         public int ReloadRate = 2000;         // time between reloads in milliseconds
         public int ReloadTimer;
-        public int AmmoCount = 2;
+        public int MaxAmmo = 10;
+        public int AmmoCount;
         public List<Rocket> RocketList = new();
         public float MaxExplosionForce = 250.0f;
         public Vector2 ShootingPosition
@@ -64,13 +65,21 @@ namespace RocketJumper.Classes
 
         public void Update(GameTime gameTime)
         {
-            FireTimer -= gameTime.ElapsedGameTime.Milliseconds;
-            if (AmmoCount != 2)
-                ReloadTimer -= gameTime.ElapsedGameTime.Milliseconds;
+            if (HasBazooka)
+            {
+                FireTimer -= gameTime.ElapsedGameTime.Milliseconds;
+                if (AmmoCount <= MaxAmmo)
+                    ReloadTimer -= gameTime.ElapsedGameTime.Milliseconds;
 
-            // handle reload
-            if (HasBazooka && AmmoCount != 2 && ReloadTimer <= 0)
-                ReloadBazooka();
+                // handle reload
+                if (AmmoCount < MaxAmmo && ReloadTimer <= 0)
+                    ReloadBazooka();
+
+                if (AmmoCount <= 0)
+                    GUIRenderer.ReloadBarVisible = true;
+                else
+                    GUIRenderer.ReloadBarVisible = false;
+            }
 
             HandleInputs();
             CheckSpriteCollision();
@@ -145,7 +154,7 @@ namespace RocketJumper.Classes
 
         public void ReloadBazooka()
         {
-            AmmoCount = 2;
+            AmmoCount = MaxAmmo;
             ReloadTimer = ReloadRate;
         }
 
@@ -163,8 +172,8 @@ namespace RocketJumper.Classes
             if (HasBazooka)
             {
                 Vector2 mousePosition = GameState.MouseState.Position.ToVector2();
-                Vector2 playerPosition = gameState.GetScreenPosition(PlayerSprite.Physics.GetGlobalCenter());
-                Vector2 direction = mousePosition - playerPosition;
+                Vector2 screenShootingPosition = gameState.GetScreenPosition(ShootingPosition);
+                Vector2 direction = mousePosition - screenShootingPosition;
 
                 direction.Normalize();
 
@@ -182,7 +191,6 @@ namespace RocketJumper.Classes
                 {
                     Rocket rocket = new Rocket(ShootingPosition, direction, GameState);
                     ReloadTimer = ReloadRate;
-                    rocket.RocketSprite.Physics.Origin = new Vector2(rocket.RocketSprite.Physics.Width / 2, rocket.RocketSprite.Physics.Height / 2);
                     RocketList.Add(rocket);
                     FireTimer = FireRate;
                     AmmoCount--;
@@ -220,6 +228,7 @@ namespace RocketJumper.Classes
         {
             if (item.Name == "Bazooka")
             {
+                AmmoCount = 0;
                 Bazooka = item;
                 HasBazooka = true;
                 Bazooka.AttachmentOrigin = new Vector2(PlayerSprite.Physics.Width / 2, Bazooka.AttachmentOffset.Y);

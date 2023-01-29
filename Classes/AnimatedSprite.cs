@@ -37,10 +37,24 @@ namespace RocketJumper.Classes
         private Rectangle sourceRectangle;
         private float timer = 0.0f;
 
-        public AnimatedSprite(Dictionary<string, Animation_s> animationDict, Vector2 position, GameState gameState, string currentAnimationId, float scale = 1.0f, bool isLooping = false, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, Vector2 attachmentOrigin = default, bool moveOnAttach = false)
+        public AnimatedSprite(
+            Dictionary<string, Animation_s> animationDict,
+            Vector2 position,
+            GameState gameState,
+            string currentAnimationId,
+            float scale = 1.0f,
+            bool isLooping = false,
+            bool gravityEnabled = false,
+            float rotation = 0.0f,
+            Vector2 attachmentOffset = default,
+            Vector2 attachmentOrigin = default,
+            bool moveOnAttach = false,
+            string boundingBoxType = "AABB",
+            Vector2 origin = default)
         {
             // default to first frame
             CurrentFrameId = 0;
+
 
             CurrentAnimationId = currentAnimationId;
             AnimationDict = animationDict;
@@ -53,7 +67,7 @@ namespace RocketJumper.Classes
             MoveOnAttach = moveOnAttach;
 
             GameState = gameState;
-            Physics = new Physics(position, FrameSize * scale, gameState, gravityEnabled, rotation);
+            Physics = new Physics(position, FrameSize * scale, gameState, gravityEnabled, rotation, boundingBoxType: boundingBoxType, origin: origin);
         }
 
         public void Update(GameTime gameTime)
@@ -80,6 +94,7 @@ namespace RocketJumper.Classes
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             Physics.Position = new Vector2((int)Physics.Position.X, (int)Physics.Position.Y);
+            Vector2 origin = Physics.Origin;
 
             spriteBatch.Draw(
                 texture: CurrentAnimation.Texture,

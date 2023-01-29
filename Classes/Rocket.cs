@@ -37,12 +37,13 @@ namespace RocketJumper.Classes
                 gameState,
                 "fly",
                 isLooping: true,
-                rotation: (float)Math.Atan2(direction.Y, direction.X)
+                rotation: (float)Math.Atan2(direction.Y, direction.X),
+                boundingBoxType: "RBB",
+                origin: new Vector2(rocketAnimation.FrameWidth / 2, rocketAnimation.FrameHeight / 2)
                 );
 
             RocketSprite.Physics.Velocity = Speed * this.direction;
 
-            RocketSprite.Physics.Origin = RocketSprite.Physics.GetLocalCenter();
             RocketSprite.Physics.IsBoundingBoxVisible = true;
 
             HitsPlayer = hitsPlayer;
@@ -86,7 +87,7 @@ namespace RocketJumper.Classes
             RocketSprite.Update(gameTime);
             Collided = RocketSprite.Physics.Collided;
             SideOfMapCollision = RocketSprite.Physics.SideOfMapCollision;
-            
+
 
             // check if player is hit
             if (HitsPlayer && RocketSprite.CollidesWith(gameState.Player.PlayerSprite))

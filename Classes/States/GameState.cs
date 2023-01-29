@@ -116,11 +116,11 @@ namespace RocketJumper.Classes.States
 
         public override void Update(GameTime gameTime)
         {
-            // if (!game.IsActive)
-            // {
-            //     PauseGame();
-            //     return;
-            // }
+            if (!game.IsActive)
+            {
+                PauseGame();
+                return;
+            }
 
             GetInputs();
 
