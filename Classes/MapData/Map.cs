@@ -21,7 +21,7 @@ namespace RocketJumper.Classes.MapData
         public List<TileSet> TileSets;      // Array of tile sets
         public List<Layer> Layers;          // Array of layers
 
-        public Vector2 start = new Vector2(35, 2847);
+        public Vector2 start = new Vector2(28 * 32, 120 * 32);
         public Rectangle finish;
 
         public int WidthInPixels
