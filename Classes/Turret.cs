@@ -17,6 +17,8 @@ namespace RocketJumper.Classes
         private Vector2 shootingDirection;
         private bool hasLineOfSightNow;
 
+        public bool PathFindingTurret = false;
+
         // parameters
         private const float fireRate = 1000.0f;
 
@@ -26,6 +28,8 @@ namespace RocketJumper.Classes
             this.gameState = level;
 
             SetTurretTop(baseSprite.Children[0]);
+
+            PathFindingTurret = ((StaticSprite)this.baseSprite).PathFinding;
         }
 
         public void Update(GameTime gameTime)
@@ -38,7 +42,10 @@ namespace RocketJumper.Classes
             fireTimer -= gameTime.ElapsedGameTime.Milliseconds;
             if (fireTimer <= 0)
             {
-                gameState.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, gameState, gameState.Player.PlayerSprite, hitsPlayer: true));
+                if (PathFindingTurret)
+                    gameState.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, gameState, gameState.Player.PlayerSprite, hitsPlayer: true));
+                else
+                    gameState.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, gameState, hitsPlayer: true));
                 fireTimer = fireRate;
 
                 // play sound

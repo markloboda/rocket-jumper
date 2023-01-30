@@ -35,6 +35,9 @@ namespace RocketJumper.Classes
         public Physics Physics { get; set; }
         public Vector2 Scale { get { return new Vector2(Physics.Size.X / Texture.Width, Physics.Size.Y / Texture.Height); } }
 
+        // if sprite is a turret
+        public bool PathFinding { get; set; }
+
 
         public StaticSprite(Dictionary<string, Texture2D> textureDict, string currentTextureId, Vector2 position, GameState level, Vector2 spriteSize, bool gravityEnabled = false, float rotation = 0.0f, Vector2 attachmentOffset = default, bool moveOnAttach = false, Vector2 attachmentOrigin = default)
         {

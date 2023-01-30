@@ -18,6 +18,7 @@ namespace RocketJumper.Classes.MapData
             Vector2 attachOffset = Vector2.Zero;
             bool moveOnAttach = false;
             int parentId = -1;
+            bool pathFinding = false;
             if (objectJson.ContainsKey("properties"))
             {
                 JArray customProperties = objectJson["properties"].ToObject<JArray>();
@@ -34,6 +35,9 @@ namespace RocketJumper.Classes.MapData
                         moveOnAttach = (bool)property["value"];
                     else if (propertyName == "Parent")
                         parentId = (int)property["value"];
+                    else if (propertyName == "PathFinding")
+                        pathFinding = (bool)property["value"];
+
                 }
             }
 
@@ -55,7 +59,10 @@ namespace RocketJumper.Classes.MapData
                 attachmentOffset: attachOffset,
                 moveOnAttach: moveOnAttach,
                 parentId: parentId
-                );
+                )
+            {
+                PathFinding = pathFinding
+            };
 
         }
     }
