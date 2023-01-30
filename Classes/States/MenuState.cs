@@ -14,14 +14,27 @@ namespace RocketJumper.Classes.States
     {
         private List<Component> components;
 
+        // enum for menu state
+        private enum MenuStateEnum
+        {
+            MainMenu,
+            Options,
+            Highscores
+        }
+
+        private MenuStateEnum currentMenuState;
+
         private List<Component> mainMenuComponents;
         private List<Component> optionsComponents;
         private List<Component> highscoresComponents;
+
+        private float mainMenuHeightUnit;
 
         // content
         public Dictionary<string, SoundEffect> SoundEffects = new();
 
         private Texture2D background;
+
 
         public MenuState(MyGame game, ContentManager content)
             : base(game, content)
@@ -30,69 +43,8 @@ namespace RocketJumper.Classes.States
 
         public override void LoadContent()
         {
-            var buttonFont = game.Font;
-
-            SoundEffects["gameStart"] = content.Load<SoundEffect>("Audio/gameStart");
-
-            mainMenuComponents = new List<Component>();
-            mainMenuComponents.Add(
-            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
-            {
-                Position = new Vector2(MyGame.ActualWidth / 2, 100),
-                Text = "Play",
-                Click = new EventHandler(Button_Play_Clicked)
-            });
-
-            mainMenuComponents.Add(
-            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
-            {
-                Position = new Vector2(MyGame.ActualWidth / 2, 200),
-                Text = "Options",
-                Click = new EventHandler(Button_Options_Clicked)
-            });
-
-            mainMenuComponents.Add(
-            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
-            {
-                Position = new Vector2(MyGame.ActualWidth / 2, 300),
-                Text = "Highscores",
-                Click = new EventHandler(Button_Highscores_Clicked)
-            });
-
-            mainMenuComponents.Add(
-            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
-            {
-                Position = new Vector2(MyGame.ActualWidth / 2, 400),
-                Text = "Exit",
-                Click = new EventHandler(Button_Exit_Clicked)
-            });
-
-            components = mainMenuComponents;
-
-            optionsComponents = new List<Component>();
-            optionsComponents.Add(
-            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
-            {
-                Position = new Vector2(MyGame.ActualWidth / 2, 100),
-                Text = "Back",
-                Click = new EventHandler(Button_Options_Back_Clicked)
-            });
-
-            highscoresComponents = new List<Component>();
-            highscoresComponents.Add(
-            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
-            {
-                Position = new Vector2(MyGame.ActualWidth / 2, 100),
-                Text = "Back",
-                Click = new EventHandler(Button_Highscores_Back_Clicked)
-            });
-
-
-
-
-            // optionsComponents.Add(
-            // new DropdownMenu(buttonFont, Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), new Vector2(MyGame.ActualWidth / 2, 200), new List<string> { "1", "2", "3", "4", "5" })
-            // );
+            SetupPosition();
+            ChangeMenuState(MenuStateEnum.MainMenu);
         }
 
         public override void Update(GameTime gameTime)
@@ -105,10 +57,116 @@ namespace RocketJumper.Classes.States
         {
             spriteBatch.Begin();
 
+            // draw title
+            spriteBatch.DrawString(game.TitleFont, "Rocket Jumper", new Vector2(MyGame.ActualWidth / 7, MyGame.ActualHeight - 7 * mainMenuHeightUnit), Color.White, 0, game.Font.MeasureString("Rocket Jumper") / 2, 1, SpriteEffects.None, 0);
+
             foreach (var component in components)
                 component.Draw(gameTime, spriteBatch);
 
             spriteBatch.End();
+
+            spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+
+            // Draw character
+
+            spriteBatch.End();
+        }
+
+        public void SetupPosition()
+        {
+            mainMenuHeightUnit = MyGame.ActualHeight / 15;
+
+            var buttonFont = game.Font;
+
+            SoundEffects["gameStart"] = content.Load<SoundEffect>("Audio/gameStart");
+
+            mainMenuComponents = new List<Component>();
+            mainMenuComponents.Add(
+            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 5, MyGame.ActualHeight - 5 * mainMenuHeightUnit),
+                Text = "Play",
+                Click = new EventHandler(Button_Play_Clicked)
+            });
+
+            mainMenuComponents.Add(
+            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 5, MyGame.ActualHeight - 4 * mainMenuHeightUnit),
+                Text = "Options",
+                Click = new EventHandler(Button_Options_Clicked)
+            });
+
+            mainMenuComponents.Add(
+            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 5, MyGame.ActualHeight - 3 * mainMenuHeightUnit),
+                Text = "Highscores",
+                Click = new EventHandler(Button_Highscores_Clicked)
+            });
+
+            mainMenuComponents.Add(
+            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 5, MyGame.ActualHeight - 2 * mainMenuHeightUnit),
+                Text = "Exit",
+                Click = new EventHandler(Button_Exit_Clicked)
+            });
+
+            optionsComponents = new List<Component>();
+            optionsComponents.Add(
+            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 2, MyGame.ActualHeight - 9 * mainMenuHeightUnit),
+                Text = "Back",
+                Click = new EventHandler(Button_Options_Back_Clicked)
+            });
+
+            // check screen resolution and set Options
+            int screenWidthPixels = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            int screenHeightPixels = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+
+            var options = new List<string>();
+            if (screenWidthPixels >= 2560 && screenHeightPixels >= 1440)
+                options.Add("2560x1440");
+            if (screenWidthPixels >= 1920 && screenHeightPixels >= 1080)
+                options.Add("1920x1080");
+            if (screenWidthPixels >= 1280 && screenHeightPixels >= 720)
+                options.Add("1280x720");
+
+            // check selected resolution
+            int windowHeight = MyGame.ActualHeight;
+            int windowWidth = MyGame.ActualWidth;
+
+            int selectedResolution = 0;
+            for (int i = 0; i < options.Count; i++)
+            {
+                string[] resolution = options[i].Split('x');
+                if (windowWidth == int.Parse(resolution[0]) && windowHeight == int.Parse(resolution[1]))
+                {
+                    selectedResolution = i;
+                    break;
+                }
+            }
+
+            optionsComponents.Add(
+            new Dropdown(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 2, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
+                Options = options,
+                SelectedIndex = selectedResolution,
+                SelectChange = new EventHandler(Options_Resolution_Changed)
+            });
+
+
+            highscoresComponents = new List<Component>();
+            highscoresComponents.Add(
+            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 2, 100),
+                Text = "Back",
+                Click = new EventHandler(Button_Highscores_Back_Clicked)
+            });
         }
 
 
@@ -124,7 +182,7 @@ namespace RocketJumper.Classes.States
 
         private void Button_Options_Clicked(object sender, EventArgs e)
         {
-            components = optionsComponents;
+            ChangeMenuState(MenuStateEnum.Options);
         }
 
         private void Button_Highscores_Clicked(object sender, EventArgs e)
@@ -150,7 +208,7 @@ namespace RocketJumper.Classes.States
                 }
             }
 
-            components = highscoresComponents;
+            ChangeMenuState(MenuStateEnum.Highscores);
         }
 
         private void Button_Exit_Clicked(object sender, EventArgs e)
@@ -160,12 +218,39 @@ namespace RocketJumper.Classes.States
 
         private void Button_Options_Back_Clicked(object sender, EventArgs e)
         {
-            components = mainMenuComponents;
+            ChangeMenuState(MenuStateEnum.MainMenu);
         }
 
         private void Button_Highscores_Back_Clicked(object sender, EventArgs e)
         {
-            components = mainMenuComponents;
+            ChangeMenuState(MenuStateEnum.MainMenu);
+        }
+
+        private void Options_Resolution_Changed(object sender, EventArgs e)
+        {
+            var dropdown = sender as Dropdown;
+            var resolution = dropdown.Options[dropdown.SelectedIndex].Split('x');
+
+            game.PrefferedResolution = new Vector2(int.Parse(resolution[0]), int.Parse(resolution[1]));
+
+            SetupPosition();
+            ChangeMenuState(MenuStateEnum.Options);
+        }
+
+        private void ChangeMenuState(MenuStateEnum menuState)
+        {
+            if (menuState == MenuStateEnum.MainMenu)
+            {
+                components = mainMenuComponents;
+            }
+            else if (menuState == MenuStateEnum.Options)
+            {
+                components = optionsComponents;
+            }
+            else if (menuState == MenuStateEnum.Highscores)
+            {
+                components = highscoresComponents;
+            }
         }
     }
 }

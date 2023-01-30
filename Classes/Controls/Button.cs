@@ -69,7 +69,7 @@ namespace RocketJumper.Classes.Controls
                 isHovering = true;
 
                 if (currentMouseState.LeftButton == ButtonState.Released && previousMouseState.LeftButton == ButtonState.Pressed)
-                    Click.Invoke(this, new EventArgs());
+                    Click?.Invoke(this, new EventArgs());
             }
         }
 

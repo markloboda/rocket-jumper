@@ -15,6 +15,7 @@ namespace RocketJumper
 
         // content
         public SpriteFont Font;
+        public SpriteFont TitleFont;
 
 
         private GraphicsDeviceManager graphics;
@@ -25,6 +26,42 @@ namespace RocketJumper
         public static int ActualWidth;
         public static int ActualHeight;
 
+        public JObject Settings;
+
+        public Vector2 PrefferedResolution
+        {
+            get
+            {
+                return new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+            }
+            set
+            {
+                graphics.PreferredBackBufferWidth = (int)value.X;
+                graphics.PreferredBackBufferHeight = (int)value.Y;
+                graphics.ApplyChanges();
+
+                ActualWidth = graphics.PreferredBackBufferWidth;
+                ActualHeight = graphics.PreferredBackBufferHeight;
+
+                // Write to settings.json
+                Settings["resolution"]["width"] = ActualWidth;
+                Settings["resolution"]["height"] = ActualHeight;
+                File.WriteAllText("Content/settings.json", Settings.ToString());
+            }
+        }
+
+        public bool Borderless
+        {
+            get
+            {
+                return this.Window.IsBorderless;
+            }
+            set
+            {
+                this.Window.IsBorderless = value;
+            }
+        }
+
         public MyGame()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -33,15 +70,13 @@ namespace RocketJumper
 
         protected override void Initialize()
         {
+            Settings = JObject.Parse(File.ReadAllText("Content/settings.json"));
+
             IsMouseVisible = true;
 
             // screen properties
-            graphics.PreferredBackBufferWidth = 1920;
-            graphics.PreferredBackBufferHeight = 1080;
+            PrefferedResolution = new Vector2(Settings["resolution"]["width"].ToObject<int>(), Settings["resolution"]["height"].ToObject<int>());
             graphics.ApplyChanges();
-
-            ActualWidth = graphics.PreferredBackBufferWidth;
-            ActualHeight = graphics.PreferredBackBufferHeight;
 
             this.Window.IsBorderless = false;
 
@@ -53,6 +88,7 @@ namespace RocketJumper
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             Font = Content.Load<SpriteFont>("Fonts/TimerFont");
+            TitleFont = Content.Load<SpriteFont>("Fonts/TitleFont");
 
             currentState = new MenuState(this, Content);
             currentState.LoadContent();
