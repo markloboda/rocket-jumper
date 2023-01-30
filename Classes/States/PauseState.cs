@@ -39,14 +39,6 @@ namespace RocketJumper.Classes.States
             pauseComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth / 2, 200),
-                Text = "Options",
-                Click = new EventHandler(Button_Options_Clicked)
-            });
-
-            pauseComponents.Add(
-            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
-            {
                 Position = new Vector2(MyGame.ActualWidth / 2, 300),
                 Text = "Quit",
                 Click = new EventHandler(Button_Quit_Clicked)
