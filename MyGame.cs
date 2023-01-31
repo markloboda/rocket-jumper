@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json.Linq;
 using RocketJumper.Classes.States;
 
@@ -112,6 +113,9 @@ namespace RocketJumper
             currentState = new MenuState(this, Content);
             currentState.LoadContent();
             nextState = null;
+
+            var mouseTexture = Content.Load<Texture2D>("UI/Cursor");
+            Mouse.SetCursor(MouseCursor.FromTexture2D(mouseTexture, mouseTexture.Width / 2, mouseTexture.Height / 2));
         }
 
         protected override void Update(GameTime gameTime)
