@@ -22,7 +22,7 @@ namespace RocketJumper.Classes
         private long timeMilliseconds;
 
         // visible components
-        public bool AmountOfTilesDrawn = true;
+        public bool AmountOfTilesDrawn = false;
 
 
         public GameUI(Player player, GameState gameState)
@@ -53,7 +53,7 @@ namespace RocketJumper.Classes
                 text: timerString,
                 position: new Vector2(MyGame.ActualWidth / 2,
                 MyGame.ActualHeight - 5),
-                color: Color.Wheat,
+                color: Color.DarkGoldenrod,
                 rotation: 0,
                 origin: new Vector2(timerSize.X / 2, timerSize.Y),
                 scale: 1,

@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
-using RocketJumper.Classes.States;
+﻿using Microsoft.Xna.Framework;
 
 namespace RocketJumper.Classes
 {
