@@ -155,7 +155,7 @@ namespace RocketJumper.Classes.States
             optionsComponents.Add(
             new TextComponent(buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth * 0.65f - 400, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
+                Position = new Vector2(MyGame.ActualWidth * 0.65f - 300, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
                 Text = "Resolution"
             });
 
@@ -171,14 +171,14 @@ namespace RocketJumper.Classes.States
             optionsComponents.Add(
             new TextComponent(buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth * 0.65f - 400, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
+                Position = new Vector2(MyGame.ActualWidth * 0.65f - 300, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
                 Text = "Volume"
             });
 
             optionsComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth * 0.65f - 200, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
+                Position = new Vector2(MyGame.ActualWidth * 0.65f - 150, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
                 Text = "<",
                 Click = new EventHandler(Options_Volume_Down_Clicked)
             });
@@ -193,7 +193,7 @@ namespace RocketJumper.Classes.States
             optionsComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth * 0.65f + 200, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
+                Position = new Vector2(MyGame.ActualWidth * 0.65f + 150, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
                 Text = ">",
                 Click = new EventHandler(Options_Volume_Up_Clicked)
             });
