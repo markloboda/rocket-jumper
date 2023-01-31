@@ -7,12 +7,29 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json.Linq;
 using RocketJumper.Classes.Controls;
+using RocketJumper.Classes.MapData;
 
 namespace RocketJumper.Classes.States
 {
     public class MenuState : State
     {
-        private List<Component> components;
+        private List<Component> components
+        {
+            get
+            {
+                switch (currentMenuState)
+                {
+                    case MenuStateEnum.MainMenu:
+                        return mainMenuComponents;
+                    case MenuStateEnum.Options:
+                        return optionsComponents;
+                    case MenuStateEnum.Highscores:
+                        return highscoresComponents;
+                    default:
+                        return mainMenuComponents;
+                }
+            }
+        }
 
         // enum for menu state
         private enum MenuStateEnum
@@ -23,6 +40,23 @@ namespace RocketJumper.Classes.States
         }
 
         private MenuStateEnum currentMenuState;
+        private string currentMenuTitle
+        {
+            get
+            {
+                switch (currentMenuState)
+                {
+                    case MenuStateEnum.MainMenu:
+                        return "Rocket Jumper";
+                    case MenuStateEnum.Options:
+                        return "Options";
+                    case MenuStateEnum.Highscores:
+                        return "Highscores";
+                    default:
+                        return "Main Menu";
+                }
+            }
+        }
 
         private List<Component> mainMenuComponents;
         private List<Component> optionsComponents;
@@ -33,7 +67,13 @@ namespace RocketJumper.Classes.States
         // content
         public Dictionary<string, SoundEffect> SoundEffects = new();
 
-        private Texture2D background;
+        private Texture2D gameBackground;
+        private Texture2D menuBackground;
+
+        private Animation_s playerIdleAnimation;
+        private int currentFrameId;
+        private float timer;
+        private Rectangle idleSourceRectangle;
 
         // settings
         private TextComponent volumeText;
@@ -46,12 +86,32 @@ namespace RocketJumper.Classes.States
 
         public override void LoadContent()
         {
+            // load background
+            gameBackground = content.Load<Texture2D>("Background/GameBackground");
+            menuBackground = content.Load<Texture2D>("Background/MenuBackground");
+
+            // load character idle animation
+            playerIdleAnimation = new Animation_s(content.Load<Texture2D>("Sprites/Player/Idle"), 5, 0.2f);
+            // default to first frame
+            currentFrameId = 0;
+
             SetupPosition();
             ChangeMenuState(MenuStateEnum.MainMenu);
         }
 
         public override void Update(GameTime gameTime)
         {
+            // update character
+            // handle frames
+            timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            while (timer > playerIdleAnimation.FrameTime)
+            {
+                timer -= playerIdleAnimation.FrameTime;
+                currentFrameId = (currentFrameId + 1) % playerIdleAnimation.FrameCount;
+            }
+            // set source rectangle
+            idleSourceRectangle = GetSourceRectangle(currentFrameId);
+
             foreach (var component in components)
                 component.Update(gameTime);
         }
@@ -59,18 +119,25 @@ namespace RocketJumper.Classes.States
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             spriteBatch.Begin();
+            // draw background
+            spriteBatch.Draw(gameBackground, new Rectangle(0, 0, MyGame.ActualWidth, gameBackground.Height), Color.White);
 
-            // draw title
-            spriteBatch.DrawString(game.TitleFont, "Rocket Jumper", new Vector2(MyGame.ActualWidth / 7, MyGame.ActualHeight - 7 * mainMenuHeightUnit), Color.White, 0, game.Font.MeasureString("Rocket Jumper") * 0.65f, 1, SpriteEffects.None, 0);
+            // draw menu title
+            spriteBatch.DrawString(game.TitleFont, currentMenuTitle, new Vector2(MyGame.ActualWidth / 7, MyGame.ActualHeight - 7 * mainMenuHeightUnit), Color.DarkGreen, 0, game.Font.MeasureString(currentMenuTitle) * 0.65f, 1, SpriteEffects.None, 0);
 
             foreach (var component in components)
                 component.Draw(gameTime, spriteBatch);
-
             spriteBatch.End();
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+            // scale of menu background
+            float scale = 10;
+            var tilesPosition = new Vector2(MyGame.ActualWidth - menuBackground.Width * scale, MyGame.ActualHeight - 3 * mainMenuHeightUnit);
+            spriteBatch.Draw(menuBackground, new Vector2(MyGame.ActualWidth - menuBackground.Width * scale, MyGame.ActualHeight - 3 * mainMenuHeightUnit), null, Color.White, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
 
-            // Draw character
+            // draw character
+            var characterPosition = new Vector2(tilesPosition.X + menuBackground.Width * scale / 2, tilesPosition.Y - playerIdleAnimation.FrameHeight * scale);
+            spriteBatch.Draw(playerIdleAnimation.Texture, characterPosition, idleSourceRectangle, Color.White, 0, Vector2.Zero, scale, SpriteEffects.FlipHorizontally, 0);
 
             spriteBatch.End();
         }
@@ -155,22 +222,6 @@ namespace RocketJumper.Classes.States
             optionsComponents.Add(
             new TextComponent(buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth * 0.65f - 300, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
-                Text = "Resolution"
-            });
-
-            optionsComponents.Add(
-            new Dropdown(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
-            {
-                Position = new Vector2(MyGame.ActualWidth * 0.65f, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
-                Options = options,
-                SelectedIndex = selectedResolution,
-                SelectChange = new EventHandler(Options_Resolution_Changed)
-            });
-
-            optionsComponents.Add(
-            new TextComponent(buttonFont)
-            {
                 Position = new Vector2(MyGame.ActualWidth * 0.65f - 300, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
                 Text = "Volume"
             });
@@ -196,6 +247,22 @@ namespace RocketJumper.Classes.States
                 Position = new Vector2(MyGame.ActualWidth * 0.65f + 150, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
                 Text = ">",
                 Click = new EventHandler(Options_Volume_Up_Clicked)
+            });
+
+            optionsComponents.Add(
+            new TextComponent(buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth * 0.65f - 300, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
+                Text = "Resolution"
+            });
+
+            optionsComponents.Add(
+            new Dropdown(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth * 0.65f, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
+                Options = options,
+                SelectedIndex = selectedResolution,
+                SelectChange = new EventHandler(Options_Resolution_Changed)
             });
 
 
@@ -298,17 +365,18 @@ namespace RocketJumper.Classes.States
         private void ChangeMenuState(MenuStateEnum menuState)
         {
             if (menuState == MenuStateEnum.MainMenu)
-            {
-                components = mainMenuComponents;
-            }
+                currentMenuState = MenuStateEnum.MainMenu;
             else if (menuState == MenuStateEnum.Options)
-            {
-                components = optionsComponents;
-            }
+                currentMenuState = MenuStateEnum.Options;
             else if (menuState == MenuStateEnum.Highscores)
-            {
-                components = highscoresComponents;
-            }
+                currentMenuState = MenuStateEnum.Highscores;
         }
+
+
+        private Rectangle GetSourceRectangle(int frameIndex)
+        {
+            return new Rectangle(frameIndex * playerIdleAnimation.FrameWidth, 0, playerIdleAnimation.FrameWidth, playerIdleAnimation.FrameHeight);
+        }
+
     }
 }

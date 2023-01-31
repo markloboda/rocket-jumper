@@ -97,8 +97,8 @@ namespace RocketJumper.Classes.Controls
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             var textColor = Color.Black;
-            var backgroundColor = Color.White;
-            var hoverColor = Color.LightGray;
+            var backgroundColor = Color.LightGray;
+            var hoverColor = Color.LightBlue;
 
             if (isHovering)
                 spriteBatch.Draw(texture, Bounds, hoverColor);

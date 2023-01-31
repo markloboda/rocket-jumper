@@ -26,7 +26,7 @@ namespace RocketJumper.Classes.Controls
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawString(font, Text, Position + CenterOffset, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.5f);
+            spriteBatch.DrawString(font, Text, Position + CenterOffset, Color.Black, 0, Vector2.Zero, 1, SpriteEffects.None, 0.5f);
         }
     }
 }
