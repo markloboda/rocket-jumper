@@ -69,6 +69,9 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/TitleFont.spritefont
 
+#begin high_scores.json
+/copy:high_scores.json
+
 #begin Levels/main_map-tiled.json
 /copy:Levels/main_map-tiled.json
 
@@ -77,6 +80,9 @@
 
 #begin Levels/test-map-2.json
 /copy:Levels/test-map-2.json
+
+#begin settings.json
+/copy:settings.json
 
 #begin Sprites/Bazooka.png
 /importer:TextureImporter

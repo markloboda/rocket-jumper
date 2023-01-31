@@ -18,11 +18,8 @@ namespace RocketJumper.Classes.States
         public const string MapFilePath = "Content/Levels/main_map-tiled.json";
         public const float PlayerScale = 2.5f;
 
-
         // debug variables
         public int TilesDrawnCount = 0;
-
-
 
         // camera
         public Matrix CameraTransform;

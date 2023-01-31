@@ -78,7 +78,7 @@ namespace RocketJumper
             PrefferedResolution = new Vector2(Settings["resolution"]["width"].ToObject<int>(), Settings["resolution"]["height"].ToObject<int>());
             graphics.ApplyChanges();
 
-            this.Window.IsBorderless = false;
+            Borderless = Settings["borderless"].ToObject<bool>();
 
             base.Initialize();
         }

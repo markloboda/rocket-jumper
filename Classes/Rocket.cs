@@ -22,7 +22,7 @@ namespace RocketJumper.Classes
         public Sprite TargetSprite;
         public bool PathFindingRocket = false;
 
-        public float Speed = 1000.0f;
+        public float Speed = 500.0f;
 
         public Rocket(Vector2 position, Vector2 direction, GameState gameState, bool hitsPlayer = false)
         {
@@ -44,7 +44,7 @@ namespace RocketJumper.Classes
 
             RocketSprite.Physics.Velocity = Speed * this.direction;
 
-            RocketSprite.Physics.IsBoundingBoxVisible = true;
+            RocketSprite.Physics.IsBoundingBoxVisible = false;
 
             HitsPlayer = hitsPlayer;
         }
@@ -53,7 +53,6 @@ namespace RocketJumper.Classes
         {
             this.gameState = level;
             this.direction = direction;
-            Speed = 500.0f;
 
             rocketAnimation = level.RocketAnimation;
 

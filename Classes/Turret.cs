@@ -43,9 +43,15 @@ namespace RocketJumper.Classes
             if (fireTimer <= 0)
             {
                 if (PathFindingTurret)
-                    gameState.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, gameState, gameState.Player.PlayerSprite, hitsPlayer: true));
+                    gameState.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, gameState, gameState.Player.PlayerSprite, hitsPlayer: true)
+                    {
+                        Speed = 350.0f
+                    });
                 else
-                    gameState.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, gameState, hitsPlayer: true));
+                    gameState.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, gameState, hitsPlayer: true)
+                    {
+                        Speed = 350.0f
+                    });
                 fireTimer = fireRate;
 
                 // play sound

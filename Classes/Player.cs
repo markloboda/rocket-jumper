@@ -51,7 +51,7 @@ namespace RocketJumper.Classes
         {
             this.gameState = gameState;
             PlayerSprite = playerSprite;
-            playerSprite.Physics.IsBoundingBoxVisible = true;
+            playerSprite.Physics.IsBoundingBoxVisible = false;
 
             GUIRenderer = new GameUI(this, this.gameState)
             {
