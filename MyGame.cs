@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json.Linq;
 using RocketJumper.Classes.States;
@@ -27,6 +29,20 @@ namespace RocketJumper
         public static int ActualHeight;
 
         public JObject Settings;
+        public float Volume
+        {
+            get
+            {
+                return Settings["volume"].ToObject<float>();
+            }
+            set
+            {
+                var volume = (float)Math.Round(value, 1);
+                Settings["volume"] = volume;
+                SoundEffect.MasterVolume = volume;
+                File.WriteAllText("Content/settings.json", Settings.ToString());
+            }
+        }
 
         public Vector2 PrefferedResolution
         {
@@ -73,6 +89,9 @@ namespace RocketJumper
             Settings = JObject.Parse(File.ReadAllText("Content/settings.json"));
 
             IsMouseVisible = true;
+
+            // settings
+            Volume = Settings["volume"].ToObject<int>();
 
             // screen properties
             PrefferedResolution = new Vector2(Settings["resolution"]["width"].ToObject<int>(), Settings["resolution"]["height"].ToObject<int>());

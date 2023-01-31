@@ -3,5 +3,6 @@
     "width": 1920,
     "height": 1080
   },
-  "borderless": false
+  "borderless": false,
+  "volume": 0.2
 }

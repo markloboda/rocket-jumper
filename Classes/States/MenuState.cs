@@ -35,6 +35,9 @@ namespace RocketJumper.Classes.States
 
         private Texture2D background;
 
+        // settings
+        private TextComponent volumeText;
+
 
         public MenuState(MyGame game, ContentManager content)
             : base(game, content)
@@ -58,7 +61,7 @@ namespace RocketJumper.Classes.States
             spriteBatch.Begin();
 
             // draw title
-            spriteBatch.DrawString(game.TitleFont, "Rocket Jumper", new Vector2(MyGame.ActualWidth / 7, MyGame.ActualHeight - 7 * mainMenuHeightUnit), Color.White, 0, game.Font.MeasureString("Rocket Jumper") / 2, 1, SpriteEffects.None, 0);
+            spriteBatch.DrawString(game.TitleFont, "Rocket Jumper", new Vector2(MyGame.ActualWidth / 7, MyGame.ActualHeight - 7 * mainMenuHeightUnit), Color.White, 0, game.Font.MeasureString("Rocket Jumper") * 0.65f, 1, SpriteEffects.None, 0);
 
             foreach (var component in components)
                 component.Draw(gameTime, spriteBatch);
@@ -117,7 +120,7 @@ namespace RocketJumper.Classes.States
             optionsComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth / 2, MyGame.ActualHeight - 9 * mainMenuHeightUnit),
+                Position = new Vector2(MyGame.ActualWidth * 0.65f, MyGame.ActualHeight - 9 * mainMenuHeightUnit),
                 Text = "Back",
                 Click = new EventHandler(Button_Options_Back_Clicked)
             });
@@ -150,12 +153,49 @@ namespace RocketJumper.Classes.States
             }
 
             optionsComponents.Add(
+            new TextComponent(buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth * 0.65f - 400, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
+                Text = "Resolution"
+            });
+
+            optionsComponents.Add(
             new Dropdown(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth / 2, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
+                Position = new Vector2(MyGame.ActualWidth * 0.65f, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
                 Options = options,
                 SelectedIndex = selectedResolution,
                 SelectChange = new EventHandler(Options_Resolution_Changed)
+            });
+
+            optionsComponents.Add(
+            new TextComponent(buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth * 0.65f - 400, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
+                Text = "Volume"
+            });
+
+            optionsComponents.Add(
+            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth * 0.65f - 200, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
+                Text = "<",
+                Click = new EventHandler(Options_Volume_Down_Clicked)
+            });
+
+            volumeText = new TextComponent(buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth * 0.65f, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
+                Text = (game.Volume * 10).ToString()
+            };
+            optionsComponents.Add(volumeText);
+
+            optionsComponents.Add(
+            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth * 0.65f + 200, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
+                Text = ">",
+                Click = new EventHandler(Options_Volume_Up_Clicked)
             });
 
 
@@ -163,7 +203,7 @@ namespace RocketJumper.Classes.States
             highscoresComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth / 2, 100),
+                Position = new Vector2(MyGame.ActualWidth * 0.65f, 100),
                 Text = "Back",
                 Click = new EventHandler(Button_Highscores_Back_Clicked)
             });
@@ -199,7 +239,7 @@ namespace RocketJumper.Classes.States
                     highscoresComponents.Add(
                     new Score(game.Font)
                     {
-                        Position = new Vector2(MyGame.ActualWidth / 2, 200 + i * 50),
+                        Position = new Vector2(MyGame.ActualWidth * 0.65f, 200 + i * 50),
                         Username = username.Name,
                         Time = long.Parse(score["time"].ToString()),
                         Date = score["date"].ToString()
@@ -235,6 +275,24 @@ namespace RocketJumper.Classes.States
 
             SetupPosition();
             ChangeMenuState(MenuStateEnum.Options);
+        }
+
+        private void Options_Volume_Down_Clicked(object sender, EventArgs e)
+        {
+            if (game.Volume > 0)
+            {
+                game.Volume -= 0.1f;
+                volumeText.Text = ((int)(game.Volume * 10)).ToString();
+            }
+        }
+
+        private void Options_Volume_Up_Clicked(object sender, EventArgs e)
+        {
+            if (game.Volume < 1)
+            {
+                game.Volume += 0.1f;
+                volumeText.Text = ((int)(game.Volume * 10)).ToString();
+            }
         }
 
         private void ChangeMenuState(MenuStateEnum menuState)
