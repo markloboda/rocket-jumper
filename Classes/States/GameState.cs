@@ -308,10 +308,5 @@ namespace RocketJumper.Classes.States
             MouseState = Mouse.GetState();
             GamePadState = GamePad.GetState(PlayerIndex.One);
         }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
