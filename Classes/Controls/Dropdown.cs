@@ -106,7 +106,8 @@ namespace RocketJumper.Classes.Controls
                 spriteBatch.Draw(texture, Bounds, backgroundColor);
 
             Vector2 textSize = font.MeasureString(Options[SelectedIndex]);
-            Vector2 textPosition = new Vector2(Position.X, Position.Y) - CenterOffset;
+            Vector2 centerTextOffset = new Vector2(textSize.X / 2, textSize.Y / 2);
+            Vector2 textPosition = new Vector2(Bounds.X + itemWidth / 2, Bounds.Y + itemHeight / 2) - centerTextOffset;
             spriteBatch.DrawString(font, Options[SelectedIndex], textPosition, textColor);
 
             if (isExpanded)
@@ -115,13 +116,14 @@ namespace RocketJumper.Classes.Controls
                 {
                     Rectangle itemRect = new Rectangle((int)(Position.X - CenterOffset.X), (int)(Position.Y - CenterOffset.Y) + (itemHeight * (i + 1)), itemWidth, itemHeight);
                     if (i == hoveringIndex)
-                        spriteBatch.Draw(texture, itemRect, hoverColor);
+                        spriteBatch.Draw(texture, itemRect, null, hoverColor, 0, Vector2.Zero, SpriteEffects.None, 0);
                     else
-                        spriteBatch.Draw(texture, itemRect, backgroundColor);
+                        spriteBatch.Draw(texture, itemRect, null, backgroundColor, 0, Vector2.Zero, SpriteEffects.None, 0);
 
                     Vector2 itemTextSize = font.MeasureString(Options[i]);
-                    Vector2 itemTextPosition = new Vector2(itemRect.X, itemRect.Y);
-                    spriteBatch.DrawString(font, Options[i], itemTextPosition, textColor);
+                    Vector2 itemTextCenterOffset = new Vector2(itemTextSize.X / 2, itemTextSize.Y / 2);
+                    Vector2 itemTextPosition = new Vector2(itemRect.X + itemRect.Width / 2, itemRect.Y + itemRect.Height / 2) - itemTextCenterOffset;
+                    spriteBatch.DrawString(font, Options[i], itemTextPosition, Color.Black, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
                 }
             }
         }

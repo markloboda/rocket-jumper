@@ -80,7 +80,7 @@ namespace RocketJumper.Classes.Controls
             if (isHovering)
                 color = Color.Gray;
 
-            spriteBatch.Draw(texture, Bounds, null, color, 0.0f, Vector2.Zero, SpriteEffects.None, 0);
+            spriteBatch.Draw(texture, Bounds, null, color, 0.0f, Vector2.Zero, SpriteEffects.None, 0.5f);
 
             if (!string.IsNullOrEmpty(Text))
             {

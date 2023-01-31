@@ -91,7 +91,7 @@ namespace RocketJumper
             IsMouseVisible = true;
 
             // settings
-            Volume = Settings["volume"].ToObject<int>();
+            SoundEffect.MasterVolume = Settings["volume"].ToObject<float>();
 
             // screen properties
             PrefferedResolution = new Vector2(Settings["resolution"]["width"].ToObject<int>(), Settings["resolution"]["height"].ToObject<int>());
