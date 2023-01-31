@@ -123,7 +123,7 @@ namespace RocketJumper.Classes.States
             spriteBatch.Draw(gameBackground, new Rectangle(0, 0, MyGame.ActualWidth, gameBackground.Height), Color.White);
 
             // draw menu title
-            spriteBatch.DrawString(game.TitleFont, currentMenuTitle, new Vector2(MyGame.ActualWidth / 7, MyGame.ActualHeight - 7 * mainMenuHeightUnit), Color.DarkGreen, 0, game.Font.MeasureString(currentMenuTitle) * 0.65f, 1, SpriteEffects.None, 0);
+            spriteBatch.DrawString(game.TitleFont, currentMenuTitle, new Vector2(MyGame.ActualWidth / 7, MyGame.ActualHeight - 8 * mainMenuHeightUnit), Color.DarkGreen, 0, game.Font.MeasureString(currentMenuTitle) * 0.65f, 1, SpriteEffects.None, 0);
 
             foreach (var component in components)
                 component.Draw(gameTime, spriteBatch);
@@ -150,14 +150,36 @@ namespace RocketJumper.Classes.States
 
             SoundEffects["gameStart"] = content.Load<SoundEffect>("Audio/gameStart");
 
-            mainMenuComponents = new List<Component>();
-            mainMenuComponents.Add(
-            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            if (File.Exists(GameState.SaveFilePath))
             {
-                Position = new Vector2(MyGame.ActualWidth / 5, MyGame.ActualHeight - 5 * mainMenuHeightUnit),
-                Text = "Play",
-                Click = new EventHandler(Button_Play_Clicked)
-            });
+                mainMenuComponents = new List<Component>();
+                mainMenuComponents.Add(
+                new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+                {
+                    Position = new Vector2(MyGame.ActualWidth / 5, MyGame.ActualHeight - 6 * mainMenuHeightUnit),
+                    Text = "Resume",
+                    Click = new EventHandler(Button_Play_Clicked)
+                });
+
+                mainMenuComponents.Add(
+                new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+                {
+                    Position = new Vector2(MyGame.ActualWidth / 5, MyGame.ActualHeight - 5 * mainMenuHeightUnit),
+                    Text = "Reset Save",
+                    Click = new EventHandler(Button_Reset_Save_Clicked)
+                });
+            }
+            else
+            {
+                mainMenuComponents = new List<Component>();
+                mainMenuComponents.Add(
+                new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+                {
+                    Position = new Vector2(MyGame.ActualWidth / 5, MyGame.ActualHeight - 5 * mainMenuHeightUnit),
+                    Text = "Play",
+                    Click = new EventHandler(Button_Play_Clicked)
+                });
+            }
 
             mainMenuComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
@@ -285,6 +307,14 @@ namespace RocketJumper.Classes.States
         {
             // SoundEffects["gameStart"].Play();
             game.ChangeState(new GameState(game, content));
+        }
+
+        private void Button_Reset_Save_Clicked(object sender, EventArgs e)
+        {
+            // reset save
+            File.Delete(GameState.SaveFilePath);
+
+            SetupPosition();
         }
 
         private void Button_Options_Clicked(object sender, EventArgs e)

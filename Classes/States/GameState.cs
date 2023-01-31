@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Xml;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -62,6 +64,23 @@ namespace RocketJumper.Classes.States
         public Texture2D AmmoTexture;
         public Texture2D ProgressBar;
 
+
+        // save game
+        public const string saveFile = "RocketJumper/SaveGame.xml";
+
+        public static string SaveFilePath
+        {
+            get { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), saveFile); }
+        }
+
+
+
+        private long previousSaveElapsedMilliseconds = 0;
+        public long TotalElapsedMilliseconds
+        {
+            get { return stopWatch.ElapsedMilliseconds + previousSaveElapsedMilliseconds; }
+        }
+
         public GameState(MyGame game, ContentManager content)
             : base(game, content)
         {
@@ -116,6 +135,9 @@ namespace RocketJumper.Classes.States
 
             tutorialTexture = content.Load<Texture2D>("UI/Tutorial-0");
             tutorialBazookaTexture = content.Load<Texture2D>("UI/Tutorial-1");
+
+            // load save game
+            LoadGame();
 
             stopWatch.Start();
         }
@@ -231,7 +253,7 @@ namespace RocketJumper.Classes.States
         {
             stopWatch.Stop();
             // save the time
-            game.SaveTime(MapFilePath, stopWatch.ElapsedMilliseconds);
+            game.SaveTime(MapFilePath, TotalElapsedMilliseconds);
             // go to menu
             game.ChangeState(new MenuState(game, content));
         }
@@ -307,6 +329,90 @@ namespace RocketJumper.Classes.States
             KeyboardState = Keyboard.GetState();
             MouseState = Mouse.GetState();
             GamePadState = GamePad.GetState(PlayerIndex.One);
+        }
+
+        public void SaveGame()
+        {
+            // create the save file if it doesn't exist
+            FileStream fileStream;
+            if (!File.Exists(SaveFilePath))
+                fileStream = File.Create(SaveFilePath);
+            else
+                fileStream = File.Open(SaveFilePath, FileMode.Truncate);
+
+            // save the game
+            using (XmlWriter writer = XmlWriter.Create(fileStream))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("SaveGame");
+
+                writer.WriteStartElement("Position");
+                writer.WriteAttributeString("X", Player.PlayerSprite.Physics.Position.X.ToString());
+                writer.WriteAttributeString("Y", Player.PlayerSprite.Physics.Position.Y.ToString());
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("HasBazooka");
+                writer.WriteAttributeString("Value", Player.HasBazooka.ToString());
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("AmmoCount");
+                writer.WriteAttributeString("Value", Player.AmmoCount.ToString());
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("FireTimer");
+                writer.WriteAttributeString("Value", Player.FireTimer.ToString());
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("ElapsedMilliseconds");
+                writer.WriteAttributeString("Value", TotalElapsedMilliseconds.ToString());
+                writer.WriteEndElement();
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+
+                writer.Close();
+                fileStream.Close();
+
+                // prompt the user
+                
+            }
+        }
+
+        public void LoadGame()
+        {
+            if (!File.Exists(SaveFilePath))
+                return;
+
+            using (XmlReader reader = XmlReader.Create(SaveFilePath))
+            {
+                while (reader.Read())
+                {
+                    if (reader.IsStartElement())
+                    {
+                        switch (reader.Name)
+                        {
+                            case "Position":
+                                float x = float.Parse(reader.GetAttribute("X"));
+                                float y = float.Parse(reader.GetAttribute("Y"));
+                                Player.PlayerSprite.Physics.Position = new Vector2(x, y);
+                                break;
+                            case "HasBazooka":
+                                Player.HasBazooka = bool.Parse(reader.GetAttribute("Value"));
+                                Player.AddBazookaToPlayer();
+                                break;
+                            case "AmmoCount":
+                                Player.AmmoCount = int.Parse(reader.GetAttribute("Value"));
+                                break;
+                            case "FireTimer":
+                                Player.FireTimer = int.Parse(reader.GetAttribute("Value"));
+                                break;
+                            case "ElapsedMilliseconds":
+                                previousSaveElapsedMilliseconds = long.Parse(reader.GetAttribute("Value"));
+                                break;
+                        }
+                    }
+                }
+            }
         }
     }
 }

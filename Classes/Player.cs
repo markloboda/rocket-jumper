@@ -239,5 +239,14 @@ namespace RocketJumper.Classes
             Items.Add(item);
             PlayerSprite.AddChild(item);
         }
+
+        public void AddBazookaToPlayer() {
+            foreach (Sprite item in GameState.ItemSprites) {
+                if (item.Name == "Bazooka") {
+                    AddItemToPlayer(item);
+                    break;
+                }
+            }
+        }
     }
 }

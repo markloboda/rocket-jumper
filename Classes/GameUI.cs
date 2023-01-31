@@ -34,7 +34,7 @@ namespace RocketJumper.Classes
 
         public void Update(GameTime gameTime)
         {
-            timeMilliseconds = gameState.stopWatch.ElapsedMilliseconds;
+            timeMilliseconds = gameState.TotalElapsedMilliseconds;
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)

@@ -38,6 +38,13 @@ namespace RocketJumper.Classes.States
             pauseComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
+                Position = new Vector2(MyGame.ActualWidth / 2, 200),
+                Text = "Save",
+                Click = new EventHandler(Button_Save_Clicked)
+            });
+            pauseComponents.Add(
+            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+            {
                 Position = new Vector2(MyGame.ActualWidth / 2, 300),
                 Text = "Quit",
                 Click = new EventHandler(Button_Quit_Clicked)
@@ -74,8 +81,9 @@ namespace RocketJumper.Classes.States
             gameState.stopWatch.Start();
         }
 
-        private void Button_Options_Clicked(object sender, EventArgs e)
+        private void Button_Save_Clicked(object sender, EventArgs e)
         {
+            gameState.SaveGame();
         }
 
         private void Button_Quit_Clicked(object sender, EventArgs e)
