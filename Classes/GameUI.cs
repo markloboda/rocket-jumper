@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -39,13 +40,14 @@ namespace RocketJumper.Classes
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             // draw timer in hours:minutes:seconds:milliseconds on the bottom center of the window
+            TimeSpan time = TimeSpan.FromMilliseconds(timeMilliseconds);
             string timerString;
             if (timeMilliseconds > 1000 * 60 * 60)
-                timerString = $"{timeMilliseconds / 1000 / 60 / 60}:{timeMilliseconds / 1000 / 60}:{timeMilliseconds / 1000}:{timeMilliseconds % 1000}";
+                timerString = $"{time.Hours}:{time.Minutes}:{time.Seconds}:{time.Milliseconds}";
             else if (timeMilliseconds > 1000 * 60)
-                timerString = $"{timeMilliseconds / 1000 / 60}:{timeMilliseconds / 1000}:{timeMilliseconds % 1000}";
+                timerString = $"{time.Minutes}:{time.Seconds}:{time.Milliseconds}";
             else
-                timerString = $"{timeMilliseconds / 1000}:{timeMilliseconds % 1000}";
+                timerString = $"{time.Seconds}:{time.Milliseconds}";
 
             Vector2 timerSize = TimerFont.MeasureString(timerString);
             spriteBatch.DrawString(

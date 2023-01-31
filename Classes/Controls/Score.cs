@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -16,13 +17,14 @@ namespace RocketJumper.Classes.Controls
         {
             get
             {
+                TimeSpan time = TimeSpan.FromMilliseconds(Time);
                 string timerString;
                 if (Time > 1000 * 60 * 60)
-                    timerString = $"{Time / 1000 / 60 / 60}:{Time / 1000 / 60}:{Time / 1000}:{Time % 1000}";
+                    timerString = $"{time.Hours}:{time.Minutes}:{time.Seconds}:{time.Milliseconds}";
                 else if (Time > 1000 * 60)
-                    timerString = $"{Time / 1000 / 60}:{Time / 1000}:{Time % 1000}";
+                    timerString = $"{time.Minutes}:{time.Seconds}:{time.Milliseconds}";
                 else
-                    timerString = $"{Time / 1000}:{Time % 1000}";
+                    timerString = $"{time.Seconds}:{time.Milliseconds}";
 
                 return $"{Username} ({Date}): {timerString}s";
             }
