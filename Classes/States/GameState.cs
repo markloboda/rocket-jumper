@@ -43,6 +43,8 @@ namespace RocketJumper.Classes.States
         public List<Sprite> ObjectSprites = new();
         public List<Turret> Turrets = new();
         private Texture2D backgroundTexture;
+        private Texture2D tutorialTexture;
+        private Texture2D tutorialBazookaTexture;
 
         // camera
         public Camera camera;
@@ -112,6 +114,9 @@ namespace RocketJumper.Classes.States
 
             backgroundTexture = content.Load<Texture2D>("Background/GameBackground");
 
+            tutorialTexture = content.Load<Texture2D>("UI/Tutorial-0");
+            tutorialBazookaTexture = content.Load<Texture2D>("UI/Tutorial-1");
+
             stopWatch.Start();
         }
 
@@ -159,8 +164,9 @@ namespace RocketJumper.Classes.States
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            // game
-            spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.Transform);
+
+            // Draw tutorial
+            spriteBatch.Begin(transformMatrix: camera.Transform);
 
             // get camera view rectangle
             Rectangle cameraRectangle = camera.GetCameraRectangle();
@@ -184,6 +190,18 @@ namespace RocketJumper.Classes.States
                 spriteBatch.Draw(backgroundTexture, new Rectangle(0, y, backgroundWidth, backgroundHeight), Color.White);
                 y += backgroundHeight;
             }
+
+            // draw tutorial
+            spriteBatch.Draw(tutorialTexture, Map.start, null, Color.Black, 0, Vector2.Zero, 0.2f, SpriteEffects.None, 0);
+
+            // draw bazooka tutorial
+            if (Player.HasBazooka)
+                spriteBatch.Draw(tutorialBazookaTexture, Map.start + new Vector2(300, 0), null, Color.Black, 0, Vector2.Zero, 0.2f, SpriteEffects.None, 0);
+
+            spriteBatch.End();
+
+            // game
+            spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.Transform);
 
             // Draw player
             Player.Draw(gameTime, spriteBatch);
