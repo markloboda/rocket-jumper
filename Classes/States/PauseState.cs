@@ -12,7 +12,6 @@ namespace RocketJumper.Classes.States
         private List<Component> components;
 
         private List<Component> pauseComponents;
-        private List<Component> optionsComponents;
 
         public Texture2D Background;
 

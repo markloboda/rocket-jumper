@@ -101,10 +101,7 @@ namespace RocketJumper.Classes
             this.gameState = gameState;
             Rotation = rotation;
             GravityEnabled = gravityEnabled;
-            if (origin == null)
-                Origin = Vector2.Zero;
-            else
-                Origin = origin;
+            Origin = origin;
             AddBoundingBox(boundingBoxType, customBoundingBoxScale);
         }
 
@@ -513,7 +510,7 @@ namespace RocketJumper.Classes
             {
                 int sizeX = (int)(Size.X * customBoundingBoxScale.X);
                 int sizeY = (int)(Size.Y * customBoundingBoxScale.Y);
-                BoundingBoxOffset = new Vector2((Size.X - sizeX) /2, (Size.Y - sizeY) /2);
+                BoundingBoxOffset = new Vector2((Size.X - sizeX) / 2, (Size.Y - sizeY) / 2);
                 if (type == "AABB")
                     AABB = new Rectangle(0, 0, sizeX, sizeY);
                 else if (type == "RBB")
