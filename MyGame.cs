@@ -29,6 +29,28 @@ namespace RocketJumper
         public static int ActualWidth;
         public static int ActualHeight;
 
+        public string SettingsFilePath {
+            get {
+                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper/settings.json");
+                if (!File.Exists(path)) {
+                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper"));
+                    File.WriteAllText(path, File.ReadAllText("Content/defaultSettings.json"));
+                }
+                return path;
+            }
+        }
+
+        public string ScoresFilePath {
+            get {
+                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper/scores.json");
+                if (!File.Exists(path)) {
+                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper"));
+                    File.WriteAllText(path, "{}");
+                }
+                return path;
+            }
+        }
+
         public JObject Settings;
         public float Volume
         {
@@ -38,10 +60,11 @@ namespace RocketJumper
             }
             set
             {
+                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), SettingsFilePath);
                 var volume = (float)Math.Round(value, 1);
                 Settings["volume"] = volume;
                 SoundEffect.MasterVolume = volume;
-                File.WriteAllText("Content/settings.json", Settings.ToString());
+                File.WriteAllText(path, Settings.ToString());
             }
         }
 
@@ -63,7 +86,7 @@ namespace RocketJumper
                 // Write to settings.json
                 Settings["resolution"]["width"] = ActualWidth;
                 Settings["resolution"]["height"] = ActualHeight;
-                File.WriteAllText("Content/settings.json", Settings.ToString());
+                File.WriteAllText(SettingsFilePath, Settings.ToString());
             }
         }
 
@@ -87,7 +110,7 @@ namespace RocketJumper
 
         protected override void Initialize()
         {
-            Settings = JObject.Parse(File.ReadAllText("Content/settings.json"));
+            Settings = JObject.Parse(File.ReadAllText(SettingsFilePath));
 
             IsMouseVisible = true;
 
@@ -156,8 +179,8 @@ namespace RocketJumper
 
         public void SaveTime(string mapPath, long milliseconds)
         {
-            // save time to high_scores.json
-            dynamic json = JObject.Parse(File.ReadAllText("Content/high_scores.json"));
+            // save time to scores.json
+            dynamic json = JObject.Parse(File.ReadAllText(ScoresFilePath));
 
             // make jobject to save time
             JObject save = new JObject();
@@ -171,7 +194,7 @@ namespace RocketJumper
             }
             json[USERNAME].Add(save);
 
-            File.WriteAllText("Content/high_scores.json", json.ToString());
+            File.WriteAllText(ScoresFilePath, json.ToString());
         }
     }
 }

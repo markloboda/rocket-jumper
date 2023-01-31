@@ -295,7 +295,7 @@ namespace RocketJumper.Classes.States
         private void Button_Highscores_Clicked(object sender, EventArgs e)
         {
             // load highscores
-            dynamic json = JObject.Parse(File.ReadAllText("Content/high_scores.json"));
+            dynamic json = JObject.Parse(File.ReadAllText(game.ScoresFilePath));
 
             // add highscores to highscoresComponents
             foreach (var username in json)
