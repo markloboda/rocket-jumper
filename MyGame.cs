@@ -165,6 +165,7 @@ namespace RocketJumper
 
         public void ChangeState(State state)
         {
+            nextState.InitialEscapeReleased = false;
             nextState = state;
         }
 

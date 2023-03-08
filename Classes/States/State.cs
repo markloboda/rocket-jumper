@@ -9,6 +9,8 @@ namespace RocketJumper.Classes.States
         protected MyGame game;
         protected ContentManager content;
         public bool IsPaused = false;
+        public bool InitialEscapeReleased = false;
+
 
         public State(MyGame game, ContentManager content)
         {

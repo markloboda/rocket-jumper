@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using RocketJumper.Classes.Controls;
+using Microsoft.Xna.Framework.Input;
 
 namespace RocketJumper.Classes.States
 {
@@ -16,6 +17,8 @@ namespace RocketJumper.Classes.States
         public Texture2D Background;
 
         GameState gameState;
+
+        private KeyboardState keyboardState;
 
         public PauseState(MyGame game, ContentManager content, GameState gameState) : base(game, content)
         {
@@ -57,6 +60,16 @@ namespace RocketJumper.Classes.States
         {
             foreach (var component in components)
                 component.Update(gameTime);
+
+            UpdateKeyboardState();
+            // Handle state inputs
+            if (keyboardState.IsKeyUp(Keys.Escape))
+                this.InitialEscapeReleased = true;
+            if (this.InitialEscapeReleased && keyboardState.IsKeyDown(Keys.Escape))
+            {
+                game.ChangeState(gameState);
+                gameState.stopWatch.Start();
+            }
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -70,6 +83,10 @@ namespace RocketJumper.Classes.States
             spriteBatch.End();
         }
 
+        private void UpdateKeyboardState()
+        {
+            keyboardState = Keyboard.GetState();
+        }
 
         /*
         * Button Events

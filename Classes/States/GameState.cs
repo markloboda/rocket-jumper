@@ -150,10 +150,11 @@ namespace RocketJumper.Classes.States
                 return;
             }
 
-            GetInputs();
-
-            // handle state inputs
-            if (KeyboardState.IsKeyDown(Keys.Escape))
+            UpdateInputStates();
+            // Handle state inputs
+            if (KeyboardState.IsKeyUp(Keys.Escape))
+                this.InitialEscapeReleased = true;
+            if (this.InitialEscapeReleased && KeyboardState.IsKeyDown(Keys.Escape))
                 PauseGame();
 
             Player.Update(gameTime);
@@ -324,7 +325,7 @@ namespace RocketJumper.Classes.States
             game.ChangeState(pauseState);
         }
 
-        private void GetInputs()
+        private void UpdateInputStates()
         {
             KeyboardState = Keyboard.GetState();
             MouseState = Mouse.GetState();
@@ -374,7 +375,7 @@ namespace RocketJumper.Classes.States
                 fileStream.Close();
 
                 // prompt the user
-                
+
             }
         }
 
