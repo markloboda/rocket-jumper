@@ -118,18 +118,15 @@ namespace RocketJumper.Classes.States
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            spriteBatch.Begin();
             // draw background
+            spriteBatch.Begin();
             spriteBatch.Draw(gameBackground, new Rectangle(0, 0, MyGame.ActualWidth, gameBackground.Height), Color.White);
 
             // draw menu title
             spriteBatch.DrawString(game.TitleFont, currentMenuTitle, new Vector2(MyGame.ActualWidth / 7, MyGame.ActualHeight - 8 * mainMenuHeightUnit), Color.DarkGreen, 0, game.Font.MeasureString(currentMenuTitle) * 0.65f, 1, SpriteEffects.None, 0);
-
-            foreach (var component in components)
-                component.Draw(gameTime, spriteBatch);
             spriteBatch.End();
-
             spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+
             // scale of menu background
             float scale = 10;
             var tilesPosition = new Vector2(MyGame.ActualWidth - menuBackground.Width * scale, MyGame.ActualHeight - 3 * mainMenuHeightUnit);
@@ -139,6 +136,12 @@ namespace RocketJumper.Classes.States
             var characterPosition = new Vector2(tilesPosition.X + menuBackground.Width * scale / 2, tilesPosition.Y - playerIdleAnimation.FrameHeight * scale);
             spriteBatch.Draw(playerIdleAnimation.Texture, characterPosition, idleSourceRectangle, Color.White, 0, Vector2.Zero, scale, SpriteEffects.FlipHorizontally, 0);
 
+            spriteBatch.End();
+
+
+            spriteBatch.Begin();
+            foreach (var component in components)
+                component.Draw(gameTime, spriteBatch);
             spriteBatch.End();
         }
 
@@ -209,7 +212,7 @@ namespace RocketJumper.Classes.States
             optionsComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth * 0.65f, MyGame.ActualHeight - 9 * mainMenuHeightUnit),
+                Position = new Vector2(MyGame.ActualWidth * 0.65f, MyGame.ActualHeight - 10 * mainMenuHeightUnit),
                 Text = "Back",
                 Click = new EventHandler(Button_Options_Back_Clicked)
             });
@@ -240,6 +243,14 @@ namespace RocketJumper.Classes.States
                     break;
                 }
             }
+
+            optionsComponents.Add(
+            new TextComponent(buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth * 0.65f - 300, MyGame.ActualHeight - 9 * mainMenuHeightUnit),
+                Text = "Borderless toggle"
+            });
+
 
             optionsComponents.Add(
             new TextComponent(buttonFont)
@@ -361,6 +372,12 @@ namespace RocketJumper.Classes.States
         private void Button_Highscores_Back_Clicked(object sender, EventArgs e)
         {
             ChangeMenuState(MenuStateEnum.MainMenu);
+        }
+
+        private void Options_Borderless_Clicked(object sender, EventArgs e)
+        {
+            game.Borderless = !game.Borderless;
+            SetupPosition();
         }
 
         private void Options_Resolution_Changed(object sender, EventArgs e)

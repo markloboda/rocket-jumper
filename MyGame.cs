@@ -29,10 +29,13 @@ namespace RocketJumper
         public static int ActualWidth;
         public static int ActualHeight;
 
-        public string SettingsFilePath {
-            get {
+        public string SettingsFilePath
+        {
+            get
+            {
                 string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper/settings.json");
-                if (!File.Exists(path)) {
+                if (!File.Exists(path))
+                {
                     Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper"));
                     File.WriteAllText(path, File.ReadAllText("Content/defaultSettings.json"));
                 }
@@ -40,10 +43,13 @@ namespace RocketJumper
             }
         }
 
-        public string ScoresFilePath {
-            get {
+        public string ScoresFilePath
+        {
+            get
+            {
                 string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper/scores.json");
-                if (!File.Exists(path)) {
+                if (!File.Exists(path))
+                {
                     Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper"));
                     File.WriteAllText(path, "{}");
                 }
@@ -126,6 +132,7 @@ namespace RocketJumper
             base.Initialize();
         }
 
+
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -165,8 +172,8 @@ namespace RocketJumper
 
         public void ChangeState(State state)
         {
-            nextState.InitialEscapeReleased = false;
             nextState = state;
+            nextState.InitialEscapeReleased = false;
         }
 
         public Texture2D GetFrame()
