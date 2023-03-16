@@ -6,6 +6,7 @@ using RocketJumper.Classes.States;
 using System;
 using System.Collections.Generic;
 
+
 namespace RocketJumper.Classes
 {
     public class Player
@@ -125,6 +126,13 @@ namespace RocketJumper.Classes
             GUIRenderer.Update(gameTime);
         }
 
+        public void UpdateReplay(GameTime gameTime, ReplayData data)
+        {
+            PlayerSprite.Physics.Position = data.PlayerPosition;
+
+            PlayerSprite.Update(gameTime);
+        }
+
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             // flip if necessary
@@ -240,9 +248,12 @@ namespace RocketJumper.Classes
             PlayerSprite.AddChild(item);
         }
 
-        public void AddBazookaToPlayer() {
-            foreach (Sprite item in GameState.ItemSprites) {
-                if (item.Name == "Bazooka") {
+        public void AddBazookaToPlayer()
+        {
+            foreach (Sprite item in GameState.ItemSprites)
+            {
+                if (item.Name == "Bazooka")
+                {
                     AddItemToPlayer(item);
                     break;
                 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,10 +9,23 @@ using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json.Linq;
 using RocketJumper.Classes.States;
 
+
 namespace RocketJumper
 {
+    public enum eWindowMode
+    {
+        Windowed,
+        Borderless,
+        Fullscreen
+    }
+
+
     public class MyGame : Game
     {
+
+        [DllImport("user32.dll")]
+        static extern void ClipCursor(ref Rectangle rect);
+
         string USERNAME = "mark";
 
         private State currentState;
@@ -57,6 +72,19 @@ namespace RocketJumper
             }
         }
 
+        public string ReplayFolderDirectory
+        {
+            get { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper/replays/"); }
+        }
+
+        public string CurrentReplayId
+        {
+            get
+            {
+                string replayId = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".bin";
+                return replayId;
+            }
+        }
         public JObject Settings;
         public float Volume
         {
@@ -96,15 +124,44 @@ namespace RocketJumper
             }
         }
 
-        public bool Borderless
+        public eWindowMode WindowMode
         {
             get
             {
-                return this.Window.IsBorderless;
+                return Settings["windowType"].ToObject<eWindowMode>();
             }
             set
             {
-                this.Window.IsBorderless = value;
+                if (value == WindowMode)
+                    return;
+                // save previous resolution
+                if (WindowMode == eWindowMode.Windowed)
+                {
+                    Settings["windowedResolution"]["width"] = graphics.PreferredBackBufferWidth;
+                    Settings["windowedResolution"]["height"] = graphics.PreferredBackBufferHeight;
+                }
+                else
+                {
+                    Settings["fullscreenResolution"]["width"] = graphics.PreferredBackBufferWidth;
+                    Settings["fullscreenResolution"]["height"] = graphics.PreferredBackBufferHeight;
+                }
+                File.WriteAllText(SettingsFilePath, Settings.ToString());
+
+                switch (value)
+                {
+                    case eWindowMode.Windowed:
+                        SetWindowed();
+                        break;
+                    case eWindowMode.Borderless:
+                        SetFullscreen(isBorderless: true);
+                        break;
+                    case eWindowMode.Fullscreen:
+                        SetFullscreen(isBorderless: false);
+                        break;
+                }
+
+                Settings["windowType"] = value.ToString();
+                File.WriteAllText(SettingsFilePath, Settings.ToString());
             }
         }
 
@@ -127,7 +184,8 @@ namespace RocketJumper
             PrefferedResolution = new Vector2(Settings["resolution"]["width"].ToObject<int>(), Settings["resolution"]["height"].ToObject<int>());
             graphics.ApplyChanges();
 
-            Borderless = Settings["borderless"].ToObject<bool>();
+            // window properties
+            WindowMode = Settings["windowType"].ToObject<eWindowMode>();
 
             base.Initialize();
         }
@@ -158,6 +216,12 @@ namespace RocketJumper
                 nextState = null;
             }
 
+            if (this.IsActive && (WindowMode == eWindowMode.Borderless || WindowMode == eWindowMode.Fullscreen))
+            {
+                Rectangle rect = Window.ClientBounds;
+                ClipCursor(ref rect);
+            }
+
             currentState.Update(gameTime);
 
             base.Update(gameTime);
@@ -185,7 +249,7 @@ namespace RocketJumper
             return texture;
         }
 
-        public void SaveTime(string mapPath, long milliseconds)
+        public void SaveTime(string mapPath, long milliseconds, string replayId)
         {
             // save time to scores.json
             dynamic json = JObject.Parse(File.ReadAllText(ScoresFilePath));
@@ -195,6 +259,7 @@ namespace RocketJumper
             save["time"] = milliseconds;
             save["date"] = System.DateTime.Now.ToString("dd/MM/yyyy");
             save["map"] = mapPath;
+            save["replayId"] = replayId;
 
             if (json[USERNAME] == null)
             {
@@ -203,6 +268,107 @@ namespace RocketJumper
             json[USERNAME].Add(save);
 
             File.WriteAllText(ScoresFilePath, json.ToString());
+        }
+
+        public void SetWindowed()
+        {
+            // set resolution
+            PrefferedResolution = new Vector2(Settings["windowedResolution"]["width"].ToObject<int>(), Settings["windowedResolution"]["height"].ToObject<int>());
+
+            // unset fullscreen
+            graphics.IsFullScreen = false;
+            graphics.ApplyChanges();
+        }
+
+        public void SetFullscreen(bool isBorderless = false)
+        {
+            // set resolution
+            PrefferedResolution = new Vector2(Settings["fullscreenResolution"]["width"].ToObject<int>(), Settings["fullscreenResolution"]["height"].ToObject<int>());
+
+            // set fullscreen
+            graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+            graphics.HardwareModeSwitch = !isBorderless;
+
+            graphics.IsFullScreen = true;
+            graphics.ApplyChanges();
+        }
+
+        public List<ReplayData> LoadReplay(string filePath)
+        {
+            var dataList = new List<ReplayData>();
+
+            // load binarized replay from ReplayFile
+            using (Stream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                using (BinaryReader reader = new BinaryReader(stream))
+                {
+                    while (reader.BaseStream.Position != reader.BaseStream.Length)
+                    {
+                        byte[] buffer = reader.ReadBytes(Marshal.SizeOf(typeof(ReplayData)));
+                        dataList.Add(toReplayData(buffer));
+                    }
+                }
+            }
+
+            return dataList;
+        }
+
+        private ReplayData toReplayData(byte[] buffer)
+        {
+            ReplayData aux = new ReplayData();
+            int length = Marshal.SizeOf(aux);
+            IntPtr ptr = Marshal.AllocHGlobal(length);
+
+            Marshal.Copy(buffer, 0, ptr, length);
+
+            aux = (ReplayData)Marshal.PtrToStructure(ptr, aux.GetType());
+            Marshal.FreeHGlobal(ptr);
+
+            return aux;
+        }
+
+        public void SaveReplay(string replayId, List<ReplayData> dataList)
+        {
+            // save binarized replay to ReplayFile 
+            using (Stream stream = new FileStream(getReplayFile(replayId), FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+            {
+                using (BinaryWriter writer = new BinaryWriter(stream))
+                {
+                    // get all data
+                    foreach (ReplayData data in dataList)
+                    {
+                        byte[] newBuffer = toBytes(data);
+                        writer.Write(newBuffer);
+                    }
+                }
+            }
+        }
+
+        private byte[] toBytes(ReplayData aux)
+        {
+            int length = Marshal.SizeOf(aux);
+            IntPtr ptr = Marshal.AllocHGlobal(length);
+            byte[] myBuffer = new byte[length];
+
+            Marshal.StructureToPtr(aux, ptr, true);
+            Marshal.Copy(ptr, myBuffer, 0, length);
+            Marshal.FreeHGlobal(ptr);
+
+            return myBuffer;
+        }
+
+        private string getReplayFile(string replayId)
+        {
+            string path = ReplayFolderDirectory;
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            // generate unique replay id based on current time
+            path = Path.Combine(path, CurrentReplayId);
+
+            return path;
         }
     }
 }

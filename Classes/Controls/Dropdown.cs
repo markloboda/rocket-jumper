@@ -110,6 +110,15 @@ namespace RocketJumper.Classes.Controls
             Vector2 textPosition = new Vector2(Bounds.X + itemWidth / 2, Bounds.Y + itemHeight / 2) - centerTextOffset;
             spriteBatch.DrawString(font, Options[SelectedIndex], textPosition, textColor);
 
+
+        }
+
+        public override void PostDraw(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            var textColor = Color.Black;
+            var backgroundColor = Color.LightGray;
+            var hoverColor = Color.LightBlue;
+
             if (isExpanded)
             {
                 for (int i = 0; i < Options.Count; i++)

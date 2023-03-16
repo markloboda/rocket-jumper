@@ -140,8 +140,13 @@ namespace RocketJumper.Classes.States
 
 
             spriteBatch.Begin();
+
             foreach (var component in components)
                 component.Draw(gameTime, spriteBatch);
+
+            foreach (var component in components)
+                component.PostDraw(gameTime, spriteBatch);
+
             spriteBatch.End();
         }
 
@@ -217,40 +222,33 @@ namespace RocketJumper.Classes.States
                 Click = new EventHandler(Button_Options_Back_Clicked)
             });
 
-            // check screen resolution and set Options
-            int screenWidthPixels = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            int screenHeightPixels = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
-
-            var options = new List<string>();
-            if (screenWidthPixels >= 2560 && screenHeightPixels >= 1440)
-                options.Add("2560x1440");
-            if (screenWidthPixels >= 1920 && screenHeightPixels >= 1080)
-                options.Add("1920x1080");
-            if (screenWidthPixels >= 1280 && screenHeightPixels >= 720)
-                options.Add("1280x720");
-
-            // check selected resolution
-            int windowHeight = MyGame.ActualHeight;
-            int windowWidth = MyGame.ActualWidth;
-
-            int selectedResolution = 0;
-            for (int i = 0; i < options.Count; i++)
+            optionsComponents.Add(
+            new TextComponent(buttonFont)
             {
-                string[] resolution = options[i].Split('x');
-                if (windowWidth == int.Parse(resolution[0]) && windowHeight == int.Parse(resolution[1]))
+                Position = new Vector2(MyGame.ActualWidth * 0.65f - 300, MyGame.ActualHeight - 9 * mainMenuHeightUnit),
+                Text = "Borderless"
+            });
+
+            var optionsWindowMode = new List<string> { "Windowed", "Borderless", "Fullscreen" };
+            int selectedWindow = 0;
+            for (int i = 0; i < optionsWindowMode.Count; i++)
+            {
+                string windowMode = optionsWindowMode[i];
+                if (windowMode == game.WindowMode.ToString())
                 {
-                    selectedResolution = i;
+                    selectedWindow = i;
                     break;
                 }
             }
 
             optionsComponents.Add(
-            new TextComponent(buttonFont)
+            new Dropdown(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth * 0.65f - 300, MyGame.ActualHeight - 9 * mainMenuHeightUnit),
-                Text = "Borderless toggle"
+                Position = new Vector2(MyGame.ActualWidth * 0.65f, MyGame.ActualHeight - 9 * mainMenuHeightUnit),
+                Options = optionsWindowMode,
+                SelectedIndex = selectedWindow,
+                SelectChange = new EventHandler(Options_Window_Changed)
             });
-
 
             optionsComponents.Add(
             new TextComponent(buttonFont)
@@ -289,11 +287,38 @@ namespace RocketJumper.Classes.States
                 Text = "Resolution"
             });
 
+            // check screen resolution and set Options
+            int screenWidthPixels = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            int screenHeightPixels = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+
+            var optionsResolution = new List<string>();
+            if (screenWidthPixels >= 2560 && screenHeightPixels >= 1440)
+                optionsResolution.Add("2560x1440");
+            if (screenWidthPixels >= 1920 && screenHeightPixels >= 1080)
+                optionsResolution.Add("1920x1080");
+            if (screenWidthPixels >= 1280 && screenHeightPixels >= 720)
+                optionsResolution.Add("1280x720");
+
+            // check selected resolution
+            int windowHeight = MyGame.ActualHeight;
+            int windowWidth = MyGame.ActualWidth;
+
+            int selectedResolution = 0;
+            for (int i = 0; i < optionsResolution.Count; i++)
+            {
+                string[] resolution = optionsResolution[i].Split('x');
+                if (windowWidth == int.Parse(resolution[0]) && windowHeight == int.Parse(resolution[1]))
+                {
+                    selectedResolution = i;
+                    break;
+                }
+            }
+
             optionsComponents.Add(
             new Dropdown(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
                 Position = new Vector2(MyGame.ActualWidth * 0.65f, MyGame.ActualHeight - 8 * mainMenuHeightUnit),
-                Options = options,
+                Options = optionsResolution,
                 SelectedIndex = selectedResolution,
                 SelectChange = new EventHandler(Options_Resolution_Changed)
             });
@@ -328,6 +353,17 @@ namespace RocketJumper.Classes.States
             SetupPosition();
         }
 
+        private void Button_Replay_Clicked(object sender, EventArgs e)
+        {
+            var path = ((ReplayEventArgs)((Button)sender).EventArgs).ReplayId;
+            if (path == null)
+                return;
+
+            var replayGameState = new GameState(game, content);
+            game.ChangeState(replayGameState);
+            replayGameState.StartReplay(game.ReplayFolderDirectory + path);
+        }
+
         private void Button_Options_Clicked(object sender, EventArgs e)
         {
             ChangeMenuState(MenuStateEnum.Options);
@@ -352,6 +388,25 @@ namespace RocketJumper.Classes.States
                         Time = long.Parse(score["time"].ToString()),
                         Date = score["date"].ToString()
                     });
+
+                    // highscoresComponents.Add(
+                    // new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), game.Font)
+                    // {
+                    //     Position = new Vector2(MyGame.ActualWidth * 0.85f, 200 + i * 50),
+                    //     Text = "Watch Replay",
+                    //     EventArgs = new ReplayEventArgs(score["replay"].ToString()),
+                    //     Click = new EventHandler(Button_Replay_Clicked)
+                    // });
+
+                    highscoresComponents.Add(
+                    new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), game.Font)
+                    {
+                        Position = new Vector2(MyGame.ActualWidth * 0.85f, 200 + i * 50),
+                        Text = "Watch Replay",
+                        EventArgs = new ReplayEventArgs(score["replayId"]?.ToString()),
+                        Click = new EventHandler(Button_Replay_Clicked)
+                    });
+
                     i++;
                 }
             }
@@ -374,10 +429,24 @@ namespace RocketJumper.Classes.States
             ChangeMenuState(MenuStateEnum.MainMenu);
         }
 
-        private void Options_Borderless_Clicked(object sender, EventArgs e)
+        private void Options_Window_Changed(object sender, EventArgs e)
         {
-            game.Borderless = !game.Borderless;
+            var dropdown = sender as Dropdown;
+            var option = dropdown.Options[dropdown.SelectedIndex];
+            switch (option)
+            {
+                case "Windowed":
+                    game.WindowMode = eWindowMode.Windowed;
+                    break;
+                case "Borderless":
+                    game.WindowMode = eWindowMode.Borderless;
+                    break;
+                case "Fullscreen":
+                    game.WindowMode = eWindowMode.Fullscreen;
+                    break;
+            }
             SetupPosition();
+            ChangeMenuState(MenuStateEnum.Options);
         }
 
         private void Options_Resolution_Changed(object sender, EventArgs e)

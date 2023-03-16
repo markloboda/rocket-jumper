@@ -3,6 +3,14 @@
     "width": 1920,
     "height": 1080
   },
-  "borderless": false,
+  "windowType": "Windowed",
+  "windowedResolution": {
+    "width": 1920,
+    "height": 1080
+  },
+  "fullscreenResolution": {
+    "width": 1920,
+    "height": 1080
+  },
   "volume": 0.5
 }

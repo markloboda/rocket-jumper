@@ -18,7 +18,7 @@ namespace RocketJumper.Classes
         public bool Collided = false;
         public bool SideOfMapCollision = false;
 
-        private Vector2 direction;
+        public Vector2 direction;
         public Sprite TargetSprite;
         public bool PathFindingRocket = false;
 

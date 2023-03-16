@@ -45,6 +45,7 @@ namespace RocketJumper.Classes.States
                 Text = "Save",
                 Click = new EventHandler(Button_Save_Clicked)
             });
+
             pauseComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
@@ -79,6 +80,9 @@ namespace RocketJumper.Classes.States
             // spriteBatch.Draw(Background, new Rectangle(0, 0, MyGame.VirtualWidth, MyGame.VirtualHeight), Color.White);
             foreach (var component in components)
                 component.Draw(gameTime, spriteBatch);
+
+            foreach (var component in components)
+                component.PostDraw(gameTime, spriteBatch);
 
             spriteBatch.End();
         }

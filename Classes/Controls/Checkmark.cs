@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace RocketJumper.Classes.Controls
 {
-    public class Button : Component
+    public class Checkmark : Component
     {
         private MouseState currentMouseState;
 
@@ -18,20 +18,9 @@ namespace RocketJumper.Classes.Controls
         private Texture2D texture;
 
         public EventHandler Click;
-        public EventArgs EventArgs;
+        public bool Checked;
 
         public bool Clicked { get; private set; }
-
-        public Vector2 Origin
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(Text))
-                    return new Vector2(font.MeasureString(Text).X / 2, font.MeasureString(Text).Y / 2);
-                else
-                    return new Vector2(texture.Width / 2, texture.Height / 2);
-            }
-        }
 
         public Vector2 Position;
 
@@ -39,20 +28,23 @@ namespace RocketJumper.Classes.Controls
         {
             get
             {
-                if (!string.IsNullOrEmpty(Text))
-                    return new Rectangle((int)(Position.X - Origin.X - Padding.X), (int)(Position.Y - Origin.Y - Padding.Y), (int)(font.MeasureString(Text).X + 2 * Padding.X), (int)(font.MeasureString(Text).Y + 2 * Padding.Y));
-                else
-                    return new Rectangle((int)(Position.X - Origin.X), (int)(Position.Y - Origin.Y), texture.Width, texture.Height);
+                return new Rectangle((int)(Position.X - Origin.X), (int)(Position.Y - Origin.Y), (int)Size.X, (int)Size.Y);
             }
         }
 
-        public Vector2 Padding = new Vector2(50, 10);
-        public string Text;
-
-
-        public Button(Texture2D texture, SpriteFont font)
+        public Vector2 Origin
         {
-            this.texture = texture;
+            get
+            {
+                return new Vector2(Size.X / 2, Size.Y / 2);
+            }
+        }
+
+        public Vector2 Size = new Vector2(40, 40);
+
+        public Checkmark(GraphicsDevice graphicsDevice, SpriteFont font)
+        {
+            this.texture = Tools.GetSingleColorTexture(graphicsDevice, Color.LightGray);
             this.font = font;
         }
 
@@ -69,25 +61,26 @@ namespace RocketJumper.Classes.Controls
                 isHovering = true;
 
                 if (currentMouseState.LeftButton == ButtonState.Released && previousMouseState.LeftButton == ButtonState.Pressed)
+                {
+                    Checked = !Checked;
                     Click?.Invoke(this, new EventArgs());
+                }
             }
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var color = Color.Transparent;
+            var color = Color.White;
 
             if (isHovering)
                 color = Color.Gray;
 
             spriteBatch.Draw(texture, Bounds, null, color, 0.0f, Vector2.Zero, SpriteEffects.None, 0.5f);
-
-            if (!string.IsNullOrEmpty(Text))
+            if (Checked)
             {
-                var x = (Bounds.X + (Bounds.Width / 2)) - (font.MeasureString(Text).X / 2);
-                var y = (Bounds.Y + (Bounds.Height / 2)) - (font.MeasureString(Text).Y / 2);
-
-                spriteBatch.DrawString(font, Text, new Vector2(x, y), Color.Black);
+                var x = (Bounds.X + (Bounds.Width / 2)) - (font.MeasureString("x").X / 2);
+                var y = (Bounds.Y + (Bounds.Height / 2)) - (font.MeasureString("x").Y / 2);
+                spriteBatch.DrawString(font, "x", new Vector2(x, y), Color.Black);
             }
         }
     }
