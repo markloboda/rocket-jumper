@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RocketJumper.Classes.Controls;
 using RocketJumper.Classes.States;
 using BigInteger = System.Numerics.BigInteger;
 
@@ -17,34 +19,95 @@ namespace RocketJumper.Classes
         public Texture2D AmmoTexture;
         public Texture2D ProgressBar;
 
+        // Replay 
+        private List<Component> replayComponents;
+
         // flags
         public bool ReloadBarVisible = false;
 
-        private long timeMilliseconds;
+        public long TimeMilliseconds;
 
         // visible components
         public bool AmountOfTilesDrawn = false;
+
+        private Button replayPlayPauseButton;
 
 
         public GameUI(Player player, GameState gameState)
         {
             this.player = player;
             this.gameState = gameState;
+
+            // Replay
+            replayComponents = new List<Component>();
+
+
+            replayPlayPauseButton = new Button(texture: gameState.PlayButtonTexture, font: gameState.Font)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 2, MyGame.ActualHeight - 50),
+                Scale = 0.1f,
+                Color = Color.Gray,
+                HoverColor = Color.DarkGray,
+                Click = Button_Pause_Click
+            };
+
+            // add replay components
+            replayComponents.Add(replayPlayPauseButton);
+
+            replayComponents.Add(new Button(texture: gameState.ForwardButtonTexture, font: gameState.Font)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 2 + 50, MyGame.ActualHeight - 50),
+                Scale = 0.1f,
+                Color = Color.Gray,
+                HoverColor = Color.DarkGray,
+                Click = Button_Forward_Click
+            });
+
+            replayComponents.Add(new Button(texture: gameState.ForwardButtonTexture, font: gameState.Font)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 2 - 50, MyGame.ActualHeight - 50),
+                Scale = 0.1f,
+                Color = Color.Gray,
+                HoverColor = Color.DarkGray,
+                Click = Button_Backward_Click,
+                SpriteEffects = SpriteEffects.FlipHorizontally
+            });
         }
 
         public void Update(GameTime gameTime)
         {
-            timeMilliseconds = gameState.TotalElapsedMilliseconds;
+            if (gameState.IsReplaying)
+            {
+                foreach (Component component in replayComponents)
+                {
+                    component.Update(gameTime);
+                }
+            }
+
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            spriteBatch.Begin();
+
+            if (gameState.IsReplaying)
+            {
+                foreach (Component component in replayComponents)
+                {
+                    component.Draw(gameTime, spriteBatch);
+                }
+            }
+
+            spriteBatch.End();
+
+            spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+
             // draw timer in hours:minutes:seconds:milliseconds on the bottom center of the window
-            TimeSpan time = TimeSpan.FromMilliseconds(timeMilliseconds);
+            TimeSpan time = TimeSpan.FromMilliseconds(TimeMilliseconds);
             string timerString;
-            if (timeMilliseconds > 1000 * 60 * 60)
+            if (TimeMilliseconds > 1000 * 60 * 60)
                 timerString = $"{time.Hours}:{time.Minutes}:{time.Seconds}:{time.Milliseconds}";
-            else if (timeMilliseconds > 1000 * 60)
+            else if (TimeMilliseconds > 1000 * 60)
                 timerString = $"{time.Minutes}:{time.Seconds}:{time.Milliseconds}";
             else
                 timerString = $"{time.Seconds}:{time.Milliseconds}";
@@ -133,6 +196,32 @@ namespace RocketJumper.Classes
                     effects: SpriteEffects.None,
                     layerDepth: 0);
             }
+
+            spriteBatch.End();
+        }
+
+        public void Button_Play_Click(object sender, EventArgs e)
+        {
+            gameState.IsReplayPaused = false;
+            replayPlayPauseButton.Texture = gameState.PlayButtonTexture;
+            replayPlayPauseButton.Click = Button_Pause_Click;
+        }
+
+        public void Button_Pause_Click(object sender, EventArgs e)
+        {
+            gameState.IsReplayPaused = true;
+            replayPlayPauseButton.Texture = gameState.PauseButtonTexture;
+            replayPlayPauseButton.Click = Button_Play_Click;
+        }
+
+        public void Button_Forward_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        public void Button_Backward_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

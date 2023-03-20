@@ -14,7 +14,23 @@ using RocketJumper.Classes.MapData;
 
 public struct ReplayData
 {
+    public long ElapsedMilliseconds;
     public Vector2 PlayerPosition;
+    public bool HasBazooka;
+    public float BazookaRotation;
+    public float InputMovement;
+    public ReplayRocketCreateData PlayerRocketCreateData;
+    public bool IsPlayerRocketShot;
+    public ReplayRocketCreateData TurretRocketCreateData;
+    public bool IsTurretRocketShot;
+}
+
+public struct ReplayRocketCreateData
+{
+    public Vector2 ShootingPosition;
+    public Vector2 Direction;
+    public bool IsFollowingPlayer;
+    public float Speed;
 }
 
 namespace RocketJumper.Classes.States
@@ -69,14 +85,20 @@ namespace RocketJumper.Classes.States
         public Texture2D AmmoTexture;
         public Texture2D ProgressBar;
 
+        // Replay UI textures
+        public Texture2D PlayButtonTexture;
+        public Texture2D PauseButtonTexture;
+        public Texture2D ForwardButtonTexture;
+
 
         // save game
         public const string saveFile = "RocketJumper/SaveGame.xml";
 
         // Replay system
         private List<ReplayData> ReplayDataList = new();
-        private int ReplayFrameIndex = 0;
-        private bool IsReplaying = false;
+        public int ReplayFrameIndex = 0;
+        public bool IsReplaying = false;
+        public bool IsReplayPaused = false;
 
         public static string SaveFilePath
         {
@@ -99,6 +121,11 @@ namespace RocketJumper.Classes.States
         public override void LoadContent()
         {
             Map = new Map(MapFilePath, content, this);
+
+            // Load textures for replay UI
+            PlayButtonTexture = content.Load<Texture2D>("UI/Play");
+            PauseButtonTexture = content.Load<Texture2D>("UI/Pause");
+            ForwardButtonTexture = content.Load<Texture2D>("UI/Forward");
 
             stopWatch = new Stopwatch();
 
@@ -160,26 +187,6 @@ namespace RocketJumper.Classes.States
             //     return;
             // }
 
-
-            if (IsReplaying)
-            {
-                UpdateReplay(gameTime);
-                return;
-            }
-
-            UpdateInputStates();
-            // Handle state inputs
-            if (KeyboardState.IsKeyUp(Keys.Escape))
-                this.InitialEscapeReleased = true;
-            if (this.InitialEscapeReleased && KeyboardState.IsKeyDown(Keys.Escape))
-                PauseGame();
-
-            Player.Update(gameTime);
-            UpdateSprites(gameTime);
-
-            // update replay data
-            SaveReplayFrame();
-
             // camera movement
             camera.Follow(this.Player.PlayerSprite);
 
@@ -203,10 +210,38 @@ namespace RocketJumper.Classes.States
 
             camera.AddVerticalOffset(currentYCameraOffset);
             CameraTransform = camera.Transform;
+
+            UpdateInputStates();
+            Player.GUIRenderer.Update(gameTime);
+
+            if (IsReplaying)
+            {
+                if (IsReplayPaused)
+                    return;
+
+                UpdateReplay(gameTime);
+            }
+            else
+            {
+                // Handle state inputs
+                if (KeyboardState.IsKeyUp(Keys.Escape))
+                    this.InitialEscapeReleased = true;
+                if (this.InitialEscapeReleased && KeyboardState.IsKeyDown(Keys.Escape))
+                    PauseGame();
+
+                Player.Update(gameTime);
+
+                UpdateSprites(gameTime);
+
+                // update replay data
+                SaveReplayFrame();
+            }
         }
 
         public void UpdateReplay(GameTime gameTime)
         {
+            HandleReplayInputs();
+
             if (ReplayFrameIndex >= ReplayDataList.Count)
             {
                 IsReplaying = false;
@@ -226,7 +261,16 @@ namespace RocketJumper.Classes.States
             camera.AddVerticalOffset(currentYCameraOffset);
             CameraTransform = camera.Transform;
 
-            ReplayFrameIndex++;
+            if (!IsReplayPaused)
+                ReplayFrameIndex++;
+        }
+
+        private void HandleReplayInputs()
+        {
+            if (KeyboardState.IsKeyUp(Keys.Escape))
+                this.InitialEscapeReleased = true;
+            if (this.InitialEscapeReleased && KeyboardState.IsKeyDown(Keys.Escape))
+                PauseGame();
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -284,9 +328,7 @@ namespace RocketJumper.Classes.States
             spriteBatch.End();
 
             // GUI
-            spriteBatch.Begin(samplerState: SamplerState.PointClamp);
             Player.GUIRenderer.Draw(gameTime, spriteBatch);
-            spriteBatch.End();
         }
 
         public Vector2 GetScreenPosition(Vector2 position)
@@ -298,16 +340,20 @@ namespace RocketJumper.Classes.States
         {
             stopWatch.Stop();
 
-            string replayId = game.CurrentReplayId;
-            
+            string replayId = game.CurrentDateReplayId;
+
             // save the time
             game.SaveTime(MapFilePath, TotalElapsedMilliseconds, replayId);
 
             // save replay to file
             game.SaveReplay(replayId, ReplayDataList);
 
+            // remove save file
+            RemoveSaveFile();
+
             // go to menu
             game.ChangeState(new MenuState(game, content));
+
         }
 
         private void DrawTileLayer(GameTime gameTime, SpriteBatch spriteBatch, Layer layer, Rectangle cameraRectangle)
@@ -425,8 +471,18 @@ namespace RocketJumper.Classes.States
                 writer.Close();
                 fileStream.Close();
             }
+
+            // save the replay
+            game.SaveReplay("save-replay.bin", ReplayDataList);
         }
-        
+
+        public void RemoveSaveFile()
+        {
+            // remove the save file
+            if (File.Exists(SaveFilePath))
+                File.Delete(SaveFilePath);
+        }
+
         public void LoadGame()
         {
             if (!File.Exists(SaveFilePath))
@@ -462,12 +518,47 @@ namespace RocketJumper.Classes.States
                     }
                 }
             }
+
+            // load the replay
+            ReplayDataList = game.LoadReplay(game.ReplayFolderDirectory + "save-replay.bin");
         }
 
         private void SaveReplayFrame()
         {
             ReplayData replayData = new ReplayData();
+            replayData.ElapsedMilliseconds = TotalElapsedMilliseconds;
             replayData.PlayerPosition = Player.PlayerSprite.Physics.Position;
+
+            replayData.HasBazooka = Player.HasBazooka;
+            if (Player.HasBazooka)
+            {
+                replayData.BazookaRotation = Player.Bazooka.Physics.Rotation;
+
+                if (Player.ShotRocket != null)
+                {
+                    replayData.IsPlayerRocketShot = true;
+                    replayData.PlayerRocketCreateData = new ReplayRocketCreateData();
+                    replayData.PlayerRocketCreateData.ShootingPosition = Player.ShotRocket.RocketSprite.Physics.Position;
+                    replayData.PlayerRocketCreateData.Direction = Player.ShotRocket.Direction;
+                }
+            }
+
+            // Turrets
+            foreach (Turret turret in Turrets)
+            {
+                if (turret.IsRocketShot)
+                {
+                    replayData.TurretRocketCreateData = new ReplayRocketCreateData();
+                    replayData.TurretRocketCreateData.ShootingPosition = turret.ShotRocket.RocketSprite.Physics.Position;
+                    replayData.TurretRocketCreateData.Direction = turret.ShotRocket.Direction;
+                    if (turret.ShotRocket.PathFindingRocket)
+                        replayData.TurretRocketCreateData.IsFollowingPlayer = true;
+                    replayData.TurretRocketCreateData.Speed = 350.0f;
+                    replayData.IsTurretRocketShot = true;
+                }
+            }
+
+            replayData.InputMovement = Player.InputMovement;
 
             ReplayDataList.Add(replayData);
         }

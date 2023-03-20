@@ -19,6 +19,9 @@ namespace RocketJumper.Classes
 
         public bool PathFindingTurret = false;
 
+        public bool IsRocketShot = false;
+        public Rocket ShotRocket;
+
         // parameters
         private const float fireRate = 1000.0f;
 
@@ -34,24 +37,31 @@ namespace RocketJumper.Classes
 
         public void Update(GameTime gameTime)
         {
+            IsRocketShot = false;
+
             AimAt(gameState.Player.PlayerSprite.Physics.GetGlobalCenter());
             if (!hasLineOfSightNow)
                 return;
 
             // shoot if possible
             fireTimer -= gameTime.ElapsedGameTime.Milliseconds;
-            if (fireTimer <= 0)
+            if (fireTimer <= 0 && !gameState.IsReplaying)
             {
+                IsRocketShot = true;
                 if (PathFindingTurret)
-                    gameState.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, gameState, gameState.Player.PlayerSprite, hitsPlayer: true)
+                    ShotRocket = new Rocket(ShootingPosition, shootingDirection, gameState, gameState.Player.PlayerSprite, hitsPlayer: true)
                     {
                         Speed = 350.0f
-                    });
+                    };
+
                 else
-                    gameState.Player.RocketList.Add(new Rocket(ShootingPosition, shootingDirection, gameState, hitsPlayer: true)
+                    ShotRocket = new Rocket(ShootingPosition, shootingDirection, gameState, hitsPlayer: true)
                     {
                         Speed = 350.0f
-                    });
+                    };
+
+                gameState.Player.RocketList.Add(ShotRocket);
+
                 fireTimer = fireRate;
 
                 // play sound

@@ -77,7 +77,7 @@ namespace RocketJumper
             get { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper/replays/"); }
         }
 
-        public string CurrentReplayId
+        public string CurrentDateReplayId
         {
             get
             {
@@ -366,7 +366,7 @@ namespace RocketJumper
                 Directory.CreateDirectory(path);
 
             // generate unique replay id based on current time
-            path = Path.Combine(path, CurrentReplayId);
+            path = Path.Combine(path, replayId);
 
             return path;
         }

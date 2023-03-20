@@ -18,7 +18,7 @@ namespace RocketJumper.Classes
         public bool Collided = false;
         public bool SideOfMapCollision = false;
 
-        public Vector2 direction;
+        public Vector2 Direction;
         public Sprite TargetSprite;
         public bool PathFindingRocket = false;
 
@@ -27,7 +27,7 @@ namespace RocketJumper.Classes
         public Rocket(Vector2 position, Vector2 direction, GameState gameState, bool hitsPlayer = false)
         {
             this.gameState = gameState;
-            this.direction = direction;
+            this.Direction = direction;
 
             rocketAnimation = gameState.RocketAnimation;
 
@@ -42,29 +42,29 @@ namespace RocketJumper.Classes
                 origin: new Vector2(rocketAnimation.FrameWidth / 2, rocketAnimation.FrameHeight / 2)
                 );
 
-            RocketSprite.Physics.Velocity = Speed * this.direction;
+            RocketSprite.Physics.Velocity = Speed * this.Direction;
 
             RocketSprite.Physics.IsBoundingBoxVisible = false;
 
             HitsPlayer = hitsPlayer;
         }
 
-        public Rocket(Vector2 position, Vector2 direction, GameState level, Sprite targetSprite, bool hitsPlayer = false)
+        public Rocket(Vector2 position, Vector2 direction, GameState gameState, Sprite targetSprite, bool hitsPlayer = false)
         {
-            this.gameState = level;
-            this.direction = direction;
+            this.gameState = gameState;
+            this.Direction = direction;
 
-            rocketAnimation = level.RocketAnimation;
+            rocketAnimation = gameState.RocketAnimation;
 
             RocketSprite = new AnimatedSprite(
                 new() { ["fly"] = rocketAnimation },
                 position,
-                level,
+                gameState,
                 "fly",
                 isLooping: true,
                 rotation: (float)Math.Atan2(direction.Y, direction.X)
                 );
-            RocketSprite.Physics.Velocity = Speed * this.direction;
+            RocketSprite.Physics.Velocity = Speed * this.Direction;
 
             RocketSprite.Physics.Origin = RocketSprite.Physics.GetLocalCenter();
 
@@ -77,10 +77,10 @@ namespace RocketJumper.Classes
         {
             if (PathFindingRocket)
             {
-                direction = TargetSprite.Physics.GetGlobalCenter() - RocketSprite.Physics.GetGlobalCenter();
-                direction.Normalize();
-                RocketSprite.Physics.Rotation = (float)Math.Atan2(direction.Y, direction.X);
-                RocketSprite.Physics.Velocity = Speed * direction;
+                Direction = TargetSprite.Physics.GetGlobalCenter() - RocketSprite.Physics.GetGlobalCenter();
+                Direction.Normalize();
+                RocketSprite.Physics.Rotation = (float)Math.Atan2(Direction.Y, Direction.X);
+                RocketSprite.Physics.Velocity = Speed * Direction;
             }
 
             RocketSprite.Update(gameTime);

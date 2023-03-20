@@ -17,7 +17,7 @@ namespace RocketJumper.Classes
 
 
         // movement vars
-        private float inputMovement;
+        public float InputMovement;
         public static float MaxHorizontalSpeed = 300;
         public Rectangle BoundingBoxWidth;
 
@@ -39,6 +39,7 @@ namespace RocketJumper.Classes
         public int MaxAmmo = 2;
         public int AmmoCount;
         public List<Rocket> RocketList = new();
+        public Rocket ShotRocket;
         public float MaxExplosionForce = 280.0f;
         public Vector2 ShootingPosition
         {
@@ -67,6 +68,10 @@ namespace RocketJumper.Classes
 
         public void Update(GameTime gameTime)
         {
+            ShotRocket = null;
+
+            GUIRenderer.TimeMilliseconds += gameTime.ElapsedGameTime.Milliseconds;
+
             if (HasBazooka)
             {
                 FireTimer -= gameTime.ElapsedGameTime.Milliseconds;
@@ -86,6 +91,53 @@ namespace RocketJumper.Classes
             HandleInputs();
             CheckSpriteCollision();
 
+            UpdateRockets(gameTime);
+
+            // add horizontal movement
+            PlayerSprite.AddInputToPhysics(new Vector2(InputMovement, 0.0f), MaxHorizontalSpeed);
+            PlayerSprite.Update(gameTime);
+        }
+
+        public void UpdateReplay(GameTime gameTime, ReplayData data)
+        {
+            GUIRenderer.TimeMilliseconds = data.ElapsedMilliseconds;
+            PlayerSprite.Physics.Position = data.PlayerPosition;
+
+            if (data.HasBazooka && !HasBazooka)
+                AddBazookaToPlayer();
+
+            HasBazooka = data.HasBazooka;
+
+            if (HasBazooka)
+            {
+                Bazooka.Physics.Rotation = data.BazookaRotation;
+
+                // Rockets
+                if (data.IsPlayerRocketShot)
+                    RocketList.Add(new Rocket(data.PlayerRocketCreateData.ShootingPosition, data.PlayerRocketCreateData.Direction, GameState));
+
+                if (data.IsTurretRocketShot)
+                {
+                    if (data.TurretRocketCreateData.IsFollowingPlayer)
+                        RocketList.Add(new Rocket(data.TurretRocketCreateData.ShootingPosition, data.TurretRocketCreateData.Direction, GameState, PlayerSprite)
+                        {
+                            Speed = data.TurretRocketCreateData.Speed
+                        });
+                    else
+                        RocketList.Add(new Rocket(data.TurretRocketCreateData.ShootingPosition, data.TurretRocketCreateData.Direction, GameState)
+                        {
+                            Speed = data.TurretRocketCreateData.Speed
+                        });
+                }
+            }
+            InputMovement = data.InputMovement;
+
+            UpdateRockets(gameTime);
+            PlayerSprite.Update(gameTime);
+        }
+
+        private void UpdateRockets(GameTime gameTime)
+        {
             // rockets
             for (int i = 0; i < RocketList.Count; i++)
             {
@@ -119,30 +171,18 @@ namespace RocketJumper.Classes
                     RocketList.RemoveAt(i--);
                 }
             }
-
-            // add horizontal movement
-            PlayerSprite.AddInputToPhysics(new Vector2(inputMovement, 0.0f), MaxHorizontalSpeed);
-            PlayerSprite.Update(gameTime);
-            GUIRenderer.Update(gameTime);
-        }
-
-        public void UpdateReplay(GameTime gameTime, ReplayData data)
-        {
-            PlayerSprite.Physics.Position = data.PlayerPosition;
-
-            PlayerSprite.Update(gameTime);
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             // flip if necessary
-            if (inputMovement < 0)
+            if (InputMovement < 0)
                 PlayerSprite.Effects = SpriteEffects.FlipHorizontally;
-            else if (inputMovement > 0)
+            else if (InputMovement > 0)
                 PlayerSprite.Effects = SpriteEffects.None;
 
             // choose and draw right player animation
-            if (inputMovement == 0)
+            if (InputMovement == 0)
             {
                 if (PlayerSprite.CurrentAnimationId != "idle")
                     PlayerSprite.ChangeAnimation("idle");
@@ -171,11 +211,11 @@ namespace RocketJumper.Classes
         {
             // basic moving
             if (GameState.KeyboardState.IsKeyDown(Keys.A) || GameState.KeyboardState.IsKeyDown(Keys.Left))
-                inputMovement = -1.0f;
+                InputMovement = -1.0f;
             else if (GameState.KeyboardState.IsKeyDown(Keys.D) || GameState.KeyboardState.IsKeyDown(Keys.Right))
-                inputMovement = 1.0f;
+                InputMovement = 1.0f;
             else
-                inputMovement = 0.0f;
+                InputMovement = 0.0f;
 
             // bazooka
             if (HasBazooka)
@@ -201,8 +241,11 @@ namespace RocketJumper.Classes
                     Rocket rocket = new Rocket(ShootingPosition, direction, GameState);
                     ReloadTimer = ReloadRate;
                     RocketList.Add(rocket);
+                    ShotRocket = rocket;
                     FireTimer = FireRate;
                     AmmoCount--;
+
+
 
                     // play sound
                     GameState.SoundEffects["woosh"].CreateInstance().Play();

@@ -38,13 +38,14 @@ namespace RocketJumper.Classes.States
                 Click = new EventHandler(Button_Resume_Clicked)
             });
 
-            pauseComponents.Add(
-            new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
-            {
-                Position = new Vector2(MyGame.ActualWidth / 2, 200),
-                Text = "Save",
-                Click = new EventHandler(Button_Save_Clicked)
-            });
+            if (!this.gameState.IsReplaying)
+                pauseComponents.Add(
+                new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
+                {
+                    Position = new Vector2(MyGame.ActualWidth / 2, 200),
+                    Text = "Save",
+                    Click = new EventHandler(Button_Save_Clicked)
+                });
 
             pauseComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)

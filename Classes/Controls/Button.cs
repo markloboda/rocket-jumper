@@ -15,21 +15,26 @@ namespace RocketJumper.Classes.Controls
 
         private MouseState previousMouseState;
 
-        private Texture2D texture;
+        public Texture2D Texture;
 
         public EventHandler Click;
         public EventArgs EventArgs;
 
+        public Color Color { get; set; } = Color.Transparent;
+        public Color HoverColor { get; set; } = Color.Gray;
+
         public bool Clicked { get; private set; }
+
+        public float Scale = 1.0f;
 
         public Vector2 Origin
         {
             get
             {
                 if (!string.IsNullOrEmpty(Text))
-                    return new Vector2(font.MeasureString(Text).X / 2, font.MeasureString(Text).Y / 2);
+                    return new Vector2((font.MeasureString(Text).X * Scale) / 2, (font.MeasureString(Text).Y * Scale) / 2);
                 else
-                    return new Vector2(texture.Width / 2, texture.Height / 2);
+                    return new Vector2((Texture.Width * Scale) / 2, (Texture.Height * Scale) / 2);
             }
         }
 
@@ -40,19 +45,20 @@ namespace RocketJumper.Classes.Controls
             get
             {
                 if (!string.IsNullOrEmpty(Text))
-                    return new Rectangle((int)(Position.X - Origin.X - Padding.X), (int)(Position.Y - Origin.Y - Padding.Y), (int)(font.MeasureString(Text).X + 2 * Padding.X), (int)(font.MeasureString(Text).Y + 2 * Padding.Y));
+                    return new Rectangle((int)(Position.X - Origin.X - Padding.X), (int)(Position.Y - Origin.Y - Padding.Y), (int)((font.MeasureString(Text).X + 2 * Padding.X) * Scale), (int)((font.MeasureString(Text).Y + 2 * Padding.Y) * Scale));
                 else
-                    return new Rectangle((int)(Position.X - Origin.X), (int)(Position.Y - Origin.Y), texture.Width, texture.Height);
+                    return new Rectangle((int)(Position.X - Origin.X), (int)(Position.Y - Origin.Y), (int)(Texture.Width * Scale), (int)(Texture.Height * Scale));
             }
         }
 
         public Vector2 Padding = new Vector2(50, 10);
         public string Text;
+        public SpriteEffects SpriteEffects = SpriteEffects.None;
 
 
         public Button(Texture2D texture, SpriteFont font)
         {
-            this.texture = texture;
+            this.Texture = texture;
             this.font = font;
         }
 
@@ -75,12 +81,12 @@ namespace RocketJumper.Classes.Controls
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var color = Color.Transparent;
+            var color = Color;
 
             if (isHovering)
-                color = Color.Gray;
+                color = HoverColor;
 
-            spriteBatch.Draw(texture, Bounds, null, color, 0.0f, Vector2.Zero, SpriteEffects.None, 0.5f);
+            spriteBatch.Draw(Texture, Bounds, null, color, 0.0f, Vector2.Zero, SpriteEffects, 0.5f);
 
             if (!string.IsNullOrEmpty(Text))
             {
