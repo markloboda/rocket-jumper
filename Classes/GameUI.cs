@@ -216,12 +216,12 @@ namespace RocketJumper.Classes
 
         public void Button_Forward_Click(object sender, EventArgs e)
         {
-
+            gameState.ReplayFrameIndex += 50;
         }
 
         public void Button_Backward_Click(object sender, EventArgs e)
         {
-
+            gameState.ReplayFrameIndex = Math.Max(0, gameState.ReplayFrameIndex - 50);
         }
     }
 }
