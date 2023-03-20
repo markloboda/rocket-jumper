@@ -27,6 +27,9 @@ namespace RocketJumper.Classes.Controls
 
         public float Scale = 1.0f;
 
+        public bool IsVisible = true;
+        public bool IsDarkened = false;
+
         public Vector2 Origin
         {
             get
@@ -64,6 +67,9 @@ namespace RocketJumper.Classes.Controls
 
         public override void Update(GameTime gameTime)
         {
+            if (!IsVisible)
+                return;
+
             previousMouseState = currentMouseState;
             currentMouseState = Mouse.GetState();
 
@@ -81,9 +87,12 @@ namespace RocketJumper.Classes.Controls
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            if (!IsVisible)
+                return;
+
             var color = Color;
 
-            if (isHovering)
+            if (isHovering || IsDarkened)
                 color = HoverColor;
 
             spriteBatch.Draw(Texture, Bounds, null, color, 0.0f, Vector2.Zero, SpriteEffects, 0.5f);

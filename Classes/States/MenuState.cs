@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -24,7 +25,7 @@ namespace RocketJumper.Classes.States
                     case MenuStateEnum.Options:
                         return optionsComponents;
                     case MenuStateEnum.Highscores:
-                        return highscoresComponents;
+                        return Enumerable.Concat(highscoresComponents, highscoresComponents_Scores).ToList();
                     default:
                         return mainMenuComponents;
                 }
@@ -61,6 +62,7 @@ namespace RocketJumper.Classes.States
         private List<Component> mainMenuComponents;
         private List<Component> optionsComponents;
         private List<Component> highscoresComponents;
+        private List<Component> highscoresComponents_Scores;
 
         private float mainMenuHeightUnit;
 
@@ -77,6 +79,11 @@ namespace RocketJumper.Classes.States
 
         // settings
         private TextComponent volumeText;
+
+        // highscores
+        private bool isDisplayingGlobalHighscores = false;
+        private Button globalHighscoresButton;
+        private Button localHighscoresButton;
 
 
         public MenuState(MyGame game, ContentManager content)
@@ -112,7 +119,7 @@ namespace RocketJumper.Classes.States
             // set source rectangle
             idleSourceRectangle = GetSourceRectangle(currentFrameId);
 
-            foreach (var component in components)
+            foreach (var component in components.ToArray())
                 component.Update(gameTime);
         }
 
@@ -325,13 +332,33 @@ namespace RocketJumper.Classes.States
 
 
             highscoresComponents = new List<Component>();
+            highscoresComponents_Scores = new List<Component>();
             highscoresComponents.Add(
             new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), buttonFont)
             {
-                Position = new Vector2(MyGame.ActualWidth * 0.65f, 100),
+                Position = new Vector2(MyGame.ActualWidth * 0.55f, 100),
                 Text = "Back",
                 Click = new EventHandler(Button_Highscores_Back_Clicked)
             });
+
+            globalHighscoresButton = new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), game.Font)
+            {
+                Position = new Vector2(MyGame.ActualWidth * 0.90f - 50, 100),
+                Text = "Global",
+                Click = new EventHandler(Button_Highscores_Global_Clicked),
+                IsVisible = false
+            };
+
+            localHighscoresButton = new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), game.Font)
+            {
+                Position = new Vector2(MyGame.ActualWidth * 0.90f - 250, 100),
+                Text = "Local",
+                Click = new EventHandler(Button_Highscores_Local_Clicked),
+                IsVisible = false
+            };
+
+            highscoresComponents.Add(globalHighscoresButton);
+            highscoresComponents.Add(localHighscoresButton);
         }
 
 
@@ -371,47 +398,68 @@ namespace RocketJumper.Classes.States
 
         private void Button_Highscores_Clicked(object sender, EventArgs e)
         {
-            // load highscores
-            dynamic json = JObject.Parse(File.ReadAllText(game.ScoresFilePath));
+            RefreshScores();
+            ChangeMenuState(MenuStateEnum.Highscores);
+        }
+
+        private void RefreshScores()
+        {
+            highscoresComponents_Scores.Clear();
+
+            dynamic json;
+            if (isDisplayingGlobalHighscores)
+                json = JArray.Parse(File.ReadAllText(MyGame.GlobalScoresFilePath));
+            else
+                json = JArray.Parse(File.ReadAllText(MyGame.LocalScoresFilePath));
 
             // add highscores to highscoresComponents
-            foreach (var username in json)
+            int i = 0;
+            foreach (var score in json)
             {
-                int i = 0;
-                foreach (var score in username.Value)
+                highscoresComponents_Scores.Add(
+                new Score(game.Font)
                 {
-                    highscoresComponents.Add(
-                    new Score(game.Font)
-                    {
-                        Position = new Vector2(MyGame.ActualWidth * 0.65f, 200 + i * 50),
-                        Username = username.Name,
-                        Time = long.Parse(score["time"].ToString()),
-                        Date = score["date"].ToString()
-                    });
+                    Position = new Vector2(MyGame.ActualWidth * 0.65f, 200 + i * 50),
+                    Username = score["username"].ToString(),
+                    ScoreTime = long.Parse(score["score"].ToString()),
+                    Date = score["date"].ToString()
+                });
 
-                    // highscoresComponents.Add(
-                    // new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), game.Font)
-                    // {
-                    //     Position = new Vector2(MyGame.ActualWidth * 0.85f, 200 + i * 50),
-                    //     Text = "Watch Replay",
-                    //     EventArgs = new ReplayEventArgs(score["replay"].ToString()),
-                    //     Click = new EventHandler(Button_Replay_Clicked)
-                    // });
+                highscoresComponents_Scores.Add(
+                new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), game.Font)
+                {
+                    Position = new Vector2(MyGame.ActualWidth * 0.85f, 200 + i * 50),
+                    Text = "Watch Replay",
+                    EventArgs = new ReplayEventArgs(score["replayId"]?.ToString()),
+                    Click = new EventHandler(Button_Replay_Clicked)
+                });
 
-                    highscoresComponents.Add(
-                    new Button(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.White), game.Font)
-                    {
-                        Position = new Vector2(MyGame.ActualWidth * 0.85f, 200 + i * 50),
-                        Text = "Watch Replay",
-                        EventArgs = new ReplayEventArgs(score["replayId"]?.ToString()),
-                        Click = new EventHandler(Button_Replay_Clicked)
-                    });
+                i++;
 
-                    i++;
-                }
             }
 
-            ChangeMenuState(MenuStateEnum.Highscores);
+            // load highscores from network with NetworkLeaderboards.GetLeaderboards
+            NetworkLeaderboards.GetLeaderboards(null).GetAwaiter().OnCompleted(() =>
+            {
+                globalHighscoresButton.IsVisible = true;
+                localHighscoresButton.IsVisible = true;
+            });
+        }
+
+        private void Button_Highscores_Global_Clicked(object sender, EventArgs e)
+        {
+            isDisplayingGlobalHighscores = true;
+            globalHighscoresButton.IsDarkened = true;
+            localHighscoresButton.IsDarkened = false;
+            RefreshScores();
+        }
+
+        private void Button_Highscores_Local_Clicked(object sender, EventArgs e)
+        {
+            isDisplayingGlobalHighscores = false;
+            globalHighscoresButton.IsDarkened = false;
+            localHighscoresButton.IsDarkened = true;
+            RefreshScores();
         }
 
         private void Button_Exit_Clicked(object sender, EventArgs e)

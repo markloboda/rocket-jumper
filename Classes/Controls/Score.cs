@@ -9,7 +9,7 @@ namespace RocketJumper.Classes.Controls
         public Vector2 Position;
         private SpriteFont font;
 
-        public long Time;
+        public long ScoreTime;
         public string Date;
         public string Username;
 
@@ -17,11 +17,11 @@ namespace RocketJumper.Classes.Controls
         {
             get
             {
-                TimeSpan time = TimeSpan.FromMilliseconds(Time);
+                TimeSpan time = TimeSpan.FromMilliseconds(ScoreTime);
                 string timerString;
-                if (Time > 1000 * 60 * 60)
+                if (ScoreTime > 1000 * 60 * 60)
                     timerString = $"{time.Hours}:{time.Minutes}:{time.Seconds}:{time.Milliseconds}";
-                else if (Time > 1000 * 60)
+                else if (ScoreTime > 1000 * 60)
                     timerString = $"{time.Minutes}:{time.Seconds}:{time.Milliseconds}";
                 else
                     timerString = $"{time.Seconds}:{time.Milliseconds}";

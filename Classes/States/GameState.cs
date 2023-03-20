@@ -349,7 +349,7 @@ namespace RocketJumper.Classes.States
             game.SaveReplay(replayId, ReplayDataList);
 
             // post score to leaderboard
-            Leaderboards.PostScore("mark", TotalElapsedMilliseconds, System.DateTime.Now.ToString("dd/MM/yyyy"));
+            NetworkLeaderboards.PostScore("mark", TotalElapsedMilliseconds, System.DateTime.Now.ToString("dd/MM/yyyy"));
 
 
             // remove save file

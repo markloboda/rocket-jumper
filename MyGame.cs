@@ -58,15 +58,29 @@ namespace RocketJumper
             }
         }
 
-        public string ScoresFilePath
+        public static string LocalScoresFilePath
         {
             get
             {
-                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper/scores.json");
+                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper/local_scores.json");
                 if (!File.Exists(path))
                 {
                     Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper"));
-                    File.WriteAllText(path, "{}");
+                    File.WriteAllText(path, "[]");
+                }
+                return path;
+            }
+        }
+
+        public static string GlobalScoresFilePath
+        {
+            get
+            {
+                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper/online_scores.json");
+                if (!File.Exists(path))
+                {
+                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RocketJumper"));
+                    File.WriteAllText(path, "[]");
                 }
                 return path;
             }
@@ -251,23 +265,20 @@ namespace RocketJumper
 
         public void SaveTime(string mapPath, long milliseconds, string replayId)
         {
-            // save time to scores.json
-            dynamic json = JObject.Parse(File.ReadAllText(ScoresFilePath));
+            // save time to local_scores.json
+            dynamic json = JArray.Parse(File.ReadAllText(LocalScoresFilePath));
 
             // make jobject to save time
             JObject save = new JObject();
-            save["time"] = milliseconds;
+            save["username"] = USERNAME;
+            save["score"] = milliseconds;
             save["date"] = System.DateTime.Now.ToString("dd/MM/yyyy");
             save["map"] = mapPath;
             save["replayId"] = replayId;
 
-            if (json[USERNAME] == null)
-            {
-                json[USERNAME] = new JArray();
-            }
-            json[USERNAME].Add(save);
+            json.Add(save);
 
-            File.WriteAllText(ScoresFilePath, json.ToString());
+            File.WriteAllText(LocalScoresFilePath, json.ToString());
         }
 
         public void SetWindowed()
