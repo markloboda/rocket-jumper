@@ -5,6 +5,7 @@ namespace RocketJumper.Classes.Controls
 {
     public class TextComponent : Component
     {
+        public Color Color = Color.Black;
         public Vector2 Position;
         public string Text;
         private SpriteFont font;
@@ -26,7 +27,7 @@ namespace RocketJumper.Classes.Controls
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawString(font, Text, Position + CenterOffset, Color.Black, 0, Vector2.Zero, 1, SpriteEffects.None, 0.5f);
+            spriteBatch.DrawString(font, Text, Position + CenterOffset, Color, 0, Vector2.Zero, 1, SpriteEffects.None, 0.5f);
         }
     }
 }

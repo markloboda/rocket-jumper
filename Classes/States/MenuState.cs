@@ -37,7 +37,8 @@ namespace RocketJumper.Classes.States
         {
             MainMenu,
             Options,
-            Highscores
+            Highscores,
+            Username
         }
 
         private MenuStateEnum currentMenuState;
@@ -63,6 +64,7 @@ namespace RocketJumper.Classes.States
         private List<Component> optionsComponents;
         private List<Component> highscoresComponents;
         private List<Component> highscoresComponents_Scores;
+        private List<Component> usernameComponents;
 
         private float mainMenuHeightUnit;
 
@@ -219,6 +221,15 @@ namespace RocketJumper.Classes.States
                 Text = "Exit",
                 Click = new EventHandler(Button_Exit_Clicked)
             });
+
+            mainMenuComponents.Add(
+            new TextComponent(buttonFont)
+            {
+                Position = new Vector2(MyGame.ActualWidth / 5, MyGame.ActualHeight - 7 * mainMenuHeightUnit),
+                Text = "Online highscores are not available at the moment.",
+                Color = Color.Red
+            });
+
 
             optionsComponents = new List<Component>();
             optionsComponents.Add(

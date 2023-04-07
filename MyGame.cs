@@ -26,7 +26,19 @@ namespace RocketJumper
         [DllImport("user32.dll")]
         static extern void ClipCursor(ref Rectangle rect);
 
-        string USERNAME = "mark";
+        string USERNAME = "username";
+        public string Username {
+            get
+            {
+                return USERNAME;
+            }
+            set
+            {
+                USERNAME = value;
+                IsUsernameSet = true;
+            }
+        }
+        public bool IsUsernameSet = false;
 
         private State currentState;
         private State nextState;
@@ -34,6 +46,7 @@ namespace RocketJumper
         // content
         public SpriteFont Font;
         public SpriteFont TitleFont;
+
 
 
         private GraphicsDeviceManager graphics;
