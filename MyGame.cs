@@ -27,7 +27,8 @@ namespace RocketJumper
         static extern void ClipCursor(ref Rectangle rect);
 
         string USERNAME = "username";
-        public string Username {
+        public string Username
+        {
             get
             {
                 return USERNAME;
@@ -124,7 +125,16 @@ namespace RocketJumper
                 string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), SettingsFilePath);
                 var volume = (float)Math.Round(value, 1);
                 Settings["volume"] = volume;
-                SoundEffect.MasterVolume = volume;
+
+                try
+                {
+                    SoundEffect.MasterVolume = volume;
+                }
+                catch (NoAudioHardwareException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+
                 File.WriteAllText(path, Settings.ToString());
             }
         }

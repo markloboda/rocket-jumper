@@ -1,0 +1,3 @@
+- Name: Rocket Jumper
+- Description: Rocket Jumper is a game, where a military man tries to reach his goal. All he has at his disposal is his bazooka, which he is immune to. He uses it to propel himself into the air.
+- Supported Devices: Any computer with .NET runtime installed should be able to run this game.

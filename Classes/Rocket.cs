@@ -93,7 +93,10 @@ namespace RocketJumper.Classes
                 Collided = true;
 
             if (Collided && !SideOfMapCollision)
-                gameState.SoundEffects["explosion"].CreateInstance().Play();
+            {
+                if (gameState.SoundEffects.ContainsKey("explosion"))
+                    gameState.SoundEffects["explosion"].CreateInstance().Play();
+            }
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)

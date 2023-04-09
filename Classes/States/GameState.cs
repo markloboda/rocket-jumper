@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +10,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using RocketJumper.Classes.MapData;
+
 
 public struct ReplayData
 {
@@ -146,8 +146,17 @@ namespace RocketJumper.Classes.States
 
             // ROCKETS
             RocketAnimation = new Animation_s(content.Load<Texture2D>("Sprites/Rocket"), 5, 0.2f);
-            SoundEffects["woosh"] = content.Load<SoundEffect>("Audio/woosh");
-            SoundEffects["explosion"] = content.Load<SoundEffect>("Audio/explosion");
+
+            try
+            {
+                SoundEffects["woosh"] = content.Load<SoundEffect>("Audio/woosh");
+                SoundEffects["explosion"] = content.Load<SoundEffect>("Audio/explosion");
+            }
+            catch (NoAudioHardwareException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
 
             // load all items and mapObjects
             foreach (Layer layer in Map.Layers)
@@ -181,11 +190,11 @@ namespace RocketJumper.Classes.States
 
         public override void Update(GameTime gameTime)
         {
-            // if (!game.IsActive)
-            // {
-            //     PauseGame();
-            //     return;
-            // }
+            if (!game.IsActive)
+            {
+                PauseGame();
+                return;
+            }
 
             // camera movement
             camera.Follow(this.Player.PlayerSprite);
@@ -349,7 +358,7 @@ namespace RocketJumper.Classes.States
             game.SaveReplay(replayId, ReplayDataList);
 
             // post score to leaderboard
-            NetworkLeaderboards.PostScore("mark", TotalElapsedMilliseconds, System.DateTime.Now.ToString("dd/MM/yyyy"));
+            // NetworkLeaderboards.PostScore("username", TotalElapsedMilliseconds, System.DateTime.Now.ToString("dd/MM/yyyy"));
 
 
             // remove save file

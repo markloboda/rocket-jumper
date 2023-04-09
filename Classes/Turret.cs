@@ -65,7 +65,9 @@ namespace RocketJumper.Classes
                 fireTimer = fireRate;
 
                 // play sound
-                gameState.SoundEffects["woosh"].CreateInstance().Play();
+                if (gameState.SoundEffects.ContainsKey("woosh"))
+                    gameState.SoundEffects["woosh"].CreateInstance().Play();
+
             }
         }
 

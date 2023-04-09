@@ -76,9 +76,12 @@ namespace RocketJumper.Classes.States
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            gameState.Draw(gameTime, spriteBatch);
+            
             spriteBatch.Begin();
 
-            // spriteBatch.Draw(Background, new Rectangle(0, 0, MyGame.VirtualWidth, MyGame.VirtualHeight), Color.White);
+            spriteBatch.Draw(Tools.GetSingleColorTexture(game.GraphicsDevice, Color.Black), new Rectangle(0, 0, MyGame.ActualWidth, MyGame.ActualHeight), Color.Black * 0.5f);
+
             foreach (var component in components)
                 component.Draw(gameTime, spriteBatch);
 

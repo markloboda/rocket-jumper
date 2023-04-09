@@ -248,7 +248,8 @@ namespace RocketJumper.Classes
 
 
                     // play sound
-                    GameState.SoundEffects["woosh"].CreateInstance().Play();
+                    if (gameState.SoundEffects.ContainsKey("woosh"))
+                        GameState.SoundEffects["woosh"].CreateInstance().Play();
                 }
             }
         }

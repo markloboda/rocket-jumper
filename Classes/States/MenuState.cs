@@ -64,7 +64,6 @@ namespace RocketJumper.Classes.States
         private List<Component> optionsComponents;
         private List<Component> highscoresComponents;
         private List<Component> highscoresComponents_Scores;
-        private List<Component> usernameComponents;
 
         private float mainMenuHeightUnit;
 
@@ -165,7 +164,14 @@ namespace RocketJumper.Classes.States
 
             var buttonFont = game.Font;
 
-            SoundEffects["gameStart"] = content.Load<SoundEffect>("Audio/gameStart");
+            try
+            {
+                SoundEffects["gameStart"] = content.Load<SoundEffect>("Audio/gameStart");
+            }
+            catch (NoAudioHardwareException e)
+            {
+                Console.WriteLine(e.Message);
+            }
 
             if (File.Exists(GameState.SaveFilePath))
             {
@@ -379,7 +385,9 @@ namespace RocketJumper.Classes.States
 
         private void Button_Play_Clicked(object sender, EventArgs e)
         {
-            // SoundEffects["gameStart"].Play();
+            if (SoundEffects.ContainsKey("gameStart"))
+                SoundEffects["gameStart"].Play();
+                
             game.ChangeState(new GameState(game, content));
         }
 
